@@ -9,9 +9,10 @@ interface GamePickModalProps {
   projectedTeam2Id: string | null;
   teams: Map<string, Team>;
   onClose: () => void;
+  hidePickStatus?: boolean;
 }
 
-export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, teams, onClose }: GamePickModalProps) {
+export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, teams, onClose, hidePickStatus = false }: GamePickModalProps) {
   const [data, setData] = useState<GamePicksResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -128,23 +129,24 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
                     teamName={team1?.name ?? "TBD"}
                     seed={team1?.seed}
                     picks={team1Picks}
-                    isWinner={isGameFinal && data.game.winnerId === actualTeam1Id}
-                    isLoser={isGameFinal && data.game.winnerId === actualTeam2Id}
+                    isWinner={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam1Id}
+                    isLoser={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam2Id}
+                    hidePickStatus={hidePickStatus}
                   />
                   <PickColumn
                     teamName={team2?.name ?? "TBD"}
                     seed={team2?.seed}
                     picks={team2Picks}
-                    isWinner={isGameFinal && data.game.winnerId === actualTeam2Id}
-                    isLoser={isGameFinal && data.game.winnerId === actualTeam1Id}
+                    isWinner={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam2Id}
+                    isLoser={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam1Id}
+                    hidePickStatus={hidePickStatus}
                   />
                 </div>
 
-                {/* Eliminated team picks -- only for teams not in the projected matchup */}
                 {otherByTeam.size > 0 && (
                   <div className="mt-4 pt-4 border-t border-hardwood-600">
-                    <p className="font-mono text-xs text-red-400/80 uppercase tracking-widest mb-3">
-                      Eliminated picks
+                    <p className={`font-mono text-xs uppercase tracking-widest mb-3 ${hidePickStatus ? "text-gray-500" : "text-red-400/80"}`}>
+                      {hidePickStatus ? "Other picks" : "Eliminated picks"}
                     </p>
                     <div className="grid grid-cols-2 gap-4">
                       {Array.from(otherByTeam.entries()).map(([teamId, { teamName, picks }]) => (
@@ -153,8 +155,9 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
                           teamName={teamName}
                           picks={picks}
                           isWinner={false}
-                          isLoser={true}
-                          forceIncorrect
+                          isLoser={!hidePickStatus}
+                          forceIncorrect={!hidePickStatus}
+                          hidePickStatus={hidePickStatus}
                         />
                       ))}
                     </div>
@@ -170,7 +173,9 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
                     {otherPicks.length > 0 && (
                       <>
                         <span>--</span>
-                        <span className="text-red-400/60">{otherPicks.length} eliminated</span>
+                        <span className={hidePickStatus ? "text-gray-500" : "text-red-400/60"}>
+                          {otherPicks.length} {hidePickStatus ? "other" : "eliminated"}
+                        </span>
                       </>
                     )}
                   </div>
@@ -211,6 +216,7 @@ function PickColumn({
   isWinner,
   isLoser,
   forceIncorrect,
+  hidePickStatus,
 }: {
   teamName: string;
   seed?: number;
@@ -218,22 +224,24 @@ function PickColumn({
   isWinner: boolean;
   isLoser: boolean;
   forceIncorrect?: boolean;
+  hidePickStatus?: boolean;
 }) {
   return (
     <div>
       <div
         className={`text-xs font-display font-bold uppercase tracking-wide mb-2 flex items-center gap-1 ${
+          hidePickStatus ? "text-gray-400" :
           isWinner ? "text-green-400" : isLoser || forceIncorrect ? "text-red-400" : "text-gray-400"
         }`}
       >
         {seed && <span className="text-gray-600">#{seed}</span>}
         {teamName}
-        {isWinner && <CheckCircleIcon className="w-3 h-3" />}
-        {(isLoser || forceIncorrect) && <XCircleIcon className="w-3 h-3" />}
+        {!hidePickStatus && isWinner && <CheckCircleIcon className="w-3 h-3" />}
+        {!hidePickStatus && (isLoser || forceIncorrect) && <XCircleIcon className="w-3 h-3" />}
       </div>
       <div className="space-y-1.5">
         {picks.map((pick) => {
-          const correct = forceIncorrect ? false : pick.isCorrect;
+          const correct = hidePickStatus ? null : forceIncorrect ? false : pick.isCorrect;
           return (
             <div
               key={pick.userId}

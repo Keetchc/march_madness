@@ -32,6 +32,7 @@ export function OfficialBracketClient() {
       teams={teams}
       picks={{}}
       isReadOnly
+      hidePickStatus
     />
   );
 }

@@ -14,11 +14,12 @@ interface BracketViewProps {
   actualTeamOverrides?: Map<string, string>;
   onPick?: (gameId: string, teamId: string) => void;
   isReadOnly?: boolean;
+  hidePickStatus?: boolean;
 }
 
 const REGIONS: Region[] = ["East", "West", "South", "Midwest"];
 
-export function BracketView({ games, teams, picks, projectedSlots, actualTeamOverrides, onPick, isReadOnly = false }: BracketViewProps) {
+export function BracketView({ games, teams, picks, projectedSlots, actualTeamOverrides, onPick, isReadOnly = false, hidePickStatus = false }: BracketViewProps) {
   const [activeTab, setActiveTab] = useState<Region | "FinalFour">("East");
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
 
@@ -115,6 +116,7 @@ export function BracketView({ games, teams, picks, projectedSlots, actualTeamOve
         projectedTeam2Id={selectedGame?.team2Id ?? null}
         teams={teams}
         onClose={() => setSelectedGameId(null)}
+        hidePickStatus={hidePickStatus}
       />
     </>
   );
