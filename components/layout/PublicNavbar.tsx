@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "/leaderboard",       label: "Leaderboard" },
   { href: "/brackets",          label: "All Brackets" },
   { href: "/official-bracket",  label: "Official Bracket" },
+  { href: "/rules",             label: "Rules" },
 ];
 
 export function PublicNavbar() {
