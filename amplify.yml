@@ -6,7 +6,12 @@ frontend:
         - npm ci
     build:
       commands:
-        - env | grep -E '^(MM_|TOURNAMENT_ID|NEXTAUTH_|ADMIN_)' >> .env.production
+        - echo "MM_REGION=\"${MM_REGION}\"" >> .env.production
+        - echo "MM_ACCESS_KEY_ID=\"${MM_ACCESS_KEY_ID}\"" >> .env.production
+        - echo "MM_SECRET_ACCESS_KEY=\"${MM_SECRET_ACCESS_KEY}\"" >> .env.production
+        - echo "TOURNAMENT_ID=\"${TOURNAMENT_ID}\"" >> .env.production
+        - echo "NEXTAUTH_SECRET=\"${NEXTAUTH_SECRET}\"" >> .env.production
+        - echo "NEXTAUTH_URL=\"${NEXTAUTH_URL}\"" >> .env.production
         - npm run build
   artifacts:
     baseDirectory: .next
