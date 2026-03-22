@@ -4,8 +4,9 @@ import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 
 const NAV_LINKS = [
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/brackets",    label: "All Brackets" },
+  { href: "/leaderboard",       label: "Leaderboard" },
+  { href: "/brackets",          label: "All Brackets" },
+  { href: "/official-bracket",  label: "Official Bracket" },
 ];
 
 export function PublicNavbar() {
