@@ -6,6 +6,7 @@ frontend:
         - npm ci
     build:
       commands:
+        - env | grep -E '^(MM_|TOURNAMENT_ID|NEXTAUTH_|ADMIN_)' >> .env.production
         - npm run build
   artifacts:
     baseDirectory: .next
