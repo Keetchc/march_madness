@@ -96,20 +96,20 @@ function TeamRow({
           size === "sm" ? "px-2 py-0.5" : "px-3 py-0.5",
         )}>
           <span className={clsx(
-            "font-mono text-green-600/80 flex-shrink-0 w-4 text-right",
-            size === "sm" ? "text-[8px]" : "text-[9px]",
+            "font-mono text-green-600/80 flex-shrink-0 w-5 text-right",
+            size === "sm" ? "text-sm" : "text-[9px]",
           )}>
             {actualTeam.seed}
           </span>
           <span className={clsx(
             "font-display font-bold uppercase tracking-wide text-green-500/70 truncate",
-            size === "sm" ? "text-[9px]" : "text-[10px]",
+            size === "sm" ? "text-sm" : "text-[10px]",
           )}>
             {size === "sm" ? actualTeam.shortName : actualTeam.name}
           </span>
           <span className={clsx(
             "font-mono text-green-600/60 flex-shrink-0 ml-auto",
-            size === "sm" ? "text-[8px]" : "text-[9px]",
+            size === "sm" ? "text-xs" : "text-[9px]",
           )}>
             actual
           </span>
@@ -118,8 +118,8 @@ function TeamRow({
       <div
         onClick={canPick ? onClick : undefined}
         className={clsx(
-          "flex items-center gap-1.5 transition-colors select-none",
-          size === "sm" ? "px-2 py-1.5" : "px-3 py-2.5",
+          "flex items-center gap-2 transition-colors select-none",
+          size === "sm" ? "px-2.5 py-2" : "px-3 py-2.5",
           canPick && "cursor-pointer",
           isCorrect && "bg-green-950/50",
           isWrong && "bg-red-950/40",
@@ -131,8 +131,8 @@ function TeamRow({
       >
         {team && (
           <span className={clsx(
-            "font-mono flex-shrink-0 w-4 text-right",
-            size === "sm" ? "text-[10px]" : "text-xs",
+            "font-mono flex-shrink-0 w-5 text-right",
+            size === "sm" ? "text-base" : "text-xs",
             isPicked && isCorrect ? "text-green-400"
               : isPicked && isWrong ? "text-red-400"
               : isOverridden ? "text-red-400/60"
@@ -146,7 +146,7 @@ function TeamRow({
 
         <span className={clsx(
           "font-display font-bold uppercase tracking-wide flex-1 truncate",
-          size === "sm" ? "text-[11px]" : "text-sm",
+          size === "sm" ? "text-base" : "text-sm",
           isPicked && isCorrect ? "text-green-400"
             : isPicked && isWrong ? "text-red-400/70"
             : isOverridden ? "text-red-400/50 line-through"
@@ -166,7 +166,7 @@ function TeamRow({
         {score !== null && !isOverridden && (
           <span className={clsx(
             "font-mono flex-shrink-0",
-            size === "sm" ? "text-[9px]" : "text-xs",
+            size === "sm" ? "text-sm" : "text-xs",
             isWinner ? "text-white font-bold" : "text-gray-500"
           )}>
             {score}
@@ -176,7 +176,7 @@ function TeamRow({
         {isPicked && (
           <span className={clsx(
             "flex-shrink-0 ml-0.5 font-mono",
-            size === "sm" ? "text-[9px]" : "text-xs",
+            size === "sm" ? "text-sm" : "text-xs",
             isCorrect ? "text-green-400" : isWrong ? "text-red-400" : "text-gray-600",
           )}>
             {isCorrect ? "✓" : isWrong ? "✗" : "●"}
@@ -186,7 +186,7 @@ function TeamRow({
         {isOverridden && !isPicked && (
           <span className={clsx(
             "flex-shrink-0 ml-0.5 font-mono text-red-400/60",
-            size === "sm" ? "text-[9px]" : "text-xs",
+            size === "sm" ? "text-sm" : "text-xs",
           )}>
             ✗
           </span>

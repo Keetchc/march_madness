@@ -96,8 +96,8 @@ export function BracketRegion({
         const gapUnits = totalSlots / roundGames.length;
 
         return (
-          <div key={round} className="flex flex-col flex-1 min-w-[150px]">
-            <p className="font-display text-[9px] font-bold uppercase tracking-widest text-gray-700 mb-1 text-center truncate px-1">
+          <div key={round} className="flex flex-col flex-1 min-w-[200px]">
+            <p className="font-display text-xs font-bold uppercase tracking-widest text-gray-700 mb-1 text-center truncate px-1">
               {ROUND_LABELS[round]}
             </p>
             <div className="flex flex-col flex-1 justify-around gap-1">
@@ -107,9 +107,9 @@ export function BracketRegion({
                   className="flex flex-col justify-center"
                   style={{
                     // Even distribution with spacing proportional to round depth
-                    marginTop: i === 0 ? `${(gapUnits - 1) * 18}px` : undefined,
+                    marginTop: i === 0 ? `${(gapUnits - 1) * 24}px` : undefined,
                     marginBottom:
-                      i === roundGames.length - 1 ? `${(gapUnits - 1) * 18}px` : undefined,
+                      i === roundGames.length - 1 ? `${(gapUnits - 1) * 24}px` : undefined,
                   }}
                 >
                   <GameSlot

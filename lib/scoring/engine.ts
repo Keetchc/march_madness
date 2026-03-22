@@ -139,10 +139,14 @@ export function buildLeaderboard(
 
   const leader = entries[0];
   const leaderBracket = brackets.find((b) => b.bracketId === leader.bracketId)!;
-  leader.status = "leader";
 
-  for (let i = 1; i < entries.length; i++) {
+  for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
+
+    if (entry.score === leader.score) {
+      entry.status = "leader";
+      continue;
+    }
 
     if (entry.maxPossibleScore <= leader.score) {
       entry.status = "eliminated";
@@ -150,7 +154,7 @@ export function buildLeaderboard(
     }
 
     const challengerBracket = brackets.find((b) => b.bracketId === entry.bracketId)!;
-    const status = computeDifferentialStatus(
+    entry.status = computeDifferentialStatus(
       entry,
       leader,
       challengerBracket,
@@ -159,7 +163,6 @@ export function buildLeaderboard(
       eliminatedTeams,
       teams,
     );
-    entry.status = status;
   }
 
   return entries;
@@ -170,8 +173,10 @@ export function buildLeaderboard(
  * whether they're alive, a long shot, or effectively eliminated.
  *
  * Only games where they picked differently can change the gap.
- * "bestCaseDifferential" assumes the challenger gets every differing pick right
- * and the leader gets zero from those games.
+ * Best-case: the challenger's differing pick wins (challenger gains points,
+ * leader gains nothing). The max gap closure is the sum of challenger gains
+ * from those differing games -- the leader's "lost" potential does NOT reduce
+ * the leader's locked-in score, so it must not inflate the differential.
  */
 function computeDifferentialStatus(
   challenger: LeaderboardEntry,
@@ -183,7 +188,7 @@ function computeDifferentialStatus(
   teams: Map<string, Team>,
 ): BracketStatus {
   const gap = leader.score - challenger.score;
-  let differentialGain = 0;
+  let bestCaseGain = 0;
 
   for (const game of pendingGames) {
     const challengerPick = challengerBracket.picks[game.gameId];
@@ -195,19 +200,10 @@ function computeDifferentialStatus(
 
     const pickedTeam = teams.get(challengerPick);
     const seed = pickedTeam?.seed ?? 1;
-    const challengerGain = ROUND_BASE_POINTS[game.round] * seed;
-
-    let leaderLoss = 0;
-    if (leaderPick && !eliminatedTeams.has(leaderPick)) {
-      const leaderTeam = teams.get(leaderPick);
-      const leaderSeed = leaderTeam?.seed ?? 1;
-      leaderLoss = ROUND_BASE_POINTS[game.round] * leaderSeed;
-    }
-
-    differentialGain += challengerGain + leaderLoss;
+    bestCaseGain += ROUND_BASE_POINTS[game.round] * seed;
   }
 
-  if (differentialGain < gap) {
+  if (bestCaseGain < gap) {
     return "eliminated";
   }
 
@@ -215,7 +211,7 @@ function computeDifferentialStatus(
     return "alive";
   }
 
-  const cushion = differentialGain - gap;
+  const cushion = bestCaseGain - gap;
   const threshold = gap * 0.5;
   if (cushion > threshold || gap === 0) {
     return "alive";

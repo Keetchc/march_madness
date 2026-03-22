@@ -15,7 +15,7 @@ export function PublicNavbar() {
 
   return (
     <header className="bg-hardwood-800 border-b border-hardwood-600 sticky top-0 z-50">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="container mx-auto px-4 max-w-[2000px]">
         <div className="flex items-center justify-between h-14">
           <Link href="/leaderboard" className="flex items-center gap-2 group">
             <span className="font-display text-xl font-black uppercase tracking-tight text-white group-hover:text-court-400 transition-colors">

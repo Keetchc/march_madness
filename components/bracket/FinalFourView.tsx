@@ -21,7 +21,7 @@ export function FinalFourView({ games, teams, picks, projectedSlots, actualTeamO
     <div className="w-full max-w-xl mx-auto">
       {/* Section label */}
       <div className="text-center mb-3">
-        <p className="font-display text-xs font-bold uppercase tracking-widest text-court-600">
+        <p className="font-display text-sm font-bold uppercase tracking-widest text-court-600">
           Final Four &amp; Championship
         </p>
       </div>
@@ -32,7 +32,7 @@ export function FinalFourView({ games, teams, picks, projectedSlots, actualTeamO
         <div className="flex-1">
           {f4Games[0] ? (
             <>
-              <p className="font-display text-[9px] uppercase tracking-widest text-gray-700 text-center mb-1">
+              <p className="font-display text-xs uppercase tracking-widest text-gray-700 text-center mb-1">
                 Semifinal 1
               </p>
               <GameSlot
@@ -56,7 +56,7 @@ export function FinalFourView({ games, teams, picks, projectedSlots, actualTeamO
         <div className="flex-1 flex flex-col items-center gap-2">
           {ncgGame ? (
             <>
-              <p className="font-display text-[9px] uppercase tracking-widest text-court-500 text-center">
+              <p className="font-display text-xs uppercase tracking-widest text-court-500 text-center">
                 Championship
               </p>
               <GameSlot
@@ -79,7 +79,7 @@ export function FinalFourView({ games, teams, picks, projectedSlots, actualTeamO
                 </div>
               ) : picks[ncgGame.gameId] ? (
                 <div className="text-center mt-1">
-                  <p className="font-display text-[9px] uppercase tracking-widest text-gray-600">
+                  <p className="font-display text-xs uppercase tracking-widest text-gray-600">
                     Your Champion
                   </p>
                   <p className="font-display font-black uppercase text-court-500/60 text-sm tracking-wide">
@@ -97,7 +97,7 @@ export function FinalFourView({ games, teams, picks, projectedSlots, actualTeamO
         <div className="flex-1">
           {f4Games[1] ? (
             <>
-              <p className="font-display text-[9px] uppercase tracking-widest text-gray-700 text-center mb-1">
+              <p className="font-display text-xs uppercase tracking-widest text-gray-700 text-center mb-1">
                 Semifinal 2
               </p>
               <GameSlot
@@ -124,7 +124,7 @@ export function FinalFourView({ games, teams, picks, projectedSlots, actualTeamO
 function EmptySlot({ label }: { label: string }) {
   return (
     <div className="border border-dashed border-hardwood-600 rounded-lg p-4 text-center">
-      <p className="font-display text-[9px] uppercase tracking-widest text-gray-700 mb-1">{label}</p>
+      <p className="font-display text-xs uppercase tracking-widest text-gray-700 mb-1">{label}</p>
       <p className="font-mono text-xs text-gray-700">TBD</p>
     </div>
   );

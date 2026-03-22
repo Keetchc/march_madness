@@ -80,7 +80,7 @@ export function BracketView({ games, teams, picks, projectedSlots, actualTeamOve
 
       {/* ─── Desktop: full bracket ─────────────────────────────────────── */}
       <div className="hidden md:block overflow-x-auto pb-6">
-        <div className="min-w-[1400px] space-y-6">
+        <div className="min-w-[1800px] space-y-6">
           <div className="flex gap-6">
             <RegionColumn label="East">
               <BracketRegion region="East" games={byRegion("East")} teams={teams} picks={picks}
@@ -125,7 +125,7 @@ export function BracketView({ games, teams, picks, projectedSlots, actualTeamOve
 function RegionColumn({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex-1">
-      <p className="font-display text-xs font-bold uppercase tracking-widest text-gray-600 mb-2 text-center">
+      <p className="font-display text-sm font-bold uppercase tracking-widest text-gray-600 mb-2 text-center">
         {label}
       </p>
       {children}
