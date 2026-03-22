@@ -178,7 +178,7 @@ function LeaderboardRow({ entry, isCurrentUser }: { entry: LeaderboardEntry; isC
         "hover:bg-hardwood-700 transition-colors cursor-pointer",
         isCurrentUser && "bg-court-500/5 hover:bg-court-500/10"
       )}>
-        <div className="flex items-center gap-3 min-w-0 md:contents">
+        <div className="flex items-center gap-3 min-w-0 pb-3 md:contents md:pb-0">
           <span className="font-display text-lg md:text-xl font-black text-gray-400 w-8 shrink-0 text-center md:w-auto">
             {medals[entry.rank] ?? entry.rank}
           </span>
@@ -202,7 +202,14 @@ function LeaderboardRow({ entry, isCurrentUser }: { entry: LeaderboardEntry; isC
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mt-2 text-center items-center md:mt-0 md:contents">
+        <div
+          className={clsx(
+            "grid grid-cols-3 gap-x-2 gap-y-1 text-center items-center md:contents",
+            "border-t border-hardwood-600/90 pt-3 mt-0",
+            "rounded-lg bg-hardwood-900/55 px-2 py-2.5 -mx-1 ring-1 ring-hardwood-600/40",
+            "md:mx-0 md:mt-0 md:pt-0 md:px-0 md:py-0 md:rounded-none md:border-t-0 md:bg-transparent md:ring-0"
+          )}
+        >
           <div className="md:text-right">
             <span className="font-mono text-lg md:text-xl font-bold text-white tabular-nums">{entry.score}</span>
           </div>

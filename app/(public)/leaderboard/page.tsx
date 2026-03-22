@@ -113,11 +113,11 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
     <Link href={`/bracket/${entry.bracketId}`}>
       <div
         className={clsx(
-          "flex flex-col gap-3 px-4 py-4 md:px-8 md:py-5 md:grid md:grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] md:gap-6 md:items-center",
+          "flex flex-col gap-0 px-4 py-4 md:gap-0 md:px-8 md:py-5 md:grid md:grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] md:gap-6 md:items-center",
           "hover:bg-hardwood-700 transition-colors"
         )}
       >
-        <div className="flex items-center gap-3 min-w-0 md:contents">
+        <div className="flex items-center gap-3 min-w-0 pb-3 md:contents md:pb-0">
           <span
             className={clsx(
               "font-display text-2xl md:text-3xl font-black w-10 shrink-0 text-center md:w-auto md:text-left",
@@ -142,7 +142,14 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-center items-center md:contents">
+        <div
+          className={clsx(
+            "grid grid-cols-4 gap-x-2 gap-y-1 text-center items-center md:contents",
+            "border-t border-hardwood-600/90 pt-3 mt-0",
+            "rounded-lg bg-hardwood-900/55 px-2 py-2.5 -mx-1 ring-1 ring-hardwood-600/40",
+            "md:mx-0 md:mt-0 md:pt-0 md:px-0 md:py-0 md:rounded-none md:border-t-0 md:bg-transparent md:ring-0"
+          )}
+        >
           <div className="flex flex-col gap-0.5 md:block md:text-right">
             <span className="font-mono text-2xl md:text-2xl font-bold text-white tabular-nums">
               {entry.score}
