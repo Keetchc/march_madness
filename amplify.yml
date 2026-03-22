@@ -6,13 +6,6 @@ frontend:
         - npm ci
     build:
       commands:
-        - printf "MM_REGION='%s'\n" "$MM_REGION" >> .env.production
-        - printf "MM_ACCESS_KEY_ID='%s'\n" "$MM_ACCESS_KEY_ID" >> .env.production
-        - printf "MM_SECRET_ACCESS_KEY='%s'\n" "$MM_SECRET_ACCESS_KEY" >> .env.production
-        - printf "TOURNAMENT_ID='%s'\n" "$TOURNAMENT_ID" >> .env.production
-        - printf "NEXTAUTH_SECRET='%s'\n" "$NEXTAUTH_SECRET" >> .env.production
-        - printf "NEXTAUTH_URL='%s'\n" "$NEXTAUTH_URL" >> .env.production
-        - cat .env.production | sed 's/\(SECRET\|ACCESS\).*=.*/\1...=REDACTED/' || true
         - npm run build
   artifacts:
     baseDirectory: .next
