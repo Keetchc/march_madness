@@ -86,7 +86,7 @@ export function BracketRegion({
   // Each round has half as many games as the previous.
   // We space them out vertically so the bracket "tree" connects properly.
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1.5">
       {rounds.map((round) => {
         const roundGames = gamesByRound(round);
         const totalSlots = Math.pow(2, REGION_ROUNDS.indexOf(round) === -1
@@ -96,7 +96,7 @@ export function BracketRegion({
         const gapUnits = totalSlots / roundGames.length;
 
         return (
-          <div key={round} className="flex flex-col flex-1 min-w-[200px]">
+          <div key={round} className="flex flex-col flex-1 min-w-[188px]">
             <p className="font-display text-xs font-bold uppercase tracking-widest text-gray-700 mb-1 text-center truncate px-1">
               {ROUND_LABELS[round]}
             </p>

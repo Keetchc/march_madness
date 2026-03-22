@@ -80,8 +80,8 @@ export function BracketView({ games, teams, picks, projectedSlots, actualTeamOve
 
       {/* ─── Desktop: full bracket ─────────────────────────────────────── */}
       <div className="hidden md:block overflow-x-auto pb-6">
-        <div className="min-w-[1800px] space-y-6">
-          <div className="flex gap-6">
+        <div className="min-w-[1680px] space-y-4">
+          <div className="flex gap-4">
             <RegionColumn label="East">
               <BracketRegion region="East" games={byRegion("East")} teams={teams} picks={picks}
                 projectedSlots={projectedSlots} actualTeamOverrides={actualTeamOverrides} onPick={onPick} onGameClick={setSelectedGameId} isReadOnly={isReadOnly} layout="horizontal" />
@@ -92,12 +92,12 @@ export function BracketView({ games, teams, picks, projectedSlots, actualTeamOve
             </RegionColumn>
           </div>
 
-          <div className="flex justify-center py-2">
+          <div className="flex justify-center py-1">
             <FinalFourView games={finalFourGames} teams={teams} picks={picks}
               projectedSlots={projectedSlots} actualTeamOverrides={actualTeamOverrides} onPick={onPick} onGameClick={setSelectedGameId} isReadOnly={isReadOnly} />
           </div>
 
-          <div className="flex gap-6">
+          <div className="flex gap-4">
             <RegionColumn label="South">
               <BracketRegion region="South" games={byRegion("South")} teams={teams} picks={picks}
                 projectedSlots={projectedSlots} actualTeamOverrides={actualTeamOverrides} onPick={onPick} onGameClick={setSelectedGameId} isReadOnly={isReadOnly} layout="horizontal" />
