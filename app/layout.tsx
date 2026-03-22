@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Bracket Bash",
-  description: "March Madness bracket challenge with your crew",
+  title: "Brian's Group March Madness",
+  description: "A place for Brian's Group to more easily get stats about their brackets",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
