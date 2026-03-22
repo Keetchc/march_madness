@@ -1,0 +1,70 @@
+{
+  "tournamentId": "2026",
+  "name": "NCAA Tournament 2026",
+  "year": 2026,
+  "lockDate": "2026-03-19T12:00:00Z",
+  "teams": [
+    { "id": "team-east-1",  "name": "Team A",    "shortName": "TMA",  "seed": 1,  "region": "East",    "espnId": "100" },
+    { "id": "team-east-16", "name": "Team B",    "shortName": "TMB",  "seed": 16, "region": "East",    "espnId": "101" },
+    { "id": "team-east-8",  "name": "Team C",    "shortName": "TMC",  "seed": 8,  "region": "East",    "espnId": "102" },
+    { "id": "team-east-9",  "name": "Team D",    "shortName": "TMD",  "seed": 9,  "region": "East",    "espnId": "103" },
+    { "id": "team-east-5",  "name": "Team E",    "shortName": "TME",  "seed": 5,  "region": "East",    "espnId": "104" },
+    { "id": "team-east-12", "name": "Team F",    "shortName": "TMF",  "seed": 12, "region": "East",    "espnId": "105" },
+    { "id": "team-east-4",  "name": "Team G",    "shortName": "TMG",  "seed": 4,  "region": "East",    "espnId": "106" },
+    { "id": "team-east-13", "name": "Team H",    "shortName": "TMH",  "seed": 13, "region": "East",    "espnId": "107" },
+    { "id": "team-east-6",  "name": "Team I",    "shortName": "TMI",  "seed": 6,  "region": "East",    "espnId": "108" },
+    { "id": "team-east-11", "name": "Team J",    "shortName": "TMJ",  "seed": 11, "region": "East",    "espnId": "109" },
+    { "id": "team-east-3",  "name": "Team K",    "shortName": "TMK",  "seed": 3,  "region": "East",    "espnId": "110" },
+    { "id": "team-east-14", "name": "Team L",    "shortName": "TML",  "seed": 14, "region": "East",    "espnId": "111" },
+    { "id": "team-east-7",  "name": "Team M",    "shortName": "TMM",  "seed": 7,  "region": "East",    "espnId": "112" },
+    { "id": "team-east-10", "name": "Team N",    "shortName": "TMN",  "seed": 10, "region": "East",    "espnId": "113" },
+    { "id": "team-east-2",  "name": "Team O",    "shortName": "TMO",  "seed": 2,  "region": "East",    "espnId": "114" },
+    { "id": "team-east-15", "name": "Team P",    "shortName": "TMP",  "seed": 15, "region": "East",    "espnId": "115" }
+  ],
+  "games": [
+    {
+      "gameId": "east-r64-1", "round": "R64", "region": "East", "bracketSlot": 1,
+      "team1Id": "team-east-1",  "team2Id": "team-east-16",
+      "nextGameId": "east-r32-1", "nextGameSlot": 1,
+      "espnGameId": "401638001"
+    },
+    {
+      "gameId": "east-r64-2", "round": "R64", "region": "East", "bracketSlot": 2,
+      "team1Id": "team-east-8",  "team2Id": "team-east-9",
+      "nextGameId": "east-r32-1", "nextGameSlot": 2,
+      "espnGameId": "401638002"
+    },
+    {
+      "gameId": "east-r32-1", "round": "R32", "region": "East", "bracketSlot": 1,
+      "team1Id": null, "team2Id": null,
+      "nextGameId": "east-s16-1", "nextGameSlot": 1,
+      "espnGameId": null
+    },
+    {
+      "gameId": "east-s16-1", "round": "S16", "region": "East", "bracketSlot": 1,
+      "team1Id": null, "team2Id": null,
+      "nextGameId": "east-e8-1", "nextGameSlot": 1,
+      "espnGameId": null
+    },
+    {
+      "gameId": "east-e8-1", "round": "E8", "region": "East", "bracketSlot": 1,
+      "team1Id": null, "team2Id": null,
+      "nextGameId": "f4-1", "nextGameSlot": 1,
+      "espnGameId": null
+    },
+    {
+      "gameId": "f4-1", "round": "F4", "region": "FinalFour", "bracketSlot": 1,
+      "team1Id": null, "team2Id": null,
+      "nextGameId": "ncg-1", "nextGameSlot": 1,
+      "espnGameId": null
+    },
+    {
+      "gameId": "ncg-1", "round": "NCG", "region": "FinalFour", "bracketSlot": 1,
+      "team1Id": null, "team2Id": null,
+      "nextGameId": null, "nextGameSlot": null,
+      "espnGameId": null
+    }
+  ],
+  "_note": "This is a truncated template. A full bracket has 63 games and 64 teams across 4 regions. When you upload your bracket files, the seed script will use that data instead."
+}
+

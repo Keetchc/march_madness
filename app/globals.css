@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --court-orange: #ff7c0a;
+  --court-amber: #ffc06d;
+  --hardwood-dark: #0f0e0c;
+  --hardwood-mid: #1a1814;
+  --hardwood-light: #252219;
+  --grain-opacity: 0.035;
+}
+
+/* Subtle grain texture over everything */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--hardwood-dark); }
+::-webkit-scrollbar-thumb { background: #3d3628; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #ff7c0a; }
+
+/* Bracket connector lines */
+.bracket-connector {
+  position: relative;
+}
+.bracket-connector::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  width: 1px;
+  height: 100%;
+  background: #312c20;
+  transform: translateY(-50%);
+}
+
+/* Game slot hover glow */
+.game-slot {
+  transition: all 0.15s ease;
+}
+.game-slot:hover {
+  box-shadow: 0 0 0 1px rgba(255, 124, 10, 0.4);
+}
+.game-slot.picked {
+  box-shadow: 0 0 0 1px rgba(255, 124, 10, 0.7);
+}
+.game-slot.correct {
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.7);
+}
+.game-slot.incorrect {
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.5);
+  opacity: 0.6;
+}
+
