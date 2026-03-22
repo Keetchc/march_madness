@@ -42,7 +42,7 @@ export default async function PublicLeaderboardPage() {
         <p className="font-mono text-xs text-court-500 uppercase tracking-widest mb-1">
           {tournament?.name ?? "Tournament"}
         </p>
-        <h1 className="font-display text-5xl font-black uppercase tracking-tight text-white">
+        <h1 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
           Leaderboard
         </h1>
         <p className="text-gray-500 text-sm font-mono mt-1">
@@ -51,14 +51,24 @@ export default async function PublicLeaderboardPage() {
       </div>
 
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
-        <div className="hidden md:grid grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] gap-6 px-8 py-4 border-b border-hardwood-600 bg-hardwood-700">
-          <span className="font-mono text-sm text-gray-600 uppercase">#</span>
-          <span className="font-mono text-sm text-gray-600 uppercase">Player</span>
-          <span className="font-mono text-sm text-gray-600 uppercase text-right">Score</span>
-          <span className="font-mono text-sm text-gray-600 uppercase text-right">Max</span>
-          <span className="font-mono text-sm text-gray-600 uppercase text-right">Correct</span>
-          <span className="font-mono text-sm text-gray-600 uppercase text-right">Status</span>
-        </div>
+        {leaderboard.length > 0 && (
+          <>
+            <div className="hidden md:grid grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] gap-6 px-8 py-4 border-b border-hardwood-600 bg-hardwood-700">
+              <span className="font-mono text-sm text-gray-600 uppercase">#</span>
+              <span className="font-mono text-sm text-gray-600 uppercase">Player</span>
+              <span className="font-mono text-sm text-gray-600 uppercase text-right">Score</span>
+              <span className="font-mono text-sm text-gray-600 uppercase text-right">Max</span>
+              <span className="font-mono text-sm text-gray-600 uppercase text-right">Correct</span>
+              <span className="font-mono text-sm text-gray-600 uppercase text-right">Status</span>
+            </div>
+            <div className="md:hidden px-4 py-3 border-b border-hardwood-600 bg-hardwood-700/80 grid grid-cols-4 gap-2 text-center">
+              <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Score</span>
+              <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Max</span>
+              <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Correct</span>
+              <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Status</span>
+            </div>
+          </>
+        )}
 
         {leaderboard.length === 0 ? (
           <div className="p-12 text-center text-gray-600 font-body">
@@ -86,7 +96,7 @@ const STATUS_CONFIG: Record<BracketStatus, { label: string; color: string }> = {
 function StatusBadge({ status }: { status: BracketStatus }) {
   const config = STATUS_CONFIG[status];
   return (
-    <span className={clsx("text-base font-mono", config.color)}>
+    <span className={clsx("text-xs md:text-base font-mono leading-tight", config.color)}>
       {config.label}
     </span>
   );
@@ -102,47 +112,55 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
   return (
     <Link href={`/bracket/${entry.bracketId}`}>
       <div
-        className="grid grid-cols-[4rem_1fr] md:grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] gap-6 px-8 py-5 items-center hover:bg-hardwood-700 transition-colors"
+        className={clsx(
+          "flex flex-col gap-3 px-4 py-4 md:px-8 md:py-5 md:grid md:grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] md:gap-6 md:items-center",
+          "hover:bg-hardwood-700 transition-colors"
+        )}
       >
-        <span
-          className={clsx(
-            "font-display text-3xl font-black",
-            rankColors[entry.rank] ?? "text-gray-600"
-          )}
-        >
-          {entry.rank}
-        </span>
+        <div className="flex items-center gap-3 min-w-0 md:contents">
+          <span
+            className={clsx(
+              "font-display text-2xl md:text-3xl font-black w-10 shrink-0 text-center md:w-auto md:text-left",
+              rankColors[entry.rank] ?? "text-gray-600"
+            )}
+          >
+            {entry.rank}
+          </span>
 
-        <div className="flex items-center gap-4 min-w-0">
-          <div className="w-12 h-12 rounded-full bg-court-700 flex-shrink-0 flex items-center justify-center">
-            <span className="font-display text-lg font-bold text-white">
-              {entry.userName.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-court-700 flex-shrink-0 flex items-center justify-center">
+              <span className="font-display text-base md:text-lg font-bold text-white">
+                {entry.userName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <p className="font-display text-base md:text-lg font-bold uppercase tracking-wide truncate text-white">
+                {entry.userName}
+              </p>
+              <p className="text-xs md:text-sm text-gray-600 font-body truncate">{entry.bracketName}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 text-center items-center md:contents">
+          <div className="flex flex-col gap-0.5 md:block md:text-right">
+            <span className="font-mono text-2xl md:text-2xl font-bold text-white tabular-nums">
+              {entry.score}
             </span>
           </div>
-          <div className="min-w-0">
-            <p className="font-display text-lg font-bold uppercase tracking-wide truncate text-white">
-              {entry.userName}
-            </p>
-            <p className="text-sm text-gray-600 font-body truncate">{entry.bracketName}</p>
+          <div className="flex flex-col gap-0.5 md:block md:text-right">
+            <span className="font-mono text-sm md:text-lg text-gray-500 tabular-nums">
+              {entry.maxPossibleScore}
+            </span>
           </div>
-        </div>
-
-        <div className="hidden md:block text-right">
-          <span className="font-mono text-2xl font-bold text-white">{entry.score}</span>
-        </div>
-
-        <div className="hidden md:block text-right">
-          <span className="font-mono text-lg text-gray-500">{entry.maxPossibleScore}</span>
-        </div>
-
-        <div className="hidden md:block text-right">
-          <span className="font-mono text-lg text-gray-400">
-            {entry.correctPicks}/{entry.totalPicks}
-          </span>
-        </div>
-
-        <div className="hidden md:block text-right">
-          <StatusBadge status={entry.status} />
+          <div className="flex flex-col gap-0.5 md:block md:text-right">
+            <span className="font-mono text-sm md:text-lg text-gray-400 tabular-nums">
+              {entry.correctPicks}/{entry.totalPicks}
+            </span>
+          </div>
+          <div className="flex justify-center md:justify-end md:text-right">
+            <StatusBadge status={entry.status} />
+          </div>
         </div>
       </div>
     </Link>

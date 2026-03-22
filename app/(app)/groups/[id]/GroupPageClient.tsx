@@ -107,14 +107,22 @@ export function GroupPageClient({ group, leaderboard, currentUserId, isGroupAdmi
         </div>
 
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
-          {/* Table header */}
-          <div className="hidden md:grid grid-cols-[3rem_1fr_5rem_5rem_5rem] gap-4 px-6 py-3 border-b border-hardwood-600 bg-hardwood-700">
-            <span className="font-mono text-xs text-gray-600 uppercase">#</span>
-            <span className="font-mono text-xs text-gray-600 uppercase">Player</span>
-            <span className="font-mono text-xs text-gray-600 uppercase text-right">Score</span>
-            <span className="font-mono text-xs text-gray-600 uppercase text-right">Max</span>
-            <span className="font-mono text-xs text-gray-600 uppercase text-right">Correct</span>
-          </div>
+          {leaderboard.length > 0 && (
+            <>
+              <div className="hidden md:grid grid-cols-[3rem_1fr_5rem_5rem_5rem] gap-4 px-6 py-3 border-b border-hardwood-600 bg-hardwood-700">
+                <span className="font-mono text-xs text-gray-600 uppercase">#</span>
+                <span className="font-mono text-xs text-gray-600 uppercase">Player</span>
+                <span className="font-mono text-xs text-gray-600 uppercase text-right">Score</span>
+                <span className="font-mono text-xs text-gray-600 uppercase text-right">Max</span>
+                <span className="font-mono text-xs text-gray-600 uppercase text-right">Correct</span>
+              </div>
+              <div className="md:hidden px-4 py-2.5 border-b border-hardwood-600 bg-hardwood-700/80 grid grid-cols-3 gap-2 text-center">
+                <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Score</span>
+                <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Max</span>
+                <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Correct</span>
+              </div>
+            </>
+          )}
 
           {leaderboard.length === 0 ? (
             <div className="p-12 text-center text-gray-600 font-body">
@@ -166,47 +174,44 @@ function LeaderboardRow({ entry, isCurrentUser }: { entry: LeaderboardEntry; isC
   return (
     <Link href={`/bracket/${entry.bracketId}`}>
       <div className={clsx(
-        "grid grid-cols-[3rem_1fr] md:grid-cols-[3rem_1fr_5rem_5rem_5rem]",
-        "gap-4 px-6 py-4 items-center hover:bg-hardwood-700 transition-colors cursor-pointer",
+        "flex flex-col gap-0 px-4 py-3 md:px-6 md:py-4 md:grid md:grid-cols-[3rem_1fr_5rem_5rem_5rem] md:gap-4 md:items-center",
+        "hover:bg-hardwood-700 transition-colors cursor-pointer",
         isCurrentUser && "bg-court-500/5 hover:bg-court-500/10"
       )}>
-        {/* Rank */}
-        <span className="font-display text-xl font-black text-gray-400">
-          {medals[entry.rank] ?? entry.rank}
-        </span>
+        <div className="flex items-center gap-3 min-w-0 md:contents">
+          <span className="font-display text-lg md:text-xl font-black text-gray-400 w-8 shrink-0 text-center md:w-auto">
+            {medals[entry.rank] ?? entry.rank}
+          </span>
 
-        {/* Player */}
-        <div className="flex items-center gap-3 min-w-0">
-          {entry.userPicture ? (
-            <Image src={entry.userPicture} alt={entry.userName} width={32} height={32} className="rounded-full flex-shrink-0" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-hardwood-600 flex-shrink-0" />
-          )}
-          <div className="min-w-0">
-            <p className={clsx(
-              "font-display font-bold uppercase tracking-wide text-sm truncate",
-              isCurrentUser ? "text-court-400" : "text-white"
-            )}>
-              {entry.userName}
-              {isCurrentUser && <span className="ml-2 text-[10px] text-court-600 normal-case font-mono">you</span>}
-            </p>
-            <p className="text-xs text-gray-600 font-body truncate">{entry.bracketName}</p>
+          <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
+            {entry.userPicture ? (
+              <Image src={entry.userPicture} alt={entry.userName} width={32} height={32} className="rounded-full flex-shrink-0" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-hardwood-600 flex-shrink-0" />
+            )}
+            <div className="min-w-0">
+              <p className={clsx(
+                "font-display font-bold uppercase tracking-wide text-sm truncate",
+                isCurrentUser ? "text-court-400" : "text-white"
+              )}>
+                {entry.userName}
+                {isCurrentUser && <span className="ml-2 text-[10px] text-court-600 normal-case font-mono">you</span>}
+              </p>
+              <p className="text-xs text-gray-600 font-body truncate">{entry.bracketName}</p>
+            </div>
           </div>
         </div>
 
-        {/* Score */}
-        <div className="hidden md:flex flex-col items-end">
-          <span className="font-mono text-xl font-bold text-white">{entry.score}</span>
-        </div>
-
-        {/* Max */}
-        <div className="hidden md:flex flex-col items-end">
-          <span className="font-mono text-sm text-gray-500">{entry.maxPossibleScore}</span>
-        </div>
-
-        {/* Correct */}
-        <div className="hidden md:flex flex-col items-end">
-          <span className="font-mono text-sm text-gray-400">{entry.correctPicks}/{entry.totalPicks}</span>
+        <div className="grid grid-cols-3 gap-2 mt-2 text-center items-center md:mt-0 md:contents">
+          <div className="md:text-right">
+            <span className="font-mono text-lg md:text-xl font-bold text-white tabular-nums">{entry.score}</span>
+          </div>
+          <div className="md:text-right">
+            <span className="font-mono text-sm text-gray-500 tabular-nums">{entry.maxPossibleScore}</span>
+          </div>
+          <div className="md:text-right">
+            <span className="font-mono text-sm text-gray-400 tabular-nums">{entry.correctPicks}/{entry.totalPicks}</span>
+          </div>
         </div>
       </div>
     </Link>
