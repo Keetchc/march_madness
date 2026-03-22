@@ -6,6 +6,8 @@ import Link from "next/link";
 import { clsx } from "clsx";
 import type { LeaderboardEntry, BracketStatus } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function PublicLeaderboardPage() {

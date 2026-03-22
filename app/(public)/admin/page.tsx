@@ -1,6 +1,8 @@
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { AdminPageClient } from "@/app/(app)/admin/AdminPageClient";
 
+export const dynamic = "force-dynamic";
+
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function PublicAdminPage() {

@@ -3,6 +3,8 @@ import { upsertUser } from "@/lib/dynamo/queries/users";
 import { getUser } from "@/lib/dynamo/queries/users";
 import { createBracket, getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { v4 as uuidv4 } from "uuid";
+
+export const dynamic = "force-dynamic";
 import type { Bracket, AppUser, Picks } from "@/lib/types";
 
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";

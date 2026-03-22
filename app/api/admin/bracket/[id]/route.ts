@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getBracket, updatePicks } from "@/lib/dynamo/queries/brackets";
 import type { Picks } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _req: Request,
   { params }: { params: { id: string } }

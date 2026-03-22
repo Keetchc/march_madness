@@ -3,6 +3,8 @@ import { requireSession, getUserId } from "@/lib/session";
 import { createGroup, getGroupsByUser } from "@/lib/dynamo/queries/groups";
 import { v4 as uuidv4 } from "uuid";
 import type { Group } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 import { DEFAULT_SCORING_RULES } from "@/lib/types";
 
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";

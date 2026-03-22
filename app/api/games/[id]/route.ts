@@ -4,6 +4,8 @@ import { getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { getUser } from "@/lib/dynamo/queries/users";
 import type { GamePicksResponse } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 // GET /api/games/[id] — game details + who picked what (public)

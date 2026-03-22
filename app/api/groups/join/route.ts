@@ -4,6 +4,8 @@ import { getGroupByInviteToken, addMember, getGroupMembership } from "@/lib/dyna
 import { getBracketsByUser } from "@/lib/dynamo/queries/brackets";
 import type { GroupMember } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 // POST /api/groups/join — join via invite token
 export async function POST(req: Request) {
   const { session, error } = await requireSession();

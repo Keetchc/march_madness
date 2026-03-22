@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 
+export const dynamic = "force-dynamic";
+
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export async function GET() {

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireSession, getUserId } from "@/lib/session";
+
+export const dynamic = "force-dynamic";
+
 import {
   getGroup,
   getGroupMembers,

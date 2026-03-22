@@ -3,6 +3,8 @@ import { getTournament } from "@/lib/dynamo/queries/games";
 import { getUser } from "@/lib/dynamo/queries/users";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function AllBracketsPage() {

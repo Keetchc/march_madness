@@ -3,6 +3,8 @@ import { requireSession, getUserId } from "@/lib/session";
 import { getBracket, updatePicks, deleteBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
 
+export const dynamic = "force-dynamic";
+
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 // GET /api/bracket/[id] — public read access

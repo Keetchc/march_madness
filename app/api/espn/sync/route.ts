@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { fetchEspnScoreboard, mapEspnStatus, extractEspnWinner } from "@/lib/espn/client";
 import { getAllGames, getAllTeams, setGameResult, advanceWinner, getGameByEspnId } from "@/lib/dynamo/queries/games";
 
+export const dynamic = "force-dynamic";
+
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 const SYNC_SECRET = process.env.ESPN_SYNC_SECRET ?? "dev-sync-secret";
 
