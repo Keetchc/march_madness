@@ -137,28 +137,27 @@ export function buildLeaderboard(
 
   if (entries.length === 0) return entries;
 
-  const leader = entries[0];
-  const leaderBracket = brackets.find((b) => b.bracketId === leader.bracketId)!;
+  const leaderScore = entries[0].score;
+  const bracketMap = new Map(brackets.map((b) => [b.bracketId, b]));
 
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
 
-    if (entry.score === leader.score) {
+    if (entry.score === leaderScore) {
       entry.status = "leader";
       continue;
     }
 
-    if (entry.maxPossibleScore <= leader.score) {
+    if (entry.maxPossibleScore <= leaderScore) {
       entry.status = "eliminated";
       continue;
     }
 
-    const challengerBracket = brackets.find((b) => b.bracketId === entry.bracketId)!;
-    entry.status = computeDifferentialStatus(
+    entry.status = computeStatusAgainstField(
       entry,
-      leader,
-      challengerBracket,
-      leaderBracket,
+      entries,
+      i,
+      bracketMap,
       pendingGames,
       eliminatedTeams,
       teams,
@@ -169,51 +168,64 @@ export function buildLeaderboard(
 }
 
 /**
- * Compare a challenger's remaining picks against the leader to determine
- * whether they're alive, a long shot, or effectively eliminated.
+ * Determine a bracket's status by comparing against EVERY bracket currently
+ * at or above it. A bracket is eliminated if there is ANY rival it can never
+ * catch -- even a bracket with nearly identical picks that will always stay
+ * one step ahead.
  *
- * Only games where they picked differently can change the gap.
- * Best-case: the challenger's differing pick wins (challenger gains points,
- * leader gains nothing). The max gap closure is the sum of challenger gains
- * from those differing games -- the leader's "lost" potential does NOT reduce
- * the leader's locked-in score, so it must not inflate the differential.
+ * Best-case for the challenger: all of their alive picks win. In differing
+ * games, the challenger gains points and the rival doesn't. In agreed games,
+ * both gain the same, so the gap doesn't change. Only the challenger's gains
+ * from differing games can close the gap.
  */
-function computeDifferentialStatus(
-  challenger: LeaderboardEntry,
-  leader: LeaderboardEntry,
-  challengerBracket: Bracket,
-  leaderBracket: Bracket,
+function computeStatusAgainstField(
+  entry: LeaderboardEntry,
+  entries: LeaderboardEntry[],
+  entryIndex: number,
+  bracketMap: Map<string, Bracket>,
   pendingGames: Game[],
   eliminatedTeams: Set<string>,
   teams: Map<string, Team>,
 ): BracketStatus {
-  const gap = leader.score - challenger.score;
-  let bestCaseGain = 0;
+  const myBracket = bracketMap.get(entry.bracketId)!;
+  let tightestCushion = Infinity;
+  let tightestGap = 0;
 
-  for (const game of pendingGames) {
-    const challengerPick = challengerBracket.picks[game.gameId];
-    const leaderPick = leaderBracket.picks[game.gameId];
+  for (let j = 0; j < entryIndex; j++) {
+    const rival = entries[j];
+    const gap = rival.score - entry.score;
+    if (gap <= 0) continue;
 
-    if (!challengerPick) continue;
-    if (challengerPick === leaderPick) continue;
-    if (eliminatedTeams.has(challengerPick)) continue;
+    const rivalBracket = bracketMap.get(rival.bracketId)!;
+    let bestCaseGain = 0;
 
-    const pickedTeam = teams.get(challengerPick);
-    const seed = pickedTeam?.seed ?? 1;
-    bestCaseGain += ROUND_BASE_POINTS[game.round] * seed;
+    for (const game of pendingGames) {
+      const myPick = myBracket.picks[game.gameId];
+      const rivalPick = rivalBracket.picks[game.gameId];
+
+      if (!myPick || myPick === rivalPick) continue;
+      if (eliminatedTeams.has(myPick)) continue;
+
+      const pickedTeam = teams.get(myPick);
+      bestCaseGain += ROUND_BASE_POINTS[game.round] * (pickedTeam?.seed ?? 1);
+    }
+
+    if (bestCaseGain < gap) {
+      return "eliminated";
+    }
+
+    const cushion = bestCaseGain - gap;
+    if (cushion < tightestCushion) {
+      tightestCushion = cushion;
+      tightestGap = gap;
+    }
   }
 
-  if (bestCaseGain < gap) {
-    return "eliminated";
-  }
-
-  if (challenger.maxPossibleScore > leader.maxPossibleScore) {
+  if (entry.maxPossibleScore > entries[0].maxPossibleScore) {
     return "alive";
   }
 
-  const cushion = bestCaseGain - gap;
-  const threshold = gap * 0.5;
-  if (cushion > threshold || gap === 0) {
+  if (tightestGap === 0 || tightestCushion > tightestGap * 0.5) {
     return "alive";
   }
 

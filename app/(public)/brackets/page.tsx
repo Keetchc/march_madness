@@ -41,24 +41,24 @@ export default async function AllBracketsPage() {
           No brackets submitted yet.
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {enriched.map((b) => (
             <Link
               key={b.bracketId}
               href={`/bracket/${b.bracketId}`}
-              className="bg-hardwood-800 border border-hardwood-600 rounded-xl p-5 hover:border-court-600 transition-colors group"
+              className="bg-hardwood-800 border border-hardwood-600 rounded-xl p-6 hover:border-court-600 transition-colors group"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-court-700 flex-shrink-0 flex items-center justify-center">
-                  <span className="font-display text-sm font-bold text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-court-700 flex-shrink-0 flex items-center justify-center">
+                  <span className="font-display text-xl font-bold text-white">
                     {b.userName.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <p className="font-display font-bold uppercase tracking-wide text-white group-hover:text-court-400 transition-colors truncate">
+                  <p className="font-display text-xl font-bold uppercase tracking-wide text-white group-hover:text-court-400 transition-colors truncate">
                     {b.userName}
                   </p>
-                  <p className="text-xs text-gray-600 font-body truncate">
+                  <p className="text-base text-gray-600 font-body truncate">
                     {b.name}
                   </p>
                 </div>
