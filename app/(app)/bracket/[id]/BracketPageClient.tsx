@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import { BracketView } from "@/components/bracket/BracketView";
 import type { Game, Team, Picks, Tournament } from "@/lib/types";
 import { projectPicksOntoGames } from "@/lib/bracket-utils";
@@ -23,6 +24,7 @@ export function BracketPageClient({
   bracketName,
   initialPicks,
 }: BracketPageClientProps) {
+  const { data: session, status: sessionStatus } = useSession();
   const [games, setGames] = useState<Game[]>([]);
   const [teams, setTeams] = useState<Map<string, Team>>(new Map());
   const [tournament, setTournament] = useState<Tournament | null>(null);
@@ -31,7 +33,19 @@ export function BracketPageClient({
   const [loading, setLoading] = useState(true);
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const isOwner = userId === bracketUserId;
+  /** Server props can miss the viewer id on public routes (CDN/RSC caching). Prefer client session when signed in. */
+  const resolvedViewerId = useMemo(() => {
+    if (sessionStatus === "authenticated" && session?.user) {
+      const u = session.user as { userId?: string; id?: string };
+      const fromClient = (u.userId ?? u.id ?? "").toString().trim();
+      if (fromClient) return fromClient;
+    }
+    return (userId ?? "").toString().trim();
+  }, [session, sessionStatus, userId]);
+
+  const isOwner =
+    resolvedViewerId !== "" &&
+    String(resolvedViewerId) === String(bracketUserId);
   const lockedBySchedule = tournament
     ? new Date() > new Date(tournament.lockDate) && tournament.status !== "pending"
     : false;

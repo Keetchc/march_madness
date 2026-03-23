@@ -6,6 +6,8 @@ import { getAuthOptions } from "@/lib/auth";
 import { getUserId } from "@/lib/session";
 import { BracketPageClient } from "@/app/(app)/bracket/[id]/BracketPageClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicBracketPage({ params }: { params: { id: string } }) {
   const bracket = await getBracket(params.id);
   if (!bracket) notFound();
