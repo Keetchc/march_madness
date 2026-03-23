@@ -16,9 +16,11 @@ const adminEmails = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.tri
 const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
 
-if (!googleClientId || !googleClientSecret) {
+const authWarnOnce = globalThis as { __mmNextAuthEnvWarned?: boolean };
+if (!authWarnOnce.__mmNextAuthEnvWarned && (!googleClientId || !googleClientSecret)) {
+  authWarnOnce.__mmNextAuthEnvWarned = true;
   console.error(
-    "[next-auth] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing/empty. Google sign-in fails with ?error=OAuthSignin. Set both in Amplify (or .env.local), not only at build time."
+    "[next-auth] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing/empty. Set both in Amplify branch env (runtime), same as NEXTAUTH_SECRET."
   );
 }
 
