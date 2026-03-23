@@ -57,7 +57,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
       group={group}
       leaderboard={leaderboard}
       currentUserId={userId}
-      isGroupAdmin={group.adminUserId === userId}
+      isGroupAdmin={group.adminUserId === userId || isAdmin}
     />
   );
 }

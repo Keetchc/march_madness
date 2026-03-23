@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireSession, getUserId } from "@/lib/session";
-import { createGroup, getGroupsByUser } from "@/lib/dynamo/queries/groups";
+import { addMember, createGroup, getGroupsByUser } from "@/lib/dynamo/queries/groups";
 import { v4 as uuidv4 } from "uuid";
-import type { Group } from "@/lib/types";
+import type { Group, GroupMember } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 import { DEFAULT_SCORING_RULES } from "@/lib/types";
@@ -43,6 +43,18 @@ export async function POST(req: Request) {
   };
 
   await createGroup(group);
+
+  // Member row required for userId-index — otherwise the group never appears on dashboard / groups list.
+  const creatorMembership: GroupMember = {
+    groupId: group.groupId,
+    userId,
+    bracketId: "",
+    joinedAt: new Date().toISOString(),
+    currentScore: 0,
+    rank: 0,
+  };
+  await addMember(creatorMembership);
+
   return NextResponse.json(group, { status: 201 });
 }
 
