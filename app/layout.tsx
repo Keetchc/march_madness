@@ -2,9 +2,46 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 
+function getMetadataBase(): URL {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXTAUTH_URL;
+  if (raw) {
+    try {
+      return new URL(raw);
+    } catch {
+      /* ignore */
+    }
+  }
+  if (process.env.VERCEL_URL) {
+    return new URL(`https://${process.env.VERCEL_URL}`);
+  }
+  return new URL("http://localhost:3000");
+}
+
+const metadataBase = getMetadataBase();
+
 export const metadata: Metadata = {
-  title: "Brian's Group March Madness",
-  description: "A place for Brian's Group to more easily get stats about their brackets",
+  metadataBase,
+  title: {
+    default: "Brian's Group March Madness",
+    template: "%s | Brian's Group",
+  },
+  description:
+    "Track brackets, leaderboard standings, compare picks, and follow March Madness with Brian's Group.",
+  openGraph: {
+    title: "Brian's Group March Madness",
+    description:
+      "Brackets, leaderboard, compare picks — your March Madness pool hub.",
+    url: "/",
+    siteName: "Brian's Group March Madness",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Brian's Group March Madness",
+    description:
+      "Brackets, leaderboard, compare picks — your March Madness pool hub.",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
