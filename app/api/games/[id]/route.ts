@@ -69,10 +69,10 @@ export async function POST(
   const game = await getGame(TOURNAMENT_ID, params.id);
   if (!game) return NextResponse.json({ error: "Game not found" }, { status: 404 });
 
-  // Save result
   await setGameResult(TOURNAMENT_ID, params.id, winnerId, score1, score2);
 
-  // Advance winner to next game if applicable
+  // Always re-apply the winner into the next game slot so the bracket tree stays
+  // aligned after any save (new result, score fix, or winner correction).
   if (game.nextGameId && game.nextGameSlot) {
     await advanceWinner(TOURNAMENT_ID, game.nextGameId, game.nextGameSlot, winnerId);
   }

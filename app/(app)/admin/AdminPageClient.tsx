@@ -112,8 +112,21 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
   }
 
   async function saveResult(gameId: string) {
+    const g = localGames.find((x) => x.gameId === gameId);
     const input = resultInputs[gameId];
-    if (!input?.winnerId) return;
+    let winnerId = input?.winnerId ?? "";
+    let score1Str = input?.score1 ?? "";
+    let score2Str = input?.score2 ?? "";
+    if (g?.status === "final") {
+      if (!winnerId) winnerId = g.winnerId ?? "";
+      if (score1Str === "" && g.score1 != null) score1Str = String(g.score1);
+      if (score2Str === "" && g.score2 != null) score2Str = String(g.score2);
+    }
+    if (!winnerId) return;
+
+    const score1 = parseInt(score1Str, 10);
+    const score2 = parseInt(score2Str, 10);
+    if (Number.isNaN(score1) || Number.isNaN(score2)) return;
 
     setSavingId(gameId);
     try {
@@ -121,22 +134,30 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          winnerId: input.winnerId,
-          score1: parseInt(input.score1) || 0,
-          score2: parseInt(input.score2) || 0,
+          winnerId,
+          score1,
+          score2,
         }),
       });
       if (res.ok) {
         setLocalGames((prev) =>
-          prev.map((g) =>
-            g.gameId === gameId
-              ? { ...g, winnerId: input.winnerId, status: "final",
-                  score1: parseInt(input.score1) || 0,
-                  score2: parseInt(input.score2) || 0 }
-              : g
+          prev.map((game) =>
+            game.gameId === gameId
+              ? {
+                  ...game,
+                  winnerId,
+                  status: "final",
+                  score1,
+                  score2,
+                }
+              : game
           )
         );
-        setResultInputs((prev) => { const n = { ...prev }; delete n[gameId]; return n; });
+        setResultInputs((prev) => {
+          const n = { ...prev };
+          delete n[gameId];
+          return n;
+        });
       }
     } finally {
       setSavingId(null);
@@ -207,6 +228,28 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
           const input = resultInputs[game.gameId];
           const isFinal = game.status === "final";
 
+          const winnerSelectValue =
+            input?.winnerId ?? (isFinal ? game.winnerId ?? "" : "");
+          const score1InputValue =
+            input?.score1 !== undefined && input.score1 !== ""
+              ? input.score1
+              : isFinal && game.score1 != null
+                ? String(game.score1)
+                : "";
+          const score2InputValue =
+            input?.score2 !== undefined && input.score2 !== ""
+              ? input.score2
+              : isFinal && game.score2 != null
+                ? String(game.score2)
+                : "";
+
+          const canSave =
+            !!winnerSelectValue &&
+            score1InputValue !== "" &&
+            score2InputValue !== "" &&
+            !Number.isNaN(parseInt(score1InputValue, 10)) &&
+            !Number.isNaN(parseInt(score2InputValue, 10));
+
           return (
             <div
               key={game.gameId}
@@ -215,8 +258,8 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
                 isFinal ? "border-green-900/50" : "border-hardwood-600"
               )}
             >
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="flex items-center gap-3 flex-wrap">
                   <div className="text-sm font-body">
                     <span className={clsx(
                       "font-display font-bold uppercase",
@@ -235,67 +278,87 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
                   <span className="font-mono text-xs text-gray-600">
                     {game.region} · Slot {game.bracketSlot}
                   </span>
+                  {isFinal && (
+                    <span className="inline-flex items-center gap-1 text-green-400 text-xs font-mono">
+                      <CheckCircleIcon className="w-3.5 h-3.5" />
+                      Final
+                    </span>
+                  )}
                 </div>
 
-                {isFinal ? (
-                  <div className="flex items-center gap-2 text-green-400 text-sm font-mono">
-                    <CheckCircleIcon className="w-4 h-4" />
-                    Final: {game.score1} - {game.score2}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <select
-                      value={input?.winnerId ?? ""}
-                      onChange={(e) =>
-                        setResultInputs((prev) => ({
-                          ...prev,
-                          [game.gameId]: { ...prev[game.gameId], winnerId: e.target.value, score1: prev[game.gameId]?.score1 ?? "", score2: prev[game.gameId]?.score2 ?? "" },
-                        }))
-                      }
-                      disabled={!team1 || !team2}
-                      className="bg-hardwood-700 border border-hardwood-500 focus:border-court-500 rounded-lg px-3 py-1.5 text-white text-sm font-body outline-none"
-                    >
-                      <option value="">-- Winner --</option>
-                      {team1 && <option value={team1.id}>{team1.name}</option>}
-                      {team2 && <option value={team2.id}>{team2.name}</option>}
-                    </select>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <select
+                    value={winnerSelectValue}
+                    onChange={(e) =>
+                      setResultInputs((prev) => ({
+                        ...prev,
+                        [game.gameId]: {
+                          winnerId: e.target.value,
+                          score1: prev[game.gameId]?.score1 ?? score1InputValue,
+                          score2: prev[game.gameId]?.score2 ?? score2InputValue,
+                        },
+                      }))
+                    }
+                    disabled={!team1 || !team2}
+                    className="bg-hardwood-700 border border-hardwood-500 focus:border-court-500 rounded-lg px-3 py-1.5 text-white text-sm font-body outline-none"
+                  >
+                    <option value="">-- Winner --</option>
+                    {team1 && <option value={team1.id}>{team1.name}</option>}
+                    {team2 && <option value={team2.id}>{team2.name}</option>}
+                  </select>
 
-                    <input
-                      type="number"
-                      placeholder={team1?.shortName ?? "T1"}
-                      value={input?.score1 ?? ""}
-                      onChange={(e) =>
-                        setResultInputs((prev) => ({
-                          ...prev,
-                          [game.gameId]: { ...prev[game.gameId] ?? { winnerId: "", score2: "" }, score1: e.target.value },
-                        }))
-                      }
-                      className="w-20 bg-hardwood-700 border border-hardwood-500 rounded-lg px-2 py-1.5 text-white text-sm font-mono text-center outline-none focus:border-court-500"
-                    />
-                    <span className="text-gray-600 font-mono">-</span>
-                    <input
-                      type="number"
-                      placeholder={team2?.shortName ?? "T2"}
-                      value={input?.score2 ?? ""}
-                      onChange={(e) =>
-                        setResultInputs((prev) => ({
-                          ...prev,
-                          [game.gameId]: { ...prev[game.gameId] ?? { winnerId: "", score1: "" }, score2: e.target.value },
-                        }))
-                      }
-                      className="w-20 bg-hardwood-700 border border-hardwood-500 rounded-lg px-2 py-1.5 text-white text-sm font-mono text-center outline-none focus:border-court-500"
-                    />
+                  <input
+                    type="number"
+                    placeholder={team1?.shortName ?? "T1"}
+                    value={score1InputValue}
+                    onChange={(e) =>
+                      setResultInputs((prev) => ({
+                        ...prev,
+                        [game.gameId]: {
+                          winnerId: prev[game.gameId]?.winnerId ?? winnerSelectValue,
+                          score1: e.target.value,
+                          score2: prev[game.gameId]?.score2 ?? score2InputValue,
+                        },
+                      }))
+                    }
+                    className="w-20 bg-hardwood-700 border border-hardwood-500 rounded-lg px-2 py-1.5 text-white text-sm font-mono text-center outline-none focus:border-court-500"
+                  />
+                  <span className="text-gray-600 font-mono">-</span>
+                  <input
+                    type="number"
+                    placeholder={team2?.shortName ?? "T2"}
+                    value={score2InputValue}
+                    onChange={(e) =>
+                      setResultInputs((prev) => ({
+                        ...prev,
+                        [game.gameId]: {
+                          winnerId: prev[game.gameId]?.winnerId ?? winnerSelectValue,
+                          score1: prev[game.gameId]?.score1 ?? score1InputValue,
+                          score2: e.target.value,
+                        },
+                      }))
+                    }
+                    className="w-20 bg-hardwood-700 border border-hardwood-500 rounded-lg px-2 py-1.5 text-white text-sm font-mono text-center outline-none focus:border-court-500"
+                  />
 
-                    <button
-                      onClick={() => saveResult(game.gameId)}
-                      disabled={!input?.winnerId || savingId === game.gameId}
-                      className="bg-court-500 hover:bg-court-600 disabled:opacity-40 text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors"
-                    >
-                      {savingId === game.gameId ? "Saving..." : "Save"}
-                    </button>
-                  </div>
-                )}
+                  <button
+                    onClick={() => saveResult(game.gameId)}
+                    disabled={!canSave || savingId === game.gameId}
+                    className="bg-court-500 hover:bg-court-600 disabled:opacity-40 text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors"
+                  >
+                    {savingId === game.gameId
+                      ? "Saving..."
+                      : isFinal
+                        ? "Update"
+                        : "Save"}
+                  </button>
+                </div>
               </div>
+              {isFinal && (
+                <p className="mt-2 text-[11px] font-mono text-amber-500/90">
+                  Tip: change only scores to fix a typo. Changing the winner updates the next round slot; fix later games if they were based on the wrong winner.
+                </p>
+              )}
             </div>
           );
         })}
