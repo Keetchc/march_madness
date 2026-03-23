@@ -3,10 +3,12 @@
  * Run `prebuild` before `next build` so metadata/layout can resolve NEXTAUTH_URL; run again after
  * build so a fresh `.next` still contains the file.
  *
- * `DYNAMO_TABLE_PREFIX` is written using branch-aware rules (see `resolveDynamoTablePrefixForArtifact`).
- * CodeBuild often only sees the “All branches” value (`mm`) for `DYNAMO_TABLE_PREFIX`; set
- * `DYNAMO_TABLE_PREFIX_DEV=mm-dev` on the dev branch so dev builds embed the correct prefix. Optional:
- * `DYNAMO_TABLE_DEV_BRANCHES` (comma-separated, default `dev`) if your Git branch name is not `dev`.
+ * `DYNAMO_TABLE_PREFIX` in the artifact is derived from **AWS_BRANCH** (set by Amplify per build —
+ * no branch-scoped env UI required). Set the same values on **all branches**:
+ *   - `DYNAMO_TABLE_PREFIX=mm`
+ *   - `DYNAMO_TABLE_DEV_BRANCHES=dev` (comma-separated Git branch names that use dev tables; default `dev`)
+ * Optional same-everywhere override for the dev prefix string: `DYNAMO_TABLE_DEV_PREFIX=mm-dev`
+ * (otherwise dev prefix is `{DYNAMO_TABLE_PREFIX}-dev`, e.g. `mm-dev`).
  */
 const fs = require("fs");
 const path = require("path");
@@ -17,12 +19,19 @@ function resolveDynamoTablePrefixForArtifact() {
     .split(",")
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  const devPrefix = process.env.DYNAMO_TABLE_PREFIX_DEV?.trim();
-  if (devPrefix && devBranches.includes(branch)) {
-    return devPrefix;
+
+  const base =
+    (process.env.DYNAMO_TABLE_PREFIX || "mm").trim().replace(/-+$/, "") || "mm";
+
+  if (branch && devBranches.includes(branch)) {
+    const explicit = process.env.DYNAMO_TABLE_DEV_PREFIX?.trim();
+    if (explicit) {
+      return explicit.replace(/-+$/, "") || `${base}-dev`;
+    }
+    return `${base}-dev`;
   }
-  const fallback = process.env.DYNAMO_TABLE_PREFIX?.trim();
-  return fallback || undefined;
+
+  return base;
 }
 
 const KEYS = [
@@ -43,25 +52,21 @@ for (const k of KEYS) {
   if (v !== undefined && v !== "") out[k] = v;
 }
 
-const dynamoPrefix = resolveDynamoTablePrefixForArtifact();
-if (dynamoPrefix) {
-  out.DYNAMO_TABLE_PREFIX = dynamoPrefix;
-}
+out.DYNAMO_TABLE_PREFIX = resolveDynamoTablePrefixForArtifact();
+const dynamoPrefix = out.DYNAMO_TABLE_PREFIX;
 
 const dir = path.join(process.cwd(), ".next");
 const target = path.join(dir, "amplify-auth.json");
 
 fs.mkdirSync(dir, { recursive: true });
 fs.writeFileSync(target, JSON.stringify(out), "utf8");
-if (dynamoPrefix) {
-  console.log(
-    "[write-amplify-auth-env]",
-    label,
-    "DYNAMO_TABLE_PREFIX in artifact:",
-    dynamoPrefix,
-    "(AWS_BRANCH=" + (process.env.AWS_BRANCH || "") + ")"
-  );
-}
+console.log(
+  "[write-amplify-auth-env]",
+  label,
+  "DYNAMO_TABLE_PREFIX in artifact:",
+  dynamoPrefix,
+  "(AWS_BRANCH=" + (process.env.AWS_BRANCH || "") + ")"
+);
 console.log(
   "[write-amplify-auth-env]",
   label,

@@ -45,3 +45,10 @@ export function serverEnv(key: string): string | undefined {
   if (v === undefined || v === "") return undefined;
   return v;
 }
+
+/** amplify-auth.json only — ignores `process.env` (used so Lambda’s `mm` does not beat branch-resolved file). */
+export function serverEnvFromArtifactOnly(key: string): string | undefined {
+  const fromFile = loadBundle()?.[key];
+  if (fromFile !== undefined && fromFile !== "") return fromFile;
+  return undefined;
+}
