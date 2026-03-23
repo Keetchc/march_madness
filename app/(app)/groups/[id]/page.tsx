@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { getGroup, getGroupMembers, getGroupMembership } from "@/lib/dynamo/queries/groups";
 import { getBracket } from "@/lib/dynamo/queries/brackets";
@@ -11,7 +11,7 @@ import { GroupPageClient } from "./GroupPageClient";
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session) redirect("/login");
 
   const userId = (session.user as any).userId as string;

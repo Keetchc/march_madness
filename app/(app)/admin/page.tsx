@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { AdminPageClient } from "./AdminPageClient";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session) redirect("/login");
   if (!(session.user as { isAdmin?: boolean }).isAdmin) redirect("/dashboard");
 

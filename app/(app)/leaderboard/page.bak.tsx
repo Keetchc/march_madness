@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
@@ -13,7 +13,7 @@ import type { LeaderboardEntry } from "@/lib/types";
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function LeaderboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session) redirect("/login");
 
   const currentUserId = (session.user as any).userId as string;

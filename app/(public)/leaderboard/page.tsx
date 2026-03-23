@@ -3,7 +3,7 @@ import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/ga
 import { getUser } from "@/lib/dynamo/queries/users";
 import { buildLeaderboard } from "@/lib/scoring/engine";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { clsx } from "clsx";
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function PublicLeaderboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   const currentUserId =
     session?.user != null
       ? ((session.user as { userId?: string }).userId ?? "")

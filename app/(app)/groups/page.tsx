@@ -1,12 +1,12 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getGroupsByUser } from "@/lib/dynamo/queries/groups";
 import Link from "next/link";
 import { PlusIcon, UsersIcon, LinkIcon } from "lucide-react";
 
 export default async function GroupsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session) redirect("/login");
 
   const userId = (session.user as any).userId as string;

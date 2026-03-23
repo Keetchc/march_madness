@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthOptions } from "@/lib/auth";
 import { getBracketsByUser } from "@/lib/dynamo/queries/brackets";
 import { getGroupsByUser } from "@/lib/dynamo/queries/groups";
 import { getTournament } from "@/lib/dynamo/queries/games";
@@ -9,7 +9,7 @@ import { TrophyIcon, UsersIcon, PlusIcon } from "lucide-react";
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   const userId = (session!.user as any).userId;
 
   const [brackets, groups, tournament] = await Promise.all([
