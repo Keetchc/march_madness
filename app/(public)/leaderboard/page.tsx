@@ -186,7 +186,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
           </div>
         </div>
 
-        {entry.criticalGames.length > 0 && entry.status !== "leader" && (
+        {entry.criticalGames.length > 0 && entry.status !== "eliminated" && (
           <div className="md:col-start-2 md:col-end-7 mt-2 md:mt-1">
             <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-court-500 mb-1.5">
               Most Important Remaining Games

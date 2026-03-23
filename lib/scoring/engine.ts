@@ -166,18 +166,85 @@ export function buildLeaderboard(
   }
 
   for (let i = 0; i < entries.length; i++) {
-    entries[i].criticalGames = computeCriticalGames(
-      entries[i],
-      entries,
-      i,
-      bracketMap,
-      pendingGames,
-      eliminatedTeams,
-      teams,
-    );
+    const e = entries[i];
+    if (e.status === "eliminated") {
+      e.criticalGames = [];
+    } else if (e.status === "leader") {
+      e.criticalGames = computeLeaderCriticalGames(
+        e,
+        entries,
+        i,
+        bracketMap,
+        pendingGames,
+        eliminatedTeams,
+        teams,
+      );
+    } else {
+      e.criticalGames = computeCriticalGames(
+        e,
+        entries,
+        i,
+        bracketMap,
+        pendingGames,
+        eliminatedTeams,
+        teams,
+      );
+    }
   }
 
   return entries;
+}
+
+/** Remaining picks with the most points at stake and the most disagreement with the rest of the field. */
+function computeLeaderCriticalGames(
+  entry: LeaderboardEntry,
+  entries: LeaderboardEntry[],
+  entryIndex: number,
+  bracketMap: Map<string, Bracket>,
+  pendingGames: Game[],
+  eliminatedTeams: Set<string>,
+  teams: Map<string, Team>,
+): CriticalGame[] {
+  const myBracket = bracketMap.get(entry.bracketId);
+  if (!myBracket) return [];
+
+  const games: CriticalGame[] = [];
+
+  for (const game of pendingGames) {
+    const myPick = myBracket.picks[game.gameId];
+    if (!myPick || eliminatedTeams.has(myPick)) continue;
+
+    const pickedTeam = teams.get(myPick);
+    const potentialPoints = ROUND_BASE_POINTS[game.round] * (pickedTeam?.seed ?? 1);
+
+    let rivalsWithDifferentPick = 0;
+    for (let j = 0; j < entries.length; j++) {
+      if (j === entryIndex) continue;
+      if (entries[j].status === "eliminated") continue;
+
+      const rivalBracket = bracketMap.get(entries[j].bracketId);
+      if (!rivalBracket) continue;
+      const rivalPick = rivalBracket.picks[game.gameId];
+      if (rivalPick && rivalPick !== myPick) {
+        rivalsWithDifferentPick++;
+      }
+    }
+
+    const swingScore = potentialPoints * (1 + rivalsWithDifferentPick * 0.6);
+    games.push({
+      gameId: game.gameId,
+      round: game.round,
+      teamId: myPick,
+      teamName: pickedTeam?.shortName ?? pickedTeam?.name ?? "TBD",
+      potentialPoints,
+      swingScore: Math.round(swingScore * 10) / 10,
+      rivalsAheadWithDifferentPick: rivalsWithDifferentPick,
+      isMustHave: false,
+    });
+  }
+
+  games.sort((a, b) => b.swingScore - a.swingScore);
+  return games.slice(0, 5);
 }
 
 function computeCriticalGames(
