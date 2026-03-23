@@ -1,6 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { serverEnv } from "@/lib/server-env";
 
 function isPublicPath(pathname: string): boolean {
   if (pathname.startsWith("/api/auth")) return true;
@@ -20,7 +21,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({ req, secret: serverEnv("NEXTAUTH_SECRET") });
 
   if (pathname.startsWith("/api/")) {
     if (!token) {

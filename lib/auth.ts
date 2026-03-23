@@ -10,6 +10,7 @@ declare module "next-auth" {
 import { DynamoDBAdapter } from "@next-auth/dynamodb-adapter";
 import { docClient } from "./dynamo/client";
 import { upsertUser } from "./dynamo/queries/users";
+import { serverEnv } from "./server-env";
 
 const dynamoAdapter = DynamoDBAdapter(docClient, {
   tableName: "mm-next-auth",
@@ -18,14 +19,13 @@ const dynamoAdapter = DynamoDBAdapter(docClient, {
 const authWarnOnce = globalThis as { __mmNextAuthEnvWarned?: boolean };
 
 /**
- * Build NextAuth options on each use so `process.env.*` is read when the handler runs.
- * Next.js can inline env at build time for module-scope reads; Amplify often has auth secrets
- * only (or correctly) at Lambda runtime — empty values get baked in and NO_SECRET / OAuthSignin persist.
+ * Build NextAuth options on each use. Auth secrets must be read via `serverEnv()` so they are not
+ * webpack-inlined from the CodeBuild environment (often empty) while Lambda has the real values.
  */
 export function getAuthOptions(): NextAuthOptions {
-  const adminEmails = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim());
-  const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
-  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
+  const adminEmails = (serverEnv("ADMIN_EMAILS") ?? "").split(",").map((e) => e.trim());
+  const googleClientId = serverEnv("GOOGLE_CLIENT_ID")?.trim() ?? "";
+  const googleClientSecret = serverEnv("GOOGLE_CLIENT_SECRET")?.trim() ?? "";
 
   if (!authWarnOnce.__mmNextAuthEnvWarned && (!googleClientId || !googleClientSecret)) {
     authWarnOnce.__mmNextAuthEnvWarned = true;
@@ -36,9 +36,9 @@ export function getAuthOptions(): NextAuthOptions {
 
   return {
     trustHost: true,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: serverEnv("NEXTAUTH_SECRET"),
 
-    debug: process.env.NEXTAUTH_DEBUG === "1",
+    debug: serverEnv("NEXTAUTH_DEBUG") === "1",
     logger: {
       error(code, metadata) {
         console.error("[next-auth]", code, metadata);
