@@ -13,6 +13,7 @@ const KEYS = [
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
   "NEXTAUTH_DEBUG",
+  "ADMIN_EMAILS",
 ];
 
 const label = process.argv[2] === "prebuild" ? "prebuild" : "postbuild";

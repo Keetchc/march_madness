@@ -9,7 +9,7 @@ declare module "next-auth" {
 }
 import { DynamoDBAdapter } from "@next-auth/dynamodb-adapter";
 import { docClient } from "./dynamo/client";
-import { upsertUser } from "./dynamo/queries/users";
+import { getUser, upsertUser } from "./dynamo/queries/users";
 import { serverEnv } from "./server-env";
 
 const dynamoAdapter = DynamoDBAdapter(docClient, {
@@ -93,10 +93,34 @@ export function getAuthOptions(): NextAuthOptions {
       async jwt({ token, user }) {
         if (user) {
           token.userId = user.id;
-          token.isAdmin = adminEmails.includes(user.email ?? "");
+          if (user.email) {
+            (token as { email?: string }).email = user.email;
+          }
         }
         if (!token.userId && typeof token.sub === "string") {
           token.userId = token.sub;
+        }
+        let email =
+          (typeof user?.email === "string" && user.email) ||
+          (typeof (token as { email?: string }).email === "string" && (token as { email?: string }).email) ||
+          "";
+        let profile: Awaited<ReturnType<typeof getUser>> = null;
+        if (!email && typeof token.userId === "string") {
+          profile = await getUser(token.userId);
+          if (profile?.email) {
+            email = profile.email;
+            (token as { email?: string }).email = email;
+          }
+        }
+        // Recompute every request so ADMIN_EMAILS applies without re-login; JWT refresh has no `user`.
+        if (email) {
+          (token as { email?: string }).email = email;
+          token.isAdmin = adminEmails.includes(email.trim());
+        } else {
+          token.isAdmin = profile?.isAdmin === true;
+        }
+        if (typeof token.isAdmin !== "boolean") {
+          token.isAdmin = false;
         }
         return token;
       },
@@ -105,7 +129,11 @@ export function getAuthOptions(): NextAuthOptions {
         if (session.user) {
           // Prefer explicit userId from sign-in; fall back to JWT `sub` (stable for Google) for older sessions.
           (session.user as any).userId = (token.userId as string | undefined) ?? token.sub;
-          (session.user as any).isAdmin = token.isAdmin;
+          (session.user as any).isAdmin = Boolean(token.isAdmin);
+          const te = (token as { email?: string }).email;
+          if (typeof te === "string" && te) {
+            session.user.email = te;
+          }
         }
         return session;
       },
