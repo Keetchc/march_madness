@@ -1,5 +1,6 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { getCsrfToken } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
 /** Only allow same-site relative paths (NextAuth also validates on the server). */
@@ -27,7 +28,17 @@ export default function LoginPage() {
 function LoginContent() {
   const searchParams = useSearchParams();
   const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"));
-  const googleHref = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
+  const [csrfFailed, setCsrfFailed] = useState(false);
+
+  useEffect(() => {
+    void getCsrfToken()
+      .then((t) => setCsrfToken(t ?? null))
+      .catch(() => {
+        setCsrfFailed(true);
+        setCsrfToken(null);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-hardwood-900 flex items-center justify-center relative overflow-hidden">
@@ -58,13 +69,26 @@ function LoginContent() {
           <p className="text-sm text-gray-400 mb-6 font-body">
             Sign in to submit your bracket, join groups, and trash-talk your friends.
           </p>
-          <a
-            href={googleHref}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-body font-semibold py-3 px-6 rounded-xl transition-all duration-150 shadow-lg hover:shadow-xl active:scale-95"
-          >
-            <GoogleIcon />
-            Continue with Google
-          </a>
+          {/*
+            With pages.signIn set, NextAuth only starts OAuth on POST /api/auth/signin/:provider
+            with a valid CSRF token. GET always redirects back to /login (no trip to Google).
+          */}
+          <form action="/api/auth/signin/google" method="post" className="w-full">
+            <input type="hidden" name="csrfToken" value={csrfToken ?? ""} />
+            <input type="hidden" name="callbackUrl" value={callbackUrl} />
+            <button
+              type="submit"
+              disabled={!csrfToken || csrfFailed}
+              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none text-gray-900 font-body font-semibold py-3 px-6 rounded-xl transition-all duration-150 shadow-lg hover:shadow-xl active:scale-95"
+            >
+              <GoogleIcon />
+              {csrfFailed
+                ? "Sign-in unavailable — refresh the page"
+                : csrfToken
+                  ? "Continue with Google"
+                  : "Preparing sign-in…"}
+            </button>
+          </form>
         </div>
 
         <p className="text-hardwood-600 text-xs mt-6 font-mono">
