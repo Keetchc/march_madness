@@ -52,7 +52,7 @@ export default async function PublicLeaderboardPage() {
           href="/compare"
           className="inline-flex mt-3 text-xs font-mono text-court-400 hover:text-court-300 transition-colors"
         >
-          Compare any two brackets ->
+          Compare any two brackets →
         </Link>
       </div>
 
