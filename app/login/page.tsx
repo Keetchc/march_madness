@@ -1,7 +1,14 @@
 "use client";
 import { Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+
+/** Only allow same-site relative paths (NextAuth also validates on the server). */
+function safeCallbackUrl(raw: string | null): string {
+  const fallback = "/dashboard";
+  if (!raw) return fallback;
+  if (!raw.startsWith("/") || raw.startsWith("//")) return fallback;
+  return raw;
+}
 
 export default function LoginPage() {
   return (
@@ -19,7 +26,8 @@ export default function LoginPage() {
 
 function LoginContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = safeCallbackUrl(searchParams.get("callbackUrl"));
+  const googleHref = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   return (
     <div className="min-h-screen bg-hardwood-900 flex items-center justify-center relative overflow-hidden">
@@ -50,13 +58,13 @@ function LoginContent() {
           <p className="text-sm text-gray-400 mb-6 font-body">
             Sign in to submit your bracket, join groups, and trash-talk your friends.
           </p>
-          <button
-            onClick={() => signIn("google", { callbackUrl })}
+          <a
+            href={googleHref}
             className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-body font-semibold py-3 px-6 rounded-xl transition-all duration-150 shadow-lg hover:shadow-xl active:scale-95"
           >
             <GoogleIcon />
             Continue with Google
-          </button>
+          </a>
         </div>
 
         <p className="text-hardwood-600 text-xs mt-6 font-mono">
