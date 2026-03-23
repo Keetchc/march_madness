@@ -118,7 +118,11 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
 
         {data && !loading && (
           <div className="p-5">
-            {totalPicks === 0 ? (
+            {data.picksHidden ? (
+              <p className="text-gray-500 text-sm text-center py-4 font-body">
+                Everyone&apos;s picks stay private until brackets lock.
+              </p>
+            ) : totalPicks === 0 ? (
               <p className="text-gray-500 text-sm text-center py-4 font-body">
                 No one has picked this game yet.
               </p>

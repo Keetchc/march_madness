@@ -230,6 +230,8 @@ export interface GamePicksResponse {
   game: Game;
   team1: Team | null;
   team2: Team | null;
+  /** When true, `picks` is empty because brackets are still open; others' picks are not revealed. */
+  picksHidden?: boolean;
   picks: Array<{
     userId: string;
     userName: string;

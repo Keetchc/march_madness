@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { getGame, getAllTeams, setGameResult, advanceWinner } from "@/lib/dynamo/queries/games";
+import { getGame, getAllTeams, getTournament, setGameResult, advanceWinner } from "@/lib/dynamo/queries/games";
 import { getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { getUser } from "@/lib/dynamo/queries/users";
+import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import type { GamePicksResponse } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
-// GET /api/games/[id] — game details + who picked what (public)
+// GET /api/games/[id] — game details; others' picks only after brackets are effectively locked
 export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
@@ -19,36 +20,42 @@ export async function GET(
   const teams = await getAllTeams(TOURNAMENT_ID);
   const teamMap = new Map(teams.map((t) => [t.id, t]));
 
-  // Get all brackets to find who picked what for this game
-  const brackets = await getBracketsByTournament(TOURNAMENT_ID);
+  const tournament = await getTournament(TOURNAMENT_ID);
+  const revealPicks = picksEffectivelyClosed(tournament);
 
-  const picks = await Promise.all(
-    brackets.map(async (bracket) => {
-      const pickedTeamId = bracket.picks[game.gameId];
-      if (!pickedTeamId) return null;
+  let picks: GamePicksResponse["picks"] = [];
+  if (revealPicks) {
+    const brackets = await getBracketsByTournament(TOURNAMENT_ID);
+    const rows = await Promise.all(
+      brackets.map(async (bracket) => {
+        const pickedTeamId = bracket.picks[game.gameId];
+        if (!pickedTeamId) return null;
 
-      const user = await getUser(bracket.userId);
-      const pickedTeam = teamMap.get(pickedTeamId);
+        const user = await getUser(bracket.userId);
+        const pickedTeam = teamMap.get(pickedTeamId);
 
-      return {
-        userId: bracket.userId,
-        userName: user?.name ?? "Unknown",
-        userPicture: user?.picture ?? "",
-        pickedTeamId,
-        pickedTeamName: pickedTeam?.name ?? "Unknown",
-        isCorrect:
-          game.status === "final"
-            ? pickedTeamId === game.winnerId
-            : null,
-      };
-    })
-  );
+        return {
+          userId: bracket.userId,
+          userName: user?.name ?? "Unknown",
+          userPicture: user?.picture ?? "",
+          pickedTeamId,
+          pickedTeamName: pickedTeam?.name ?? "Unknown",
+          isCorrect:
+            game.status === "final"
+              ? pickedTeamId === game.winnerId
+              : null,
+        };
+      })
+    );
+    picks = rows.filter(Boolean) as GamePicksResponse["picks"];
+  }
 
   const response: GamePicksResponse = {
     game,
     team1: game.team1Id ? teamMap.get(game.team1Id) ?? null : null,
     team2: game.team2Id ? teamMap.get(game.team2Id) ?? null : null,
-    picks: picks.filter(Boolean) as GamePicksResponse["picks"],
+    picks,
+    picksHidden: !revealPicks,
   };
 
   return NextResponse.json(response);

@@ -1,4 +1,5 @@
 "use client";
+import type { MouseEvent } from "react";
 import type { Game, Team, Picks } from "@/lib/types";
 import { clsx } from "clsx";
 
@@ -27,16 +28,11 @@ export function GameSlot({ game, teams, picks, projectedSlots, actualTeamOverrid
   const actualTeam1 = actualTeam1Id ? teams.get(actualTeam1Id) : null;
   const actualTeam2 = actualTeam2Id ? teams.get(actualTeam2Id) : null;
 
-  return (
-    <div
-      onClick={onInfoClick}
-      className="cursor-pointer"
-      title="Click to see all picks"
-    >
+  const card = (
       <div
         className={clsx(
           "bg-hardwood-800 border border-hardwood-600 rounded-lg overflow-hidden",
-          "transition-all duration-150 hover:border-court-600",
+          isReadOnly && "transition-all duration-150 hover:border-court-600",
         )}
       >
         <TeamRow
@@ -49,7 +45,9 @@ export function GameSlot({ game, teams, picks, projectedSlots, actualTeamOverrid
           isWrong={isComplete && userPick === game.team1Id && game.winnerId !== game.team1Id}
           isProjected={isTeam1Projected}
           isOverridden={actualTeam1Id !== null}
-          onClick={() => !isReadOnly && game.team1Id && onPick?.(game.gameId, game.team1Id)}
+          onClick={() => {
+            if (!isReadOnly && game.team1Id) onPick?.(game.gameId, game.team1Id);
+          }}
           canPick={!isReadOnly && !isComplete && !!game.team1Id}
           size={size}
           score={game.score1}
@@ -71,8 +69,21 @@ export function GameSlot({ game, teams, picks, projectedSlots, actualTeamOverrid
           score={game.score2}
         />
       </div>
-    </div>
   );
+
+  if (isReadOnly) {
+    return (
+      <div
+        onClick={onInfoClick}
+        className="cursor-pointer"
+        title="Click to see all picks"
+      >
+        {card}
+      </div>
+    );
+  }
+
+  return card;
 }
 
 function TeamRow({
@@ -116,7 +127,14 @@ function TeamRow({
         </div>
       )}
       <div
-        onClick={canPick ? onClick : undefined}
+        onClick={
+          canPick
+            ? (e: MouseEvent<HTMLDivElement>) => {
+                e.stopPropagation();
+                onClick();
+              }
+            : undefined
+        }
         className={clsx(
           "flex items-center gap-2 transition-colors select-none",
           size === "sm" ? "px-2.5 py-2" : "px-3 py-2.5",
