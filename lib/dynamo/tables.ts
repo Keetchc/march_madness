@@ -7,12 +7,10 @@ if (typeof process !== "undefined") {
 
 /**
  * Table name prefix (e.g. `mm` → `mm-users`, `mm-dev` → `mm-dev-users`).
- * Set `DYNAMO_TABLE_PREFIX` on each Amplify branch (e.g. prod `mm`, dev `mm-dev`).
- * Also listed in `scripts/write-amplify-auth-env.js` so Lambda reads the bundle when needed.
+ * Set `DYNAMO_TABLE_PREFIX` in Amplify (All branches + branch override is OK). It is intentionally
+ * **not** packed into `amplify-auth.json` so CodeBuild never freezes the “All branches” value.
  *
- * Resolution order: **runtime `process.env` first**, then `serverEnv` (amplify-auth.json + env).
- * Amplify builds may bake `DYNAMO_TABLE_PREFIX=mm` from an “All branches” var into `.next/amplify-auth.json`
- * while the **dev** Lambda still receives `mm-dev` from the branch override — the file must not win over that.
+ * Resolution order: **runtime `process.env` first**, then `serverEnv` (other keys from amplify-auth.json + env).
  */
 /** Bracket access so Next/Webpack does not statically replace `process.env.DYNAMO_*` at build time. */
 function runtimeEnvString(key: "DYNAMO_TABLE_PREFIX"): string | undefined {

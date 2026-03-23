@@ -2,6 +2,10 @@
  * Packs auth-related env into `.next/amplify-auth.json` for Lambda (artifact is only `.next/`).
  * Run `prebuild` before `next build` so metadata/layout can resolve NEXTAUTH_URL; run again after
  * build so a fresh `.next` still contains the file.
+ *
+ * Intentionally omits DYNAMO_TABLE_PREFIX: Amplify often defines `mm` for “All branches” and
+ * `mm-dev` only as a branch override. CodeBuild still sees `mm`, so baking it into this file would
+ * override the real Lambda value. Read table prefix from `process.env` only (see lib/dynamo/tables.ts).
  */
 const fs = require("fs");
 const path = require("path");
@@ -14,7 +18,6 @@ const KEYS = [
   "GOOGLE_CLIENT_SECRET",
   "NEXTAUTH_DEBUG",
   "ADMIN_EMAILS",
-  "DYNAMO_TABLE_PREFIX",
 ];
 
 const label = process.argv[2] === "prebuild" ? "prebuild" : "postbuild";
