@@ -5,7 +5,13 @@ import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-hardwood-900 flex items-center justify-center">
+          <p className="text-gray-400 font-mono text-sm animate-pulse">Loading sign-in…</p>
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );

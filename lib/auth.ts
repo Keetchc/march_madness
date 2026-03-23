@@ -7,6 +7,10 @@ import { upsertUser } from "./dynamo/queries/users";
 const adminEmails = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim());
 
 export const authOptions: NextAuthOptions = {
+  // Required behind proxies (Amplify, Vercel, etc.) so OAuth callbacks resolve the real host.
+  trustHost: true,
+  secret: process.env.NEXTAUTH_SECRET,
+
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
