@@ -64,8 +64,15 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
+  // Do not set pages.signIn to /login: NextAuth then redirects every GET /api/auth/signin
+  // back to /login, so OAuth never starts from a link or the default sign-in document.
+  // We keep a branded /login that links to /api/auth/signin (one full page load = valid CSRF cookies).
+  theme: {
+    colorScheme: "dark",
+    brandColor: "#ea580c",
+  },
+
   pages: {
-    signIn: "/login",
     error: "/login",
   },
 };

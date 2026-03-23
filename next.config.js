@@ -11,8 +11,7 @@ const nextConfig = {
     MM_ACCESS_KEY_ID: process.env.MM_ACCESS_KEY_ID,
     MM_SECRET_ACCESS_KEY: process.env.MM_SECRET_ACCESS_KEY,
     TOURNAMENT_ID: process.env.TOURNAMENT_ID,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    // Do not expose NEXTAUTH_SECRET to the browser via env{} — server reads process.env at runtime.
   },
 };
 
