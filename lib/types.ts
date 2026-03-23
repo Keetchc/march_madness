@@ -155,6 +155,17 @@ export interface AppUser {
 
 export type BracketStatus = "leader" | "alive" | "longshot" | "eliminated";
 
+export interface CriticalGame {
+  gameId: string;
+  round: Round;
+  teamId: string;
+  teamName: string;
+  potentialPoints: number;
+  swingScore: number;
+  rivalsAheadWithDifferentPick: number;
+  isMustHave: boolean;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   userId: string;
@@ -168,6 +179,7 @@ export interface LeaderboardEntry {
   correctPicks: number;
   totalPicks: number;
   status: BracketStatus;
+  criticalGames: CriticalGame[];
 }
 
 // ─── ESPN API ─────────────────────────────────────────────────────────────────

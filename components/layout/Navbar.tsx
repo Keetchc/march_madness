@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { href: "/bracket",     label: "My Brackets" },
   { href: "/groups",      label: "Groups" },
   { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/compare",     label: "Compare" },
 ];
 
 export function Navbar({ user }: NavbarProps) {

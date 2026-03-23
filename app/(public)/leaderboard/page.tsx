@@ -48,6 +48,12 @@ export default async function PublicLeaderboardPage() {
         <p className="text-gray-500 text-sm font-mono mt-1">
           {completedGames} games complete -- {brackets.length} brackets
         </p>
+        <Link
+          href="/compare"
+          className="inline-flex mt-3 text-xs font-mono text-court-400 hover:text-court-300 transition-colors"
+        >
+          Compare any two brackets ->
+        </Link>
       </div>
 
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
@@ -169,6 +175,31 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
             <StatusBadge status={entry.status} />
           </div>
         </div>
+
+        {entry.criticalGames.length > 0 && entry.status !== "leader" && (
+          <div className="md:col-start-2 md:col-end-7 mt-2 md:mt-1">
+            <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-court-500 mb-1.5">
+              Most Important Remaining Games
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {entry.criticalGames.slice(0, 3).map((game) => (
+                <span
+                  key={game.gameId}
+                  className={clsx(
+                    "inline-flex items-center gap-1 rounded-full px-2 py-1 font-mono text-[10px] md:text-xs border",
+                    game.isMustHave
+                      ? "text-yellow-300 border-yellow-600/70 bg-yellow-900/25"
+                      : "text-gray-300 border-hardwood-500 bg-hardwood-700/60"
+                  )}
+                >
+                  <span>{game.teamName}</span>
+                  <span className="text-gray-500">{game.round}</span>
+                  <span className="text-white tabular-nums">+{game.potentialPoints}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Link>
   );

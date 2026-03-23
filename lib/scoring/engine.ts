@@ -1,4 +1,4 @@
-import type { Bracket, Game, Team, Round, LeaderboardEntry, BracketStatus } from "../types";
+import type { Bracket, Game, Team, Round, LeaderboardEntry, BracketStatus, CriticalGame } from "../types";
 
 const ROUND_BASE_POINTS: Record<Round, number> = {
   R64: 1,
@@ -118,6 +118,7 @@ export function buildLeaderboard(
       correctPicks: result.correctPicks,
       totalPicks: Object.keys(bracket.picks).length,
       status: "alive" as BracketStatus,
+      criticalGames: [],
     };
   });
 
@@ -164,7 +165,78 @@ export function buildLeaderboard(
     );
   }
 
+  for (let i = 0; i < entries.length; i++) {
+    entries[i].criticalGames = computeCriticalGames(
+      entries[i],
+      entries,
+      i,
+      bracketMap,
+      pendingGames,
+      eliminatedTeams,
+      teams,
+    );
+  }
+
   return entries;
+}
+
+function computeCriticalGames(
+  entry: LeaderboardEntry,
+  entries: LeaderboardEntry[],
+  entryIndex: number,
+  bracketMap: Map<string, Bracket>,
+  pendingGames: Game[],
+  eliminatedTeams: Set<string>,
+  teams: Map<string, Team>,
+): CriticalGame[] {
+  if (entryIndex === 0) return [];
+
+  const myBracket = bracketMap.get(entry.bracketId);
+  if (!myBracket) return [];
+
+  const gapToLeader = entries[0].score - entry.score;
+  if (gapToLeader <= 0) return [];
+
+  const aheadRivals = entries.slice(0, entryIndex);
+  const games: CriticalGame[] = [];
+
+  for (const game of pendingGames) {
+    const myPick = myBracket.picks[game.gameId];
+    if (!myPick || eliminatedTeams.has(myPick)) continue;
+
+    const pickedTeam = teams.get(myPick);
+    const potentialPoints = ROUND_BASE_POINTS[game.round] * (pickedTeam?.seed ?? 1);
+    const rivalsAheadWithDifferentPick = aheadRivals.reduce((count, rival) => {
+      const rivalBracket = bracketMap.get(rival.bracketId);
+      if (!rivalBracket) return count;
+      return rivalBracket.picks[game.gameId] !== myPick ? count + 1 : count;
+    }, 0);
+
+    // Weight by how many brackets above them can lose relative ground.
+    const swingScore = potentialPoints * (1 + rivalsAheadWithDifferentPick * 0.6);
+    games.push({
+      gameId: game.gameId,
+      round: game.round,
+      teamId: myPick,
+      teamName: pickedTeam?.shortName ?? pickedTeam?.name ?? "TBD",
+      potentialPoints,
+      swingScore: Math.round(swingScore * 10) / 10,
+      rivalsAheadWithDifferentPick,
+      isMustHave: false,
+    });
+  }
+
+  games.sort((a, b) => b.swingScore - a.swingScore);
+
+  let covered = 0;
+  for (const game of games) {
+    if (covered < gapToLeader) {
+      game.isMustHave = true;
+      covered += game.potentialPoints;
+    }
+  }
+
+  return games.slice(0, 5);
 }
 
 /**
