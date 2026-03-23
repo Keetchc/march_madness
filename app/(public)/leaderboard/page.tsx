@@ -2,6 +2,9 @@ import { getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { getUser } from "@/lib/dynamo/queries/users";
 import { buildLeaderboard } from "@/lib/scoring/engine";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import Image from "next/image";
 import Link from "next/link";
 import { clsx } from "clsx";
 import type { LeaderboardEntry, BracketStatus } from "@/lib/types";
@@ -11,6 +14,12 @@ export const dynamic = "force-dynamic";
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function PublicLeaderboardPage() {
+  const session = await getServerSession(authOptions);
+  const currentUserId =
+    session?.user != null
+      ? ((session.user as { userId?: string }).userId ?? "")
+      : "";
+
   const [brackets, games, teams, tournament] = await Promise.all([
     getBracketsByTournament(TOURNAMENT_ID),
     getAllGames(TOURNAMENT_ID),
@@ -93,7 +102,11 @@ export default async function PublicLeaderboardPage() {
         ) : (
           <div className="divide-y divide-hardwood-700">
             {leaderboard.map((entry) => (
-              <LeaderboardRow key={entry.bracketId} entry={entry} />
+              <LeaderboardRow
+                key={entry.bracketId}
+                entry={entry}
+                isCurrentUser={!!currentUserId && entry.userId === currentUserId}
+              />
             ))}
           </div>
         )}
@@ -118,7 +131,13 @@ function StatusBadge({ status }: { status: BracketStatus }) {
   );
 }
 
-function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
+function LeaderboardRow({
+  entry,
+  isCurrentUser,
+}: {
+  entry: LeaderboardEntry;
+  isCurrentUser?: boolean;
+}) {
   const rankColors: Record<number, string> = {
     1: "text-yellow-400",
     2: "text-gray-300",
@@ -130,7 +149,8 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
       <div
         className={clsx(
           "flex flex-col gap-0 px-4 py-4 md:gap-0 md:px-8 md:py-5 md:grid md:grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] md:gap-6 md:items-center",
-          "hover:bg-hardwood-700 transition-colors"
+          "hover:bg-hardwood-700 transition-colors",
+          isCurrentUser && "bg-court-500/5 hover:bg-court-500/10"
         )}
       >
         <div className="flex items-center gap-3 min-w-0 pb-3 md:contents md:pb-0">
@@ -144,14 +164,35 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
           </span>
 
           <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-court-700 flex-shrink-0 flex items-center justify-center">
-              <span className="font-display text-base md:text-lg font-bold text-white">
-                {entry.userName.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            {entry.userPicture ? (
+              <Image
+                src={entry.userPicture}
+                alt={entry.userName}
+                width={48}
+                height={48}
+                unoptimized
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full flex-shrink-0 object-cover ring-2 ring-hardwood-600"
+              />
+            ) : (
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-court-700 flex-shrink-0 flex items-center justify-center">
+                <span className="font-display text-base md:text-lg font-bold text-white">
+                  {entry.userName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
             <div className="min-w-0">
-              <p className="font-display text-base md:text-lg font-bold uppercase tracking-wide truncate text-white">
+              <p
+                className={clsx(
+                  "font-display text-base md:text-lg font-bold uppercase tracking-wide truncate",
+                  isCurrentUser ? "text-court-400" : "text-white"
+                )}
+              >
                 {entry.userName}
+                {isCurrentUser && (
+                  <span className="ml-2 text-[10px] md:text-xs text-court-600 normal-case font-mono">
+                    you
+                  </span>
+                )}
               </p>
               <p className="text-xs md:text-sm text-gray-600 font-body truncate">{entry.bracketName}</p>
             </div>

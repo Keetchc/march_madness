@@ -1,11 +1,18 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
-import { AdminPageClient } from "@/app/(app)/admin/AdminPageClient";
+import { AdminPageClient } from "./AdminPageClient";
 
 export const dynamic = "force-dynamic";
 
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
-export default async function PublicAdminPage() {
+export default async function AdminPage() {
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
+  if (!(session.user as { isAdmin?: boolean }).isAdmin) redirect("/dashboard");
+
   const [games, teams, tournament] = await Promise.all([
     getAllGames(TOURNAMENT_ID),
     getAllTeams(TOURNAMENT_ID),
