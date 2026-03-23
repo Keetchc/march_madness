@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["esnext"],
+    "types": ["node"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,

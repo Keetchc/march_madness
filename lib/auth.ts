@@ -9,11 +9,12 @@ declare module "next-auth" {
 }
 import { DynamoDBAdapter } from "@next-auth/dynamodb-adapter";
 import { docClient } from "./dynamo/client";
+import { TABLES } from "./dynamo/tables";
 import { getUser, upsertUser } from "./dynamo/queries/users";
 import { serverEnv } from "./server-env";
 
 const dynamoAdapter = DynamoDBAdapter(docClient, {
-  tableName: "mm-next-auth",
+  tableName: TABLES.NEXTAUTH,
 });
 
 const authWarnOnce = globalThis as { __mmNextAuthEnvWarned?: boolean };

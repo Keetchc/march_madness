@@ -14,6 +14,7 @@ const KEYS = [
   "GOOGLE_CLIENT_SECRET",
   "NEXTAUTH_DEBUG",
   "ADMIN_EMAILS",
+  "DYNAMO_TABLE_PREFIX",
 ];
 
 const label = process.argv[2] === "prebuild" ? "prebuild" : "postbuild";
