@@ -229,8 +229,8 @@ export async function getGroupsByUser(userId: string): Promise<Group[]> {
     collectGroupIdsWhereAdmin(userId),
   ]);
 
-  const allIds = new Set<string>([...memberIds, ...adminIds]);
-  const groups = await Promise.all([...allIds].map(getGroup));
+  const allIds = new Set<string>(Array.from(memberIds).concat(Array.from(adminIds)));
+  const groups = await Promise.all(Array.from(allIds).map(getGroup));
   return groups.filter(Boolean) as Group[];
 }
 
