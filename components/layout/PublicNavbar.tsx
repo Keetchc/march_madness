@@ -32,7 +32,7 @@ export function PublicNavbar() {
 
   return (
     <header className="relative bg-hardwood-800 border-b border-hardwood-600 sticky top-0 z-50">
-      <div className="container mx-auto px-2 sm:px-3 md:px-4 max-w-[2000px]">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-10 max-w-[2000px]">
         <div className="flex items-center justify-between gap-3 h-14 min-w-0">
           <Link href="/leaderboard" className="flex items-center gap-2 group min-w-0 shrink">
             <span className="font-display text-lg sm:text-xl font-black uppercase tracking-tight text-white group-hover:text-court-400 transition-colors truncate">

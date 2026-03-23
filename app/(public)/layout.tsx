@@ -4,7 +4,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-hardwood-900 flex flex-col">
       <PublicNavbar />
-      <main className="flex-1 container mx-auto px-2 sm:px-3 md:px-4 py-8 max-w-[2000px]">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 md:px-8 lg:px-10 py-8 max-w-[2000px]">
         {children}
       </main>
     </div>
