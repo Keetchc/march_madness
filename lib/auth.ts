@@ -57,6 +57,25 @@ export function getAuthOptions(): NextAuthOptions {
     session: { strategy: "jwt" },
 
     callbacks: {
+      async redirect({ url, baseUrl }) {
+        let target: string;
+        if (url.startsWith("/") && !url.startsWith("//")) {
+          target = `${baseUrl}${url}`;
+        } else {
+          try {
+            const parsed = new URL(url);
+            target = parsed.origin === baseUrl ? url : baseUrl;
+          } catch {
+            target = baseUrl;
+          }
+        }
+        const path = new URL(target).pathname;
+        if (path === "/" || path === "") {
+          return `${baseUrl}/dashboard`;
+        }
+        return target;
+      },
+
       async signIn({ user }) {
         if (user.email && user.id) {
           await upsertUser({

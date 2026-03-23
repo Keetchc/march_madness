@@ -14,6 +14,16 @@ const NAV_LINKS = [
   { href: "/rules",             label: "Rules" },
 ];
 
+/** `/bracket` must not match `/brackets` (public directory of all brackets). */
+function isBracketAppActive(pathname: string): boolean {
+  return pathname.startsWith("/bracket") && !pathname.startsWith("/brackets");
+}
+
+function linkActive(href: string, pathname: string): boolean {
+  if (href === "/bracket") return isBracketAppActive(pathname);
+  return pathname.startsWith(href);
+}
+
 export function PublicNavbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -50,7 +60,7 @@ export function PublicNavbar() {
                 href={link.href}
                 className={clsx(
                   "font-body text-sm font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap",
-                  pathname.startsWith(link.href)
+                  linkActive(link.href, pathname)
                     ? "text-court-400 bg-hardwood-700"
                     : "text-gray-400 hover:text-white hover:bg-hardwood-700"
                 )}
@@ -70,6 +80,28 @@ export function PublicNavbar() {
                   )}
                 >
                   Dashboard
+                </Link>
+                <Link
+                  href="/bracket"
+                  className={clsx(
+                    "font-body text-sm font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap",
+                    isBracketAppActive(pathname)
+                      ? "text-court-400 bg-hardwood-700"
+                      : "text-gray-400 hover:text-white hover:bg-hardwood-700"
+                  )}
+                >
+                  My Brackets
+                </Link>
+                <Link
+                  href="/groups"
+                  className={clsx(
+                    "font-body text-sm font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap",
+                    pathname.startsWith("/groups")
+                      ? "text-court-400 bg-hardwood-700"
+                      : "text-gray-400 hover:text-white hover:bg-hardwood-700"
+                  )}
+                >
+                  Groups
                 </Link>
                 <button
                   type="button"
@@ -117,7 +149,7 @@ export function PublicNavbar() {
                 href={link.href}
                 className={clsx(
                   "font-body text-sm font-medium px-4 py-3 rounded-lg transition-colors",
-                  pathname.startsWith(link.href)
+                  linkActive(link.href, pathname)
                     ? "text-court-400 bg-hardwood-700"
                     : "text-gray-400 hover:text-white hover:bg-hardwood-700"
                 )}
@@ -137,6 +169,28 @@ export function PublicNavbar() {
                   )}
                 >
                   Dashboard
+                </Link>
+                <Link
+                  href="/bracket"
+                  className={clsx(
+                    "font-body text-sm font-medium px-4 py-3 rounded-lg transition-colors",
+                    isBracketAppActive(pathname)
+                      ? "text-court-400 bg-hardwood-700"
+                      : "text-gray-400 hover:text-white hover:bg-hardwood-700"
+                  )}
+                >
+                  My Brackets
+                </Link>
+                <Link
+                  href="/groups"
+                  className={clsx(
+                    "font-body text-sm font-medium px-4 py-3 rounded-lg transition-colors",
+                    pathname.startsWith("/groups")
+                      ? "text-court-400 bg-hardwood-700"
+                      : "text-gray-400 hover:text-white hover:bg-hardwood-700"
+                  )}
+                >
+                  Groups
                 </Link>
                 <button
                   type="button"
