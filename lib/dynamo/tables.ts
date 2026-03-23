@@ -7,25 +7,33 @@ if (typeof process !== "undefined") {
 
 /**
  * Table name prefix (e.g. `mm` → `mm-users`, `mm-dev` → `mm-dev-users`).
- * Set `DYNAMO_TABLE_PREFIX` in Amplify (All branches + branch override is OK). It is intentionally
- * **not** packed into `amplify-auth.json` so CodeBuild never freezes the “All branches” value.
  *
- * Resolution order: **runtime `process.env` first**, then `serverEnv` (other keys from amplify-auth.json + env).
+ * Amplify: CodeBuild often only receives `DYNAMO_TABLE_PREFIX=mm` (“All branches”) while Lambda may
+ * keep that too. `scripts/write-amplify-auth-env.js` writes a **branch-aware** `DYNAMO_TABLE_PREFIX`
+ * into `.next/amplify-auth.json` when you set `DYNAMO_TABLE_PREFIX_DEV=mm-dev` on the dev branch
+ * (see script). We read that file **before** raw `process.env` so dev deploys use `mm-dev` tables.
  */
-/** Bracket access so Next/Webpack does not statically replace `process.env.DYNAMO_*` at build time. */
-function runtimeEnvString(key: "DYNAMO_TABLE_PREFIX"): string | undefined {
+function rawEnv(key: string): string | undefined {
   const v = process.env[key];
   return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
 }
 
-function dynamoTablePrefix(): string {
-  const raw = (
-    runtimeEnvString("DYNAMO_TABLE_PREFIX") ??
-    serverEnv("DYNAMO_TABLE_PREFIX") ??
-    "mm"
-  ).trim();
-  const normalized = raw.replace(/-+$/, "") || "mm";
+function normalizePrefix(raw: string): string {
+  const normalized = raw.replace(/-+$/, "").trim() || "mm";
   return normalized;
+}
+
+function dynamoTablePrefix(): string {
+  const raw =
+    serverEnv("DYNAMO_TABLE_PREFIX") ??
+    rawEnv("DYNAMO_TABLE_PREFIX") ??
+    "mm";
+  return normalizePrefix(raw);
+}
+
+/** For ops/debug routes only (e.g. `/api/runtime-env-check`). */
+export function getDynamoTablePrefixForOps(): string {
+  return dynamoTablePrefix();
 }
 
 /** Resolved at access time so scripts and Lambda see the right env. */

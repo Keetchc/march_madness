@@ -10,6 +10,8 @@ frontend:
         - test -n "$NEXTAUTH_SECRET" && echo "Build env NEXTAUTH_SECRET present" || echo "Build env NEXTAUTH_SECRET MISSING"
         - test -n "$GOOGLE_CLIENT_ID" && echo "Build env GOOGLE_CLIENT_ID present" || echo "Build env GOOGLE_CLIENT_ID MISSING"
         - test -n "$DYNAMO_TABLE_PREFIX" && echo "Build env DYNAMO_TABLE_PREFIX=$DYNAMO_TABLE_PREFIX" || echo "Build env DYNAMO_TABLE_PREFIX MISSING (app falls back to mm)"
+        - echo "Build AWS_BRANCH=${AWS_BRANCH:-}"
+        - test -n "$DYNAMO_TABLE_PREFIX_DEV" && echo "Build env DYNAMO_TABLE_PREFIX_DEV=$DYNAMO_TABLE_PREFIX_DEV" || echo "Build env DYNAMO_TABLE_PREFIX_DEV MISSING (set on dev branch for mm-dev tables; optional on prod)"
         - node scripts/write-amplify-auth-env.js prebuild
         - node scripts/amplify-prebuild-auth.js
         - npm run build

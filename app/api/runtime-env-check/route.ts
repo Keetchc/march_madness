@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getDynamoTablePrefixForOps } from "@/lib/dynamo/tables";
 import { serverEnv } from "@/lib/server-env";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +36,10 @@ export async function GET() {
       hasGoogleClientId: hasRawProcess("GOOGLE_CLIENT_ID"),
       hasGoogleClientSecret: hasRawProcess("GOOGLE_CLIENT_SECRET"),
       hasDynamoTablePrefix: hasRawProcess("DYNAMO_TABLE_PREFIX"),
+      hasDynamoTablePrefixDev: hasRawProcess("DYNAMO_TABLE_PREFIX_DEV"),
+      hasAwsBranch: hasRawProcess("AWS_BRANCH"),
     },
-    note: "viaServerEnv includes amplify-auth.json if present; rawProcessEnvOnly is Lambda env injection only.",
+    resolvedDynamoTablePrefix: getDynamoTablePrefixForOps(),
+    note: "viaServerEnv includes amplify-auth.json if present; rawProcessEnvOnly is Lambda env injection only. resolvedDynamoTablePrefix is what Dynamo queries use.",
   });
 }
