@@ -1,5 +1,12 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+
+declare module "next-auth" {
+  interface AuthOptions {
+    /** Supported in next-auth 4.24+; typings omit it in some releases. */
+    trustHost?: boolean;
+  }
+}
 import { DynamoDBAdapter } from "@next-auth/dynamodb-adapter";
 import { docClient } from "./dynamo/client";
 import { upsertUser } from "./dynamo/queries/users";
