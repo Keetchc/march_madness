@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { Menu, X } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 
 const NAV_LINKS = [
   { href: "/leaderboard",       label: "Leaderboard" },
@@ -16,6 +17,8 @@ const NAV_LINKS = [
 export function PublicNavbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const authed = status === "authenticated" && session?.user;
 
   useEffect(() => {
     setMenuOpen(false);
@@ -55,6 +58,36 @@ export function PublicNavbar() {
                 {link.label}
               </Link>
             ))}
+            {authed && (
+              <>
+                <Link
+                  href="/dashboard"
+                  className={clsx(
+                    "font-body text-sm font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap",
+                    pathname.startsWith("/dashboard")
+                      ? "text-court-400 bg-hardwood-700"
+                      : "text-gray-400 hover:text-white hover:bg-hardwood-700"
+                  )}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/leaderboard" })}
+                  className="font-mono text-xs text-gray-500 hover:text-gray-300 px-3 py-1.5 transition-colors"
+                >
+                  Sign out
+                </button>
+              </>
+            )}
+            {!authed && status !== "loading" && (
+              <Link
+                href="/login"
+                className="font-body text-sm font-medium px-3 py-1.5 rounded-lg text-court-400 hover:text-court-300 hover:bg-hardwood-700 transition-colors whitespace-nowrap"
+              >
+                Log in
+              </Link>
+            )}
           </nav>
 
           <button
@@ -92,6 +125,36 @@ export function PublicNavbar() {
                 {link.label}
               </Link>
             ))}
+            {authed && (
+              <>
+                <Link
+                  href="/dashboard"
+                  className={clsx(
+                    "font-body text-sm font-medium px-4 py-3 rounded-lg transition-colors",
+                    pathname.startsWith("/dashboard")
+                      ? "text-court-400 bg-hardwood-700"
+                      : "text-gray-400 hover:text-white hover:bg-hardwood-700"
+                  )}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/leaderboard" })}
+                  className="text-left font-mono text-sm text-gray-500 hover:text-gray-300 px-4 py-3 rounded-lg hover:bg-hardwood-700 transition-colors"
+                >
+                  Sign out
+                </button>
+              </>
+            )}
+            {!authed && status !== "loading" && (
+              <Link
+                href="/login"
+                className="font-body text-sm font-medium px-4 py-3 rounded-lg text-court-400 hover:bg-hardwood-700 transition-colors"
+              >
+                Log in
+              </Link>
+            )}
           </nav>
         </>
       )}

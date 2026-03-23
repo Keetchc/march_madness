@@ -8,9 +8,23 @@ type Props = {
   authError?: string;
 };
 
+/** Google often blocks or breaks OAuth inside embedded in-app browsers (Instagram, Facebook, etc.). */
+function likelyInAppBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /(FBAN|FBAV|FB_IAB|Instagram|Line\/|Messenger|Snapchat|Twitter for iPhone|Twitter for Android)/i.test(
+    ua
+  );
+}
+
 export function LoginForm({ callbackUrl, authError }: Props) {
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
   const [csrfFailed, setCsrfFailed] = useState(false);
+  const [inAppHint, setInAppHint] = useState(false);
+
+  useEffect(() => {
+    setInAppHint(likelyInAppBrowser());
+  }, []);
 
   useEffect(() => {
     void getCsrfToken()
@@ -26,6 +40,14 @@ export function LoginForm({ callbackUrl, authError }: Props) {
       <p className="text-sm text-gray-400 mb-6 font-body">
         Sign in to submit your bracket, join groups, and trash-talk your friends.
       </p>
+      {inAppHint && (
+        <p className="text-sm text-sky-200/90 bg-sky-950/40 border border-sky-800/50 rounded-lg px-3 py-2 mb-4 font-body text-left leading-snug">
+          You may be inside another app&apos;s browser. Google often shows errors or extra warnings there.
+          Use <span className="font-semibold text-sky-100">Open in Safari</span> or{" "}
+          <span className="font-semibold text-sky-100">Open in Chrome</span> from the share/menu, then try
+          again.
+        </p>
+      )}
       {authError === "OAuthSignin" && (
         <p className="text-sm text-amber-200/90 bg-amber-950/40 border border-amber-800/60 rounded-lg px-3 py-2 mb-4 font-body text-left leading-snug">
           Google sign-in could not start on the server. Most often{" "}

@@ -16,13 +16,41 @@ function nextAuthSecretForEdge(): string | undefined {
   return undefined;
 }
 
-function isPublicPath(pathname: string): boolean {
+const PUBLIC_PAGE_PREFIXES = [
+  "/leaderboard",
+  "/compare",
+  "/brackets",
+  "/rules",
+  "/official-bracket",
+] as const;
+
+function isPublicPagePath(pathname: string): boolean {
+  for (const p of PUBLIC_PAGE_PREFIXES) {
+    if (pathname === p || pathname.startsWith(`${p}/`)) return true;
+  }
+  // View any bracket by id (share links); keep /bracket and /bracket/new behind auth
+  if (pathname.startsWith("/bracket/") && !pathname.startsWith("/bracket/new")) return true;
+  return false;
+}
+
+/** Read-only APIs needed for public bracket / official views (client fetches). */
+function isPublicApiGet(pathname: string, method: string): boolean {
+  if (method !== "GET") return false;
+  if (pathname === "/api/tournament") return true;
+  if (/^\/api\/bracket\/[^/]+$/.test(pathname)) return true;
+  return false;
+}
+
+function isPublicPath(pathname: string, method: string): boolean {
   if (pathname.startsWith("/api/auth")) return true;
   if (pathname === "/api/runtime-env-check") return true;
   if (pathname === "/api/espn/sync") return true;
+  if (pathname.startsWith("/api/") && isPublicApiGet(pathname, method)) return true;
   if (pathname.startsWith("/_next")) return true;
   if (pathname === "/favicon.ico") return true;
   if (pathname === "/login") return true;
+  if (pathname === "/") return true;
+  if (isPublicPagePath(pathname)) return true;
   if (pathname === "/opengraph-image" || pathname === "/twitter-image") return true;
   if (/\.(?:svg|png|jpg|jpeg|gif|webp|ico)$/i.test(pathname)) return true;
   return false;
@@ -31,7 +59,7 @@ function isPublicPath(pathname: string): boolean {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (isPublicPath(pathname)) {
+  if (isPublicPath(pathname, req.method)) {
     return NextResponse.next();
   }
 

@@ -1,4 +1,7 @@
+import { getServerSession } from "next-auth";
+import { getAuthOptions } from "@/lib/auth";
 import { LoginForm } from "./LoginForm";
+import { LoginSessionPanel } from "./LoginSessionPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -14,11 +17,12 @@ function safeCallbackUrl(raw: string | string[] | undefined): string {
   return v;
 }
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: { callbackUrl?: string | string[]; error?: string | string[] };
 }) {
+  const session = await getServerSession(getAuthOptions());
   const callbackUrl = safeCallbackUrl(searchParams.callbackUrl);
   const authError = pickFirst(searchParams.error);
 
@@ -44,7 +48,11 @@ export default function LoginPage({
           </p>
         </div>
 
-        <LoginForm callbackUrl={callbackUrl} authError={authError} />
+        {session?.user ? (
+          <LoginSessionPanel name={session.user.name} email={session.user.email} />
+        ) : (
+          <LoginForm callbackUrl={callbackUrl} authError={authError} />
+        )}
 
         <p className="text-hardwood-600 text-xs mt-6 font-mono">
           No account needed — just your Google login.
