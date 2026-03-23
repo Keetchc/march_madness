@@ -95,12 +95,16 @@ export function getAuthOptions(): NextAuthOptions {
           token.userId = user.id;
           token.isAdmin = adminEmails.includes(user.email ?? "");
         }
+        if (!token.userId && typeof token.sub === "string") {
+          token.userId = token.sub;
+        }
         return token;
       },
 
       async session({ session, token }) {
         if (session.user) {
-          (session.user as any).userId = token.userId;
+          // Prefer explicit userId from sign-in; fall back to JWT `sub` (stable for Google) for older sessions.
+          (session.user as any).userId = (token.userId as string | undefined) ?? token.sub;
           (session.user as any).isAdmin = token.isAdmin;
         }
         return session;

@@ -2,6 +2,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
   UpdateCommand,
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
@@ -143,19 +144,93 @@ export async function removeMember(groupId: string, userId: string): Promise<voi
   );
 }
 
-// Get all groups a user belongs to (via GSI on userId)
+function isMissingIndexError(err: unknown): boolean {
+  const name = err && typeof err === "object" && "name" in err ? (err as { name: string }).name : "";
+  return name === "ValidationException" || name === "ResourceNotFoundException";
+}
+
+/** Member rows: `userId` + sk MEMBER#… — listed via userId-index when present. */
+async function collectGroupIdsFromMemberUserId(userId: string): Promise<Set<string>> {
+  const ids = new Set<string>();
+  let startKey: Record<string, unknown> | undefined;
+  try {
+    do {
+      const res = await dynamo.send(
+        new QueryCommand({
+          TableName: TABLES.GROUPS,
+          IndexName: "userId-index",
+          KeyConditionExpression: "userId = :uid",
+          ExpressionAttributeValues: { ":uid": userId },
+          ProjectionExpression: "groupId",
+          ExclusiveStartKey: startKey,
+        })
+      );
+      for (const item of res.Items ?? []) {
+        const gid = item.groupId as string;
+        if (gid) ids.add(gid);
+      }
+      startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+    } while (startKey);
+    return ids;
+  } catch (e) {
+    if (!isMissingIndexError(e)) throw e;
+  }
+
+  // Table without userId-index (or query unsupported): full scan — OK for small pools.
+  startKey = undefined;
+  do {
+    const res = await dynamo.send(
+      new ScanCommand({
+        TableName: TABLES.GROUPS,
+        FilterExpression: "userId = :uid AND begins_with(sk, :mp)",
+        ExpressionAttributeValues: { ":uid": userId, ":mp": "MEMBER#" },
+        ProjectionExpression: "groupId",
+        ExclusiveStartKey: startKey,
+      })
+    );
+    for (const item of res.Items ?? []) {
+      const gid = item.groupId as string;
+      if (gid) ids.add(gid);
+    }
+    startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (startKey);
+  return ids;
+}
+
+/** Group META rows where this user is admin (covers legacy creates with no MEMBER row). */
+async function collectGroupIdsWhereAdmin(userId: string): Promise<Set<string>> {
+  const ids = new Set<string>();
+  let startKey: Record<string, unknown> | undefined;
+  do {
+    const res = await dynamo.send(
+      new ScanCommand({
+        TableName: TABLES.GROUPS,
+        FilterExpression: "adminUserId = :uid AND sk = :meta",
+        ExpressionAttributeValues: { ":uid": userId, ":meta": "META" },
+        ProjectionExpression: "groupId",
+        ExclusiveStartKey: startKey,
+      })
+    );
+    for (const item of res.Items ?? []) {
+      const gid = item.groupId as string;
+      if (gid) ids.add(gid);
+    }
+    startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (startKey);
+  return ids;
+}
+
+// Groups the user is in (member row) OR admins (META row), merged and deduped.
 export async function getGroupsByUser(userId: string): Promise<Group[]> {
-  const res = await dynamo.send(
-    new QueryCommand({
-      TableName: TABLES.GROUPS,
-      IndexName: "userId-index",
-      KeyConditionExpression: "userId = :uid",
-      ExpressionAttributeValues: { ":uid": userId },
-    })
-  );
-  // These items are member records; we need to fetch each group META
-  const groupIds = (res.Items ?? []).map((i) => i.groupId as string);
-  const groups = await Promise.all(groupIds.map(getGroup));
+  if (!userId) return [];
+
+  const [memberIds, adminIds] = await Promise.all([
+    collectGroupIdsFromMemberUserId(userId),
+    collectGroupIdsWhereAdmin(userId),
+  ]);
+
+  const allIds = new Set<string>([...memberIds, ...adminIds]);
+  const groups = await Promise.all([...allIds].map(getGroup));
   return groups.filter(Boolean) as Group[];
 }
 

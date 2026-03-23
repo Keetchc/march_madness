@@ -26,6 +26,7 @@ export async function requireAdmin() {
 }
 
 export function getUserId(session: any): string {
-  return session.user.userId as string;
+  const id = session?.user?.userId ?? session?.user?.id;
+  return id as string;
 }
 
