@@ -109,7 +109,7 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
       {adminTab === "results" ? (
         <GameResultsPanel games={games} teamsMap={teamsMap} />
       ) : adminTab === "add-bracket" ? (
-        <AdminBracketBuilder games={games} teamsMap={teamsMap} />
+        <AdminBracketBuilder games={games} teams={teamsMap} />
       ) : tournament ? (
         <PicksLockPanel tournament={tournament} onSaved={setTournament} />
       ) : (
