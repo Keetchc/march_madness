@@ -162,7 +162,7 @@ function LeaderboardRow({
         {/* Correct picks */}
         <div className="hidden md:block text-right">
           <span className="font-mono text-sm text-gray-400">
-            {entry.correctPicks}/{entry.totalPicks}
+            {entry.correctPicks}/{entry.gamesDecidedCount}
           </span>
         </div>
 

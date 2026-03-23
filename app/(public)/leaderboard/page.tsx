@@ -64,13 +64,23 @@ export default async function PublicLeaderboardPage() {
               <span className="font-mono text-sm text-gray-600 uppercase">Player</span>
               <span className="font-mono text-sm text-gray-600 uppercase text-right">Score</span>
               <span className="font-mono text-sm text-gray-600 uppercase text-right">Max</span>
-              <span className="font-mono text-sm text-gray-600 uppercase text-right">Correct</span>
+              <span
+                className="font-mono text-sm text-gray-600 uppercase text-right"
+                title="Correct picks out of tournament games already final"
+              >
+                Correct
+              </span>
               <span className="font-mono text-sm text-gray-600 uppercase text-right">Status</span>
             </div>
             <div className="md:hidden px-4 py-3 border-b border-hardwood-600 bg-hardwood-700/80 grid grid-cols-4 gap-2 text-center">
               <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Score</span>
               <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Max</span>
-              <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Correct</span>
+              <span
+                className="font-mono text-[10px] text-gray-600 uppercase tracking-wide"
+                title="Correct picks out of games already final"
+              >
+                Correct
+              </span>
               <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Status</span>
             </div>
           </>
@@ -168,7 +178,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
           </div>
           <div className="flex flex-col gap-0.5 md:block md:text-right">
             <span className="font-mono text-sm md:text-lg text-gray-400 tabular-nums">
-              {entry.correctPicks}/{entry.totalPicks}
+              {entry.correctPicks}/{entry.gamesDecidedCount}
             </span>
           </div>
           <div className="flex justify-center md:justify-end md:text-right">

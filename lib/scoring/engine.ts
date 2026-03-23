@@ -116,7 +116,7 @@ export function buildLeaderboard(
       maxPossibleScore: result.maxPossibleScore,
       roundBreakdown: result.roundBreakdown,
       correctPicks: result.correctPicks,
-      totalPicks: Object.keys(bracket.picks).length,
+      gamesDecidedCount: result.totalCompletedGames,
       status: "alive" as BracketStatus,
       criticalGames: [],
     };

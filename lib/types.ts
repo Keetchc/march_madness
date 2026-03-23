@@ -177,7 +177,8 @@ export interface LeaderboardEntry {
   maxPossibleScore: number;
   roundBreakdown: Record<Round, number>;
   correctPicks: number;
-  totalPicks: number;
+  /** Tournament games already final with a winner (denominator for correct / decided) */
+  gamesDecidedCount: number;
   status: BracketStatus;
   criticalGames: CriticalGame[];
 }

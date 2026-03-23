@@ -217,7 +217,7 @@ function LeaderboardRow({ entry, isCurrentUser }: { entry: LeaderboardEntry; isC
             <span className="font-mono text-sm text-gray-500 tabular-nums">{entry.maxPossibleScore}</span>
           </div>
           <div className="md:text-right">
-            <span className="font-mono text-sm text-gray-400 tabular-nums">{entry.correctPicks}/{entry.totalPicks}</span>
+            <span className="font-mono text-sm text-gray-400 tabular-nums">{entry.correctPicks}/{entry.gamesDecidedCount}</span>
           </div>
         </div>
       </div>
