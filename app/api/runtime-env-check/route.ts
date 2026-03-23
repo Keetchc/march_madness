@@ -1,9 +1,15 @@
 import { env } from "node:process";
 import { NextResponse } from "next/server";
+import { serverEnv } from "@/lib/server-env";
 
 export const dynamic = "force-dynamic";
 
-function has(k: string): boolean {
+function hasServerEnv(k: string): boolean {
+  const v = serverEnv(k);
+  return typeof v === "string" && v.length > 0;
+}
+
+function hasRawProcess(k: string): boolean {
   const v = env[k];
   return typeof v === "string" && v.length > 0;
 }
@@ -18,10 +24,17 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    hasNextAuthSecret: has("NEXTAUTH_SECRET"),
-    hasGoogleClientId: has("GOOGLE_CLIENT_ID"),
-    hasGoogleClientSecret: has("GOOGLE_CLIENT_SECRET"),
-    hasNextAuthUrl: has("NEXTAUTH_URL"),
-    source: "node:process.env",
+    viaServerEnv: {
+      hasNextAuthSecret: hasServerEnv("NEXTAUTH_SECRET"),
+      hasGoogleClientId: hasServerEnv("GOOGLE_CLIENT_ID"),
+      hasGoogleClientSecret: hasServerEnv("GOOGLE_CLIENT_SECRET"),
+      hasNextAuthUrl: hasServerEnv("NEXTAUTH_URL"),
+    },
+    rawProcessEnvOnly: {
+      hasNextAuthSecret: hasRawProcess("NEXTAUTH_SECRET"),
+      hasGoogleClientId: hasRawProcess("GOOGLE_CLIENT_ID"),
+      hasGoogleClientSecret: hasRawProcess("GOOGLE_CLIENT_SECRET"),
+    },
+    note: "viaServerEnv includes amplify-auth.json if present; rawProcessEnvOnly is Lambda env injection only.",
   });
 }

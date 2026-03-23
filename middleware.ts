@@ -1,12 +1,14 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { BUILD_TIME_NEXTAUTH_SECRET } from "@/lib/generated-middleware-secret";
 
-/** Edge middleware cannot use `node:process`; bracket access avoids some static env inlining. */
-function edgeEnv(name: string): string | undefined {
-  const v = process.env[name];
-  if (v === undefined || v === "") return undefined;
-  return v;
+/** Edge has no fs (cannot read amplify-auth.json); use runtime env then build-time secret from Amplify prebuild. */
+function nextAuthSecretForEdge(): string | undefined {
+  const fromEnv = process.env["NEXTAUTH_SECRET"];
+  if (fromEnv !== undefined && fromEnv !== "") return fromEnv;
+  if (BUILD_TIME_NEXTAUTH_SECRET !== "") return BUILD_TIME_NEXTAUTH_SECRET;
+  return undefined;
 }
 
 function isPublicPath(pathname: string): boolean {
@@ -28,7 +30,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req, secret: edgeEnv("NEXTAUTH_SECRET") });
+  const token = await getToken({ req, secret: nextAuthSecretForEdge() });
 
   if (pathname.startsWith("/api/")) {
     if (!token) {
