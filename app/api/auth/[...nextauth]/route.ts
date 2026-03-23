@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import type { NextRequest } from "next/server";
 import { getAuthOptions } from "@/lib/auth";
+import { hydrateAuthEnvFromDisk } from "@/lib/hydrate-auth-env";
+
+hydrateAuthEnvFromDisk();
 
 type RouteCtx = { params: { nextauth: string[] } };
 

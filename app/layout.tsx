@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import { hydrateAuthEnvFromDisk } from "@/lib/hydrate-auth-env";
 import { serverEnv } from "@/lib/server-env";
+
+hydrateAuthEnvFromDisk();
 
 function getMetadataBase(): URL {
   const raw = serverEnv("NEXT_PUBLIC_SITE_URL") ?? serverEnv("NEXTAUTH_URL");
