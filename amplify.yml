@@ -6,6 +6,9 @@ frontend:
         - npm ci
     build:
       commands:
+        # If these print MISSING, Amplify is not injecting vars into CodeBuild (fix console / branch scope).
+        - test -n "$NEXTAUTH_SECRET" && echo "Build env NEXTAUTH_SECRET present" || echo "Build env NEXTAUTH_SECRET MISSING"
+        - test -n "$GOOGLE_CLIENT_ID" && echo "Build env GOOGLE_CLIENT_ID present" || echo "Build env GOOGLE_CLIENT_ID MISSING"
         - npm run build
   artifacts:
     baseDirectory: .next

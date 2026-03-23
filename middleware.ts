@@ -1,10 +1,17 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { serverEnv } from "@/lib/server-env";
+
+/** Edge middleware cannot use `node:process`; bracket access avoids some static env inlining. */
+function edgeEnv(name: string): string | undefined {
+  const v = process.env[name];
+  if (v === undefined || v === "") return undefined;
+  return v;
+}
 
 function isPublicPath(pathname: string): boolean {
   if (pathname.startsWith("/api/auth")) return true;
+  if (pathname === "/api/runtime-env-check") return true;
   if (pathname === "/api/espn/sync") return true;
   if (pathname.startsWith("/_next")) return true;
   if (pathname === "/favicon.ico") return true;
@@ -21,7 +28,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req, secret: serverEnv("NEXTAUTH_SECRET") });
+  const token = await getToken({ req, secret: edgeEnv("NEXTAUTH_SECRET") });
 
   if (pathname.startsWith("/api/")) {
     if (!token) {
