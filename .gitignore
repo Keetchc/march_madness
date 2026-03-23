@@ -20,6 +20,8 @@ build/
 .scripts-out/
 
 # Misc
+# Windows reserved name — bad shell redirects can create this file
+nul
 .DS_Store
 *.pem
 npm-debug.log*
