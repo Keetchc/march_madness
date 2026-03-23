@@ -23,7 +23,7 @@ export default async function AdminPage() {
     <AdminPageClient
       games={games}
       teams={teams}
-      tournament={tournament!}
+      tournament={tournament}
     />
   );
 }

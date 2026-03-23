@@ -32,9 +32,11 @@ export function BracketPageClient({
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
   const isOwner = userId === bracketUserId;
-  const isLocked = tournament
+  const lockedBySchedule = tournament
     ? new Date() > new Date(tournament.lockDate) && tournament.status !== "pending"
     : false;
+  const picksOpenByAdmin = tournament?.picksOpenOverride === true;
+  const isLocked = picksOpenByAdmin ? false : lockedBySchedule;
   const canEdit = isOwner && !isLocked;
 
   // Load tournament data

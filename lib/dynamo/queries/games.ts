@@ -29,6 +29,31 @@ export async function upsertTournament(t: Tournament): Promise<void> {
   );
 }
 
+export async function updateTournamentPicksSettings(
+  tournamentId: string,
+  updates: { lockDate?: string; picksOpenOverride?: boolean }
+): Promise<void> {
+  const parts: string[] = [];
+  const values: Record<string, unknown> = {};
+  if (updates.lockDate !== undefined) {
+    parts.push("lockDate = :ld");
+    values[":ld"] = updates.lockDate;
+  }
+  if (updates.picksOpenOverride !== undefined) {
+    parts.push("picksOpenOverride = :po");
+    values[":po"] = updates.picksOpenOverride;
+  }
+  if (parts.length === 0) return;
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: TABLES.TOURNAMENT,
+      Key: { pk: `TOURNAMENT#${tournamentId}`, sk: "META" },
+      UpdateExpression: "SET " + parts.join(", "),
+      ExpressionAttributeValues: values,
+    })
+  );
+}
+
 // ─── Teams ────────────────────────────────────────────────────────────────────
 
 export async function getTeam(tournamentId: string, teamId: string): Promise<Team | null> {

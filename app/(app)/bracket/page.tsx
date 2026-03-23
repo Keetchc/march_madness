@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
 import { getBracketsByUser } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
+import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import Link from "next/link";
 import { TrophyIcon, PlusIcon } from "lucide-react";
 
@@ -16,9 +17,7 @@ export default async function BracketsListPage() {
     getTournament(TOURNAMENT_ID),
   ]);
 
-  const isLocked = tournament
-    ? new Date() > new Date(tournament.lockDate) && tournament.status !== "pending"
-    : false;
+  const isLocked = picksEffectivelyClosed(tournament);
 
   return (
     <div className="space-y-8 animate-fade-in">

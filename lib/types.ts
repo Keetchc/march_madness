@@ -54,6 +54,8 @@ export interface Tournament {
   status: "pending" | "active" | "complete";
   lockDate: string; // ISO - picks close at this time
   createdAt: string;
+  /** When true, members can create/edit brackets regardless of lockDate (admin-controlled). */
+  picksOpenOverride?: boolean;
 }
 
 // ─── Brackets & Picks ─────────────────────────────────────────────────────────

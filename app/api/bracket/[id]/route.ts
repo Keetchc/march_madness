@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireSession, getUserId } from "@/lib/session";
 import { getBracket, updatePicks, deleteBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
+import { picksEffectivelyClosed } from "@/lib/picks-lock";
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +34,9 @@ export async function PUT(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Check tournament lock
   const tournament = await getTournament(TOURNAMENT_ID);
-  if (tournament && tournament.status === "active") {
-    const lockDate = new Date(tournament.lockDate);
-    if (new Date() > lockDate) {
-      return NextResponse.json({ error: "Tournament is locked. Picks are closed." }, { status: 403 });
-    }
+  if (picksEffectivelyClosed(tournament)) {
+    return NextResponse.json({ error: "Tournament is locked. Picks are closed." }, { status: 403 });
   }
 
   const body = await req.json();

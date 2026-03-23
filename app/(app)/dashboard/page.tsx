@@ -3,6 +3,7 @@ import { getAuthOptions } from "@/lib/auth";
 import { getBracketsByUser } from "@/lib/dynamo/queries/brackets";
 import { getGroupsByUser } from "@/lib/dynamo/queries/groups";
 import { getTournament } from "@/lib/dynamo/queries/games";
+import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import Link from "next/link";
 import { TrophyIcon, UsersIcon, PlusIcon } from "lucide-react";
 
@@ -18,9 +19,7 @@ export default async function DashboardPage() {
     getTournament(TOURNAMENT_ID),
   ]);
 
-  const isLocked = tournament
-    ? new Date() > new Date(tournament.lockDate) && tournament.status !== "pending"
-    : false;
+  const isLocked = picksEffectivelyClosed(tournament);
 
   return (
     <div className="space-y-10 animate-fade-in">

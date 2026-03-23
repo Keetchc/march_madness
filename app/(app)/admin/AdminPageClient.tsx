@@ -1,17 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Game, Team, Tournament, Round } from "@/lib/types";
 import { clsx } from "clsx";
 import { RefreshCwIcon, CheckCircleIcon } from "lucide-react";
 import { AdminBracketBuilder } from "@/components/admin/AdminBracketBuilder";
+import { PicksLockPanel } from "@/components/admin/PicksLockPanel";
 
 interface AdminPageClientProps {
   games: Game[];
   teams: Map<string, Team> | Team[];
-  tournament: Tournament;
+  tournament: Tournament | null;
 }
 
-type AdminTab = "results" | "add-bracket";
+type AdminTab = "results" | "add-bracket" | "picks";
 
 const ROUND_ORDER: Round[] = ["R64", "R32", "S16", "E8", "F4", "NCG"];
 const ROUND_LABELS: Record<Round, string> = {
@@ -19,10 +20,15 @@ const ROUND_LABELS: Record<Round, string> = {
   E8: "Elite Eight", F4: "Final Four", NCG: "Championship",
 };
 
-export function AdminPageClient({ games, teams: teamsInput, tournament }: AdminPageClientProps) {
+export function AdminPageClient({ games, teams: teamsInput, tournament: tournamentProp }: AdminPageClientProps) {
   const teamsMap: Map<string, Team> = teamsInput instanceof Map
     ? teamsInput
     : new Map((teamsInput as Team[]).map((t) => [t.id, t]));
+
+  const [tournament, setTournament] = useState<Tournament | null>(tournamentProp);
+  useEffect(() => {
+    setTournament(tournamentProp);
+  }, [tournamentProp]);
 
   const [adminTab, setAdminTab] = useState<AdminTab>("results");
 
@@ -33,16 +39,31 @@ export function AdminPageClient({ games, teams: teamsInput, tournament }: AdminP
         <div>
           <p className="font-mono text-xs text-yellow-500 uppercase tracking-widest mb-1">Admin</p>
           <h1 className="font-display text-5xl font-black uppercase tracking-tight text-white">
-            {adminTab === "results" ? "Game Results" : "Add Bracket"}
+            {adminTab === "results"
+              ? "Game Results"
+              : adminTab === "add-bracket"
+                ? "Add Bracket"
+                : "Bracket picks"}
           </h1>
           <p className="text-gray-500 font-mono text-sm mt-1">
-            {tournament.name} · Status:{" "}
-            <span className={clsx(
-              tournament.status === "active" ? "text-green-400" :
-              tournament.status === "complete" ? "text-gray-400" : "text-yellow-400"
-            )}>
-              {tournament.status}
-            </span>
+            {tournament ? (
+              <>
+                {tournament.name} · Status:{" "}
+                <span
+                  className={clsx(
+                    tournament.status === "active"
+                      ? "text-green-400"
+                      : tournament.status === "complete"
+                        ? "text-gray-400"
+                        : "text-yellow-400"
+                  )}
+                >
+                  {tournament.status}
+                </span>
+              </>
+            ) : (
+              <span className="text-amber-400">No tournament META in Dynamo — seed the tournament first.</span>
+            )}
           </p>
         </div>
       </div>
@@ -71,13 +92,28 @@ export function AdminPageClient({ games, teams: teamsInput, tournament }: AdminP
         >
           Add Bracket
         </button>
+        <button
+          onClick={() => setAdminTab("picks")}
+          className={clsx(
+            "px-5 py-2 rounded-lg font-display text-sm font-bold uppercase tracking-wide transition-colors",
+            adminTab === "picks"
+              ? "bg-court-500 text-white"
+              : "bg-hardwood-700 text-gray-400 hover:text-white hover:bg-hardwood-600"
+          )}
+        >
+          Bracket picks
+        </button>
       </div>
 
       {/* Tab content */}
       {adminTab === "results" ? (
         <GameResultsPanel games={games} teamsMap={teamsMap} />
+      ) : adminTab === "add-bracket" ? (
+        <AdminBracketBuilder games={games} teamsMap={teamsMap} />
+      ) : tournament ? (
+        <PicksLockPanel tournament={tournament} onSaved={setTournament} />
       ) : (
-        <AdminBracketBuilder games={games} teams={teamsMap} />
+        <p className="text-gray-500 font-body">Seed a tournament record to configure picks.</p>
       )}
     </div>
   );

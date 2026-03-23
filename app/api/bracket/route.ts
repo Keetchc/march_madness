@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireSession, getUserId } from "@/lib/session";
 import { getBracketsByUser, createBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
+import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import { v4 as uuidv4 } from "uuid";
 
 export const dynamic = "force-dynamic";
@@ -32,13 +33,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bracket name is required" }, { status: 400 });
   }
 
-  // Check tournament lock
   const tournament = await getTournament(TOURNAMENT_ID);
-  if (tournament) {
-    const lockDate = new Date(tournament.lockDate);
-    if (new Date() > lockDate && tournament.status !== "pending") {
-      return NextResponse.json({ error: "Tournament is locked. No new brackets." }, { status: 403 });
-    }
+  if (picksEffectivelyClosed(tournament)) {
+    return NextResponse.json({ error: "Tournament is locked. No new brackets." }, { status: 403 });
   }
 
   const bracket: Bracket = {
