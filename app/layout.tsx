@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import { serverEnv } from "@/lib/server-env";
 
 function getMetadataBase(): URL {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXTAUTH_URL;
+  const raw = serverEnv("NEXT_PUBLIC_SITE_URL") ?? serverEnv("NEXTAUTH_URL");
   if (raw) {
     try {
       return new URL(raw);
