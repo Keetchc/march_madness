@@ -13,9 +13,20 @@ import { TABLES } from "./dynamo/tables";
 import { getUser, upsertUser } from "./dynamo/queries/users";
 import { serverEnv } from "./server-env";
 
-const dynamoAdapter = DynamoDBAdapter(docClient, {
-  tableName: TABLES.NEXTAUTH,
-});
+/**
+ * Lazily create the adapter on first `getAuthOptions()` so `TABLES.NEXTAUTH` resolves after
+ * `hydrateAuthEnvFromDisk()` (and so `DYNAMO_TABLE_PREFIX` is not fixed at module load).
+ */
+let dynamoAdapter: ReturnType<typeof DynamoDBAdapter> | undefined;
+
+function getDynamoAdapter() {
+  if (!dynamoAdapter) {
+    dynamoAdapter = DynamoDBAdapter(docClient, {
+      tableName: TABLES.NEXTAUTH,
+    });
+  }
+  return dynamoAdapter;
+}
 
 const authWarnOnce = globalThis as { __mmNextAuthEnvWarned?: boolean };
 
@@ -53,7 +64,7 @@ export function getAuthOptions(): NextAuthOptions {
       }),
     ],
 
-    adapter: dynamoAdapter,
+    adapter: getDynamoAdapter(),
 
     session: { strategy: "jwt" },
 

@@ -28,11 +28,13 @@ export async function GET() {
       hasGoogleClientId: hasServerEnv("GOOGLE_CLIENT_ID"),
       hasGoogleClientSecret: hasServerEnv("GOOGLE_CLIENT_SECRET"),
       hasNextAuthUrl: hasServerEnv("NEXTAUTH_URL"),
+      hasDynamoTablePrefix: hasServerEnv("DYNAMO_TABLE_PREFIX"),
     },
     rawProcessEnvOnly: {
       hasNextAuthSecret: hasRawProcess("NEXTAUTH_SECRET"),
       hasGoogleClientId: hasRawProcess("GOOGLE_CLIENT_ID"),
       hasGoogleClientSecret: hasRawProcess("GOOGLE_CLIENT_SECRET"),
+      hasDynamoTablePrefix: hasRawProcess("DYNAMO_TABLE_PREFIX"),
     },
     note: "viaServerEnv includes amplify-auth.json if present; rawProcessEnvOnly is Lambda env injection only.",
   });
