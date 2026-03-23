@@ -23,7 +23,11 @@ export interface ProjectionResult {
 export function projectPicksOntoGames(
   games: Game[],
   picks: Picks,
+  options?: { fillUnpickedFromActualWinners?: boolean },
 ): ProjectionResult {
+  const fillUnpicked =
+    options?.fillUnpickedFromActualWinners !== false;
+
   const gameMap = new Map(games.map((g) => [g.gameId, { ...g }]));
   const projectedSlots = new Set<string>();
   const actualTeamOverrides = new Map<string, string>();
@@ -35,7 +39,9 @@ export function projectPicksOntoGames(
       const nextGame = gameMap.get(game.nextGameId);
       if (!nextGame) continue;
 
-      const pickedWinner = picks[game.gameId] ?? game.winnerId;
+      const pickedWinner =
+        picks[game.gameId] ??
+        (fillUnpicked ? game.winnerId : undefined);
       if (!pickedWinner) continue;
 
       const slotKey = `${nextGame.gameId}:${game.nextGameSlot}`;

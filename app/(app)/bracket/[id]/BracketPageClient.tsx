@@ -91,8 +91,13 @@ export function BracketPageClient({
   }, [savePicks]);
 
   const { games: projectedGames, projectedSlots, actualTeamOverrides } = useMemo(
-    () => projectPicksOntoGames(games, picks),
-    [games, picks],
+    () =>
+      projectPicksOntoGames(games, picks, {
+        // When the owner can still edit, do not backfill empty slots with real game winners
+        // (otherwise a new empty bracket looks like the “official” result tree).
+        fillUnpickedFromActualWinners: !canEdit,
+      }),
+    [games, picks, canEdit],
   );
 
   if (loading) {

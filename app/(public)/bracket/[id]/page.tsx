@@ -3,6 +3,7 @@ import { getUser } from "@/lib/dynamo/queries/users";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
+import { getUserId } from "@/lib/session";
 import { BracketPageClient } from "@/app/(app)/bracket/[id]/BracketPageClient";
 
 export default async function PublicBracketPage({ params }: { params: { id: string } }) {
@@ -10,8 +11,7 @@ export default async function PublicBracketPage({ params }: { params: { id: stri
   if (!bracket) notFound();
 
   const session = await getServerSession(getAuthOptions());
-  const sessionUserId =
-    session?.user != null ? ((session.user as { userId?: string }).userId ?? "") : "";
+  const sessionUserId = session?.user ? (getUserId(session) ?? "") : "";
 
   const user = await getUser(bracket.userId);
   const displayName = user?.name
