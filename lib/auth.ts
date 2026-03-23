@@ -13,15 +13,32 @@ import { upsertUser } from "./dynamo/queries/users";
 
 const adminEmails = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim());
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
+
+if (!googleClientId || !googleClientSecret) {
+  console.error(
+    "[next-auth] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing/empty. Google sign-in fails with ?error=OAuthSignin. Set both in Amplify (or .env.local), not only at build time."
+  );
+}
+
 export const authOptions: NextAuthOptions = {
   // Required behind proxies (Amplify, Vercel, etc.) so OAuth callbacks resolve the real host.
   trustHost: true,
   secret: process.env.NEXTAUTH_SECRET,
 
+  // Set NEXTAUTH_DEBUG=1 in the host env to log SIGNIN_OAUTH_ERROR details to CloudWatch / terminal.
+  debug: process.env.NEXTAUTH_DEBUG === "1",
+  logger: {
+    error(code, metadata) {
+      console.error("[next-auth]", code, metadata);
+    },
+  },
+
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
     }),
   ],
 

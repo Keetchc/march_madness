@@ -1,8 +1,12 @@
 export const dynamic = "force-dynamic";
 
 /** Only allow same-site relative paths (NextAuth also validates on the server). */
+function pickFirst(raw: string | string[] | undefined): string | undefined {
+  return Array.isArray(raw) ? raw[0] : raw;
+}
+
 function safeCallbackUrl(raw: string | string[] | undefined): string {
-  const v = Array.isArray(raw) ? raw[0] : raw;
+  const v = pickFirst(raw);
   const fallback = "/dashboard";
   if (!v) return fallback;
   if (!v.startsWith("/") || v.startsWith("//")) return fallback;
@@ -12,9 +16,10 @@ function safeCallbackUrl(raw: string | string[] | undefined): string {
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { callbackUrl?: string | string[] };
+  searchParams: { callbackUrl?: string | string[]; error?: string | string[] };
 }) {
   const callbackUrl = safeCallbackUrl(searchParams.callbackUrl);
+  const authError = pickFirst(searchParams.error);
   const signinHref = `/api/auth/signin?${new URLSearchParams({ callbackUrl }).toString()}`;
 
   return (
@@ -43,6 +48,19 @@ export default function LoginPage({
           <p className="text-sm text-gray-400 mb-6 font-body">
             Sign in to submit your bracket, join groups, and trash-talk your friends.
           </p>
+          {authError === "OAuthSignin" && (
+            <p className="text-sm text-amber-200/90 bg-amber-950/40 border border-amber-800/60 rounded-lg px-3 py-2 mb-4 font-body text-left leading-snug">
+              Google sign-in could not start on the server. Most often{" "}
+              <span className="font-semibold text-amber-100">GOOGLE_CLIENT_ID</span> or{" "}
+              <span className="font-semibold text-amber-100">GOOGLE_CLIENT_SECRET</span> is missing in
+              your hosting environment, or <span className="font-semibold text-amber-100">NEXTAUTH_URL</span>{" "}
+              does not match this site&apos;s public URL. In Google Cloud, the redirect URI must be{" "}
+              <code className="font-mono text-xs text-amber-100/95 break-all">
+                https://YOUR_DOMAIN/api/auth/callback/google
+              </code>
+              .
+            </p>
+          )}
           {/*
             Use a full document navigation (plain <a>), not next/link, so the browser loads NextAuth’s
             HTML sign-in page and receives CSRF cookies in that response.
