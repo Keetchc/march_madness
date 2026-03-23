@@ -1,4 +1,3 @@
-import { env } from "node:process";
 import { NextResponse } from "next/server";
 import { serverEnv } from "@/lib/server-env";
 
@@ -10,7 +9,7 @@ function hasServerEnv(k: string): boolean {
 }
 
 function hasRawProcess(k: string): boolean {
-  const v = env[k];
+  const v = process.env[k];
   return typeof v === "string" && v.length > 0;
 }
 
@@ -19,7 +18,7 @@ function hasRawProcess(k: string): boolean {
  * route once, then remove the flag. Returns only booleans — no secret values.
  */
 export async function GET() {
-  if (env.DEPLOY_ENV_CHECK !== "1" && env.NEXTAUTH_DEBUG !== "1") {
+  if (process.env.DEPLOY_ENV_CHECK !== "1" && process.env.NEXTAUTH_DEBUG !== "1") {
     return new NextResponse(null, { status: 404 });
   }
 

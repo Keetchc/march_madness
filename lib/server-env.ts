@@ -2,12 +2,12 @@
  * Resolve auth-related config for Node server routes.
  *
  * 1) `.next/amplify-auth.json` — written during Amplify build (see scripts/write-amplify-auth-env.js).
- *    Lambda often deploys only `.next/`; runtime `process.env` may omit console vars, but this file ships.
- * 2) `node:process` env — local dev and hosts that inject env correctly.
+ * 2) `process.env` — local dev and hosts that inject env correctly.
+ *
+ * Use `fs` / `path` without `node:` so webpack resolves modules during build.
  */
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { env as nodeEnv } from "node:process";
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
 
 type Bundle = Record<string, string>;
 
@@ -41,7 +41,7 @@ export function serverEnv(key: string): string | undefined {
   const fromFile = loadBundle()?.[key];
   if (fromFile !== undefined && fromFile !== "") return fromFile;
 
-  const v = nodeEnv[key];
+  const v = process.env[key];
   if (v === undefined || v === "") return undefined;
   return v;
 }

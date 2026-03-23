@@ -1,14 +1,16 @@
 /**
  * Hydrate `process.env` from `.next/amplify-auth.json` on the Node server so NextAuth and any code
  * that reads `process.env.NEXTAUTH_URL` (not only `serverEnv()`) see the production URL on Lambda.
+ *
+ * Use `fs` / `path` (not `node:fs`) so webpack can bundle the instrumentation hook.
  */
-export async function register() {
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
+
+export function register() {
   if (process.env.NEXT_RUNTIME === "edge") return;
 
   try {
-    const { existsSync, readFileSync } = await import("node:fs");
-    const { join } = await import("node:path");
-
     const candidates = [
       join(process.cwd(), "amplify-auth.json"),
       join(process.cwd(), ".next", "amplify-auth.json"),
