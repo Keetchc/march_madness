@@ -11,6 +11,15 @@ export type Round =
 /** First round → championship (use for display; object key order from APIs is not reliable). */
 export const ROUNDS_IN_ORDER: readonly Round[] = ["R64", "R32", "S16", "E8", "F4", "NCG"];
 
+export const ROUND_DISPLAY_LABELS: Record<Round, string> = {
+  R64: "Round of 64",
+  R32: "Round of 32",
+  S16: "Sweet 16",
+  E8: "Elite Eight",
+  F4: "Final Four",
+  NCG: "Championship",
+};
+
 export type Region = "East" | "West" | "South" | "Midwest" | "FinalFour";
 
 export type GameStatus = "scheduled" | "in_progress" | "final";
@@ -202,6 +211,13 @@ export interface LeaderboardEntry {
   gamesDecidedCount: number;
   status: BracketStatus;
   criticalGames: CriticalGame[];
+  /**
+   * Earliest round that still has at least one non-final game (pool-wide).
+   * Used to highlight “next wave” picks vs everyone else (e.g. all pending R64 on day one).
+   */
+  nextSliceRound: Round | null;
+  /** Pending games in {@link nextSliceRound} where your pick diverges from others in this leaderboard. */
+  nextSliceCriticalGames: CriticalGame[];
 }
 
 // ─── ESPN API ─────────────────────────────────────────────────────────────────

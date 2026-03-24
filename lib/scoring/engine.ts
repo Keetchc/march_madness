@@ -1,13 +1,14 @@
-import type {
-  Bracket,
-  Game,
-  Team,
-  Round,
-  LeaderboardEntry,
-  BracketStatus,
-  CriticalGame,
-  ScoringRules,
-  Picks,
+import {
+  ROUNDS_IN_ORDER,
+  type Bracket,
+  type Game,
+  type Team,
+  type Round,
+  type LeaderboardEntry,
+  type BracketStatus,
+  type CriticalGame,
+  type ScoringRules,
+  type Picks,
 } from "../types";
 
 /** Dynamo / APIs may use different casing; scoring must treat completed games consistently. */
@@ -240,6 +241,8 @@ export function buildLeaderboard(
       gamesDecidedCount: result.totalCompletedGames,
       status: "alive" as BracketStatus,
       criticalGames: [],
+      nextSliceRound: null,
+      nextSliceCriticalGames: [],
     };
   });
 
@@ -300,7 +303,97 @@ export function buildLeaderboard(
     );
   }
 
+  const nextSliceRound = firstRoundWithPendingGames(games);
+  const slicePendingGames =
+    nextSliceRound != null
+      ? pendingGames.filter((g) => g.round === nextSliceRound)
+      : [];
+
+  for (let i = 0; i < entries.length; i++) {
+    entries[i].nextSliceRound = nextSliceRound;
+    entries[i].nextSliceCriticalGames =
+      slicePendingGames.length > 0
+        ? computeNextSliceCriticalGames(
+            entries[i],
+            entries,
+            bracketMap,
+            slicePendingGames,
+            eliminatedTeams,
+            teams,
+            scoringRules,
+          )
+        : [];
+  }
+
   return entries;
+}
+
+function firstRoundWithPendingGames(allGames: Game[]): Round | null {
+  for (const r of ROUNDS_IN_ORDER) {
+    if (allGames.some((g) => g.round === r && !isGameFinalStatus(g.status))) {
+      return r;
+    }
+  }
+  return null;
+}
+
+/** Pending games in the “next” open round vs everyone else in this leaderboard (not only people ahead of you). */
+function computeNextSliceCriticalGames(
+  entry: LeaderboardEntry,
+  entries: LeaderboardEntry[],
+  bracketMap: Map<string, Bracket>,
+  slicePendingGames: Game[],
+  eliminatedTeams: Set<string>,
+  teams: Map<string, Team>,
+  scoringRules?: ScoringRules,
+): CriticalGame[] {
+  if (slicePendingGames.length === 0) return [];
+
+  const myBracket = bracketMap.get(entry.bracketId);
+  if (!myBracket) return [];
+
+  const myPicks = coerceBracketPicks(myBracket.picks);
+  const otherPicksList = entries
+    .filter((e) => e.bracketId !== entry.bracketId)
+    .map((e) => {
+      const b = bracketMap.get(e.bracketId);
+      return b ? coerceBracketPicks(b.picks) : null;
+    });
+
+  const out: CriticalGame[] = [];
+
+  for (const game of slicePendingGames) {
+    const myPick = getPickForGame(myPicks, game.gameId);
+    if (!myPick || eliminatedTeams.has(myPick)) continue;
+
+    const pickedTeam = teams.get(myPick);
+    const potentialPoints = maxPointsForAlivePick(game, myPick, teams, scoringRules);
+
+    let rivalsWithDifferentPick = 0;
+    for (const rp of otherPicksList) {
+      if (!rp) continue;
+      const theirPick = getPickForGame(rp, game.gameId);
+      if (!theirPick) continue;
+      if (theirPick !== myPick) rivalsWithDifferentPick++;
+    }
+
+    if (entries.length > 1 && rivalsWithDifferentPick === 0) continue;
+
+    const swingScore = potentialPoints * (1 + rivalsWithDifferentPick * 0.6);
+    out.push({
+      gameId: game.gameId,
+      round: game.round,
+      teamId: myPick,
+      teamName: pickedTeam?.shortName ?? pickedTeam?.name ?? "TBD",
+      potentialPoints,
+      swingScore: Math.round(swingScore * 10) / 10,
+      rivalsAheadWithDifferentPick: rivalsWithDifferentPick,
+      isMustHave: false,
+    });
+  }
+
+  out.sort((a, b) => b.swingScore - a.swingScore);
+  return out.slice(0, 5);
 }
 
 function computeCriticalGames(
