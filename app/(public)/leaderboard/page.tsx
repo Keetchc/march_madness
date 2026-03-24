@@ -217,7 +217,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
           <div
             className={clsx(
               "md:col-start-2 md:col-end-7 md:mt-1",
-              entry.criticalGames.length > 0 && entry.status !== "eliminated" ? "mt-3" : "mt-2",
+              entry.criticalGames.length > 0 ? "mt-3" : "mt-2",
             )}
           >
             <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-sky-400/90 mb-0.5">
