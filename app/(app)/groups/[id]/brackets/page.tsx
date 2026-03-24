@@ -6,6 +6,7 @@ import { getGroup, getGroupMembers, getGroupMembership } from "@/lib/dynamo/quer
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { getUser } from "@/lib/dynamo/queries/users";
+import type { Bracket } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,9 @@ export default async function GroupBracketsPage({ params }: { params: { id: stri
 
   const members = await getGroupMembers(params.id);
   const bracketIds = members.map((m) => m.bracketId).filter(Boolean);
-  const brackets = (await Promise.all(bracketIds.map((id) => getBracket(id)))).filter(Boolean);
+  const brackets = (await Promise.all(bracketIds.map((id) => getBracket(id)))).filter(
+    (b): b is Bracket => b != null
+  );
 
   const tournament = await getTournament(group.tournamentId ?? TOURNAMENT_ID);
 
