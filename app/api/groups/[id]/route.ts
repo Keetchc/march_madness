@@ -44,28 +44,29 @@ export async function GET(
   // Build leaderboard for this group
   const bracketIds = members.map((m) => m.bracketId).filter(Boolean);
   const brackets = await Promise.all(bracketIds.map((id) => getBracket(id)));
-  const validBrackets = brackets.filter(Boolean) as Awaited<ReturnType<typeof getBracket>>[];
+  const validBrackets = brackets.filter(Boolean) as NonNullable<Awaited<ReturnType<typeof getBracket>>>[];
 
-  const [games, teams] = await Promise.all([
-    getAllGames(TOURNAMENT_ID),
-    getAllTeams(TOURNAMENT_ID),
-  ]);
+  const tid = group.tournamentId ?? TOURNAMENT_ID;
+  const [games, teams] = await Promise.all([getAllGames(tid), getAllTeams(tid)]);
+
+  const userIdSet = new Set<string>();
+  for (const m of members) {
+    if (m.userId) userIdSet.add(String(m.userId));
+  }
+  for (const b of validBrackets) {
+    if (b.userId) userIdSet.add(String(b.userId));
+  }
 
   const userRecords = await Promise.all(
-    members.map(async (m) => {
-      const u = await getUser(m.userId);
-      return [m.userId, { name: u?.name ?? "Unknown", picture: u?.picture ?? "" }] as const;
+    [...userIdSet].map(async (uid) => {
+      const u = await getUser(uid);
+      return [uid, { name: u?.name ?? "Unknown", picture: u?.picture ?? "" }] as const;
     })
   );
   const usersMap = new Map(userRecords);
   const teamsMap = new Map(teams.map((t) => [t.id, t]));
 
-  const leaderboard = buildLeaderboard(
-    validBrackets as any,
-    usersMap,
-    games,
-    teamsMap,
-  );
+  const leaderboard = buildLeaderboard(validBrackets, usersMap, games, teamsMap, group.scoringRules);
 
   // Persist updated scores back to member records
   await Promise.all(

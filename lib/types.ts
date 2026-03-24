@@ -8,6 +8,9 @@ export type Round =
   | "F4"    // Final Four
   | "NCG";  // National Championship Game
 
+/** First round → championship (use for display; object key order from APIs is not reliable). */
+export const ROUNDS_IN_ORDER: readonly Round[] = ["R64", "R32", "S16", "E8", "F4", "NCG"];
+
 export type Region = "East" | "West" | "South" | "Midwest" | "FinalFour";
 
 export type GameStatus = "scheduled" | "in_progress" | "final";
@@ -91,14 +94,18 @@ export interface ScoringRules {
   };
 }
 
-export const DEFAULT_SCORING_RULES: ScoringRules = {
+/**
+ * Brian's Rules — same structure as legacy main-branch scoring: points = base × seed for each correct pick.
+ * Defaults match the classic pool weights (F4 / NCG use 14 and 22, not 16 / 32).
+ */
+export const BRIANS_SCORING_RULES: ScoringRules = {
   rounds: {
-    R64: { basePoints: 1,  upsetMultiplier: 0 },
-    R32: { basePoints: 2,  upsetMultiplier: 0 },
-    S16: { basePoints: 4,  upsetMultiplier: 0 },
-    E8:  { basePoints: 8,  upsetMultiplier: 0 },
-    F4:  { basePoints: 16, upsetMultiplier: 0 },
-    NCG: { basePoints: 32, upsetMultiplier: 0 },
+    R64: { basePoints: 1, upsetMultiplier: 0 },
+    R32: { basePoints: 2, upsetMultiplier: 0 },
+    S16: { basePoints: 4, upsetMultiplier: 0 },
+    E8: { basePoints: 8, upsetMultiplier: 0 },
+    F4: { basePoints: 14, upsetMultiplier: 0 },
+    NCG: { basePoints: 22, upsetMultiplier: 0 },
   },
   bonuses: {
     correctChampion: 0,
@@ -106,20 +113,32 @@ export const DEFAULT_SCORING_RULES: ScoringRules = {
   },
 };
 
+/** Default for new groups and API fallback — Brian's Rules (base × seed). */
+export const DEFAULT_SCORING_RULES: ScoringRules = BRIANS_SCORING_RULES;
+
+/** Upset-heavy preset; bases align with Brian's round weights, plus multipliers and bonuses. */
 export const UPSET_SCORING_RULES: ScoringRules = {
   rounds: {
-    R64: { basePoints: 1,  upsetMultiplier: 1.0 },
-    R32: { basePoints: 2,  upsetMultiplier: 1.5 },
-    S16: { basePoints: 4,  upsetMultiplier: 2.0 },
-    E8:  { basePoints: 8,  upsetMultiplier: 2.5 },
-    F4:  { basePoints: 16, upsetMultiplier: 3.0 },
-    NCG: { basePoints: 32, upsetMultiplier: 0.0 },
+    R64: { basePoints: 1, upsetMultiplier: 1.0 },
+    R32: { basePoints: 2, upsetMultiplier: 1.5 },
+    S16: { basePoints: 4, upsetMultiplier: 2.0 },
+    E8: { basePoints: 8, upsetMultiplier: 2.5 },
+    F4: { basePoints: 14, upsetMultiplier: 3.0 },
+    NCG: { basePoints: 22, upsetMultiplier: 0.0 },
   },
   bonuses: {
     correctChampion: 25,
     perfectRound: 50,
   },
 };
+
+export type ScoringPresetId = "brians" | "upset" | "custom";
+
+export function detectScoringPreset(rules: ScoringRules): ScoringPresetId {
+  if (JSON.stringify(rules) === JSON.stringify(UPSET_SCORING_RULES)) return "upset";
+  if (JSON.stringify(rules) === JSON.stringify(BRIANS_SCORING_RULES)) return "brians";
+  return "custom";
+}
 
 // ─── Groups ───────────────────────────────────────────────────────────────────
 

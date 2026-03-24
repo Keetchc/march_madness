@@ -1,20 +1,42 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { requireSession, getUserId } from "@/lib/session";
+import { getAuthOptions } from "@/lib/auth";
 import { getBracket, updatePicks, deleteBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 
 export const dynamic = "force-dynamic";
 
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+const DEFAULT_TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
-// GET /api/bracket/[id] — public read access
+// GET /api/bracket/[id] — full bracket for owner/admin after lock; others get redacted picks before lock
 export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
   const bracket = await getBracket(params.id);
   if (!bracket) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const tid = bracket.tournamentId ?? DEFAULT_TOURNAMENT_ID;
+  const tournament = await getTournament(tid);
+  const closed = picksEffectivelyClosed(tournament);
+
+  const session = await getServerSession(getAuthOptions());
+  const viewerId = session?.user ? getUserId(session) : "";
+  const isOwner = viewerId !== "" && String(viewerId) === String(bracket.userId);
+  const isAppAdmin = Boolean((session?.user as { isAdmin?: boolean } | undefined)?.isAdmin);
+
+  if (!closed && !isOwner && !isAppAdmin) {
+    return NextResponse.json({
+      ...bracket,
+      picks: {},
+      score: 0,
+      maxPossibleScore: 0,
+      isEliminated: false,
+    });
+  }
+
   return NextResponse.json(bracket);
 }
 
@@ -34,7 +56,8 @@ export async function PUT(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const tournament = await getTournament(TOURNAMENT_ID);
+  const tid = bracket.tournamentId ?? DEFAULT_TOURNAMENT_ID;
+  const tournament = await getTournament(tid);
   if (picksEffectivelyClosed(tournament)) {
     return NextResponse.json({ error: "Tournament is locked. Picks are closed." }, { status: 403 });
   }

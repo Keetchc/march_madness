@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireSession, getUserId } from "@/lib/session";
 import { getGroupByInviteToken, addMember, getGroupMembership } from "@/lib/dynamo/queries/groups";
 import { getBracketsByUser } from "@/lib/dynamo/queries/brackets";
+import { upsertUser } from "@/lib/dynamo/queries/users";
 import type { GroupMember } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,18 @@ export async function POST(req: Request) {
     if (!owned) {
       return NextResponse.json({ error: "Bracket not found or not yours" }, { status: 400 });
     }
+  }
+
+  const su = session.user;
+  if (su) {
+    await upsertUser({
+      userId,
+      name: su.name ?? "",
+      email: su.email ?? "",
+      picture: (su as { image?: string }).image ?? "",
+      isAdmin: Boolean((su as { isAdmin?: boolean }).isAdmin),
+      createdAt: new Date().toISOString(),
+    });
   }
 
   const member: GroupMember = {

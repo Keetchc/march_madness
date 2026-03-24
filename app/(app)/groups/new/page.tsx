@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ScoringRules, Round } from "@/lib/types";
-import { DEFAULT_SCORING_RULES, UPSET_SCORING_RULES } from "@/lib/types";
+import type { ScoringRules, Round, ScoringPresetId } from "@/lib/types";
+import { BRIANS_SCORING_RULES, DEFAULT_SCORING_RULES, UPSET_SCORING_RULES } from "@/lib/types";
 import { clsx } from "clsx";
 
 const ROUND_LABELS: Record<Round, string> = {
@@ -14,14 +14,17 @@ const ROUND_LABELS: Record<Round, string> = {
 export default function NewGroupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [scoringPreset, setScoringPreset] = useState<"standard" | "upset" | "custom">("standard");
+  const [scoringPreset, setScoringPreset] = useState<ScoringPresetId>("brians");
   const [scoringRules, setScoringRules] = useState<ScoringRules>(DEFAULT_SCORING_RULES);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  function applyPreset(preset: "standard" | "upset" | "custom") {
+  const basesEditable = scoringPreset === "brians" || scoringPreset === "custom";
+  const advancedEditable = scoringPreset === "custom";
+
+  function applyPreset(preset: ScoringPresetId) {
     setScoringPreset(preset);
-    if (preset === "standard") setScoringRules(DEFAULT_SCORING_RULES);
+    if (preset === "brians") setScoringRules(BRIANS_SCORING_RULES);
     if (preset === "upset") setScoringRules(UPSET_SCORING_RULES);
   }
 
@@ -74,7 +77,7 @@ export default function NewGroupPage() {
 
           {/* Presets */}
           <div className="flex gap-2 flex-wrap">
-            {(["standard", "upset", "custom"] as const).map((p) => (
+            {(["brians", "upset", "custom"] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => applyPreset(p)}
@@ -85,17 +88,18 @@ export default function NewGroupPage() {
                     : "bg-hardwood-700 text-gray-400 border border-hardwood-500 hover:text-white"
                 )}
               >
-                {p === "standard" && "Standard"}
-                {p === "upset" && "🔥 Upset Bonus"}
+                {p === "brians" && "Brian's Rules"}
+                {p === "upset" && "🔥 Upset bonus"}
                 {p === "custom" && "Custom"}
               </button>
             ))}
           </div>
 
           <p className="text-xs font-body text-gray-600">
-            {scoringPreset === "standard" && "Simple points per correct pick, doubling each round."}
-            {scoringPreset === "upset" && "Bonus points when lower seeds win — rewards risky picks."}
-            {scoringPreset === "custom" && "Edit points per round below."}
+            {scoringPreset === "brians" &&
+              "Base × seed per correct pick. Adjust bases per round; use Custom for upset multipliers or champion bonus."}
+            {scoringPreset === "upset" && "Lower-seed wins pay extra; includes champion bonus. Use Custom to edit."}
+            {scoringPreset === "custom" && "Edit base points, upset multipliers, and bonuses below."}
           </p>
 
           {/* Round points table */}
@@ -111,19 +115,20 @@ export default function NewGroupPage() {
                       min={0}
                       max={999}
                       value={scoringRules.rounds[round].basePoints}
-                      disabled={scoringPreset !== "custom"}
-                      onChange={(e) =>
+                      disabled={!basesEditable}
+                      onChange={(e) => {
+                        if (scoringPreset === "brians") setScoringPreset("custom");
                         setScoringRules((prev) => ({
                           ...prev,
                           rounds: {
                             ...prev.rounds,
                             [round]: {
                               ...prev.rounds[round],
-                              basePoints: parseInt(e.target.value) || 0,
+                              basePoints: parseInt(e.target.value, 10) || 0,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       className="w-16 bg-hardwood-700 border border-hardwood-500 rounded px-2 py-1 text-white text-sm font-mono text-center disabled:opacity-40 outline-none focus:border-court-500"
                     />
                   </div>
@@ -135,7 +140,7 @@ export default function NewGroupPage() {
                       max={10}
                       step={0.5}
                       value={scoringRules.rounds[round].upsetMultiplier}
-                      disabled={scoringPreset !== "custom"}
+                      disabled={!advancedEditable}
                       onChange={(e) =>
                         setScoringRules((prev) => ({
                           ...prev,
@@ -164,7 +169,7 @@ export default function NewGroupPage() {
               min={0}
               max={999}
               value={scoringRules.bonuses.correctChampion}
-              disabled={scoringPreset !== "custom"}
+              disabled={!advancedEditable}
               onChange={(e) =>
                 setScoringRules((prev) => ({
                   ...prev,

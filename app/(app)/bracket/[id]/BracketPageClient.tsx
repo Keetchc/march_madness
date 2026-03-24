@@ -13,6 +13,11 @@ interface BracketPageClientProps {
   bracketUserId: string;
   bracketName: string;
   initialPicks: Picks;
+  /** Non-owner view while picks are still open — no tree, no stats. */
+  picksHiddenUntilLock?: boolean;
+  lockHint?: string;
+  /** Server omitted picks; refetch when client learns the viewer is the owner. */
+  serverRedactedPicks?: boolean;
 }
 
 type SaveState = "saved" | "saving" | "unsaved" | "error";
@@ -23,6 +28,9 @@ export function BracketPageClient({
   bracketUserId,
   bracketName,
   initialPicks,
+  picksHiddenUntilLock = false,
+  lockHint,
+  serverRedactedPicks = false,
 }: BracketPageClientProps) {
   const { data: session, status: sessionStatus } = useSession();
   const [games, setGames] = useState<Game[]>([]);
@@ -52,6 +60,9 @@ export function BracketPageClient({
   const picksOpenByAdmin = tournament?.picksOpenOverride === true;
   const isLocked = picksOpenByAdmin ? false : lockedBySchedule;
   const canEdit = isOwner && !isLocked;
+
+  /** Server may not have had session; hide others’ picks until lock unless client knows you’re the owner. */
+  const hideBracketTree = picksHiddenUntilLock && !isOwner;
 
   // Load tournament data
   useEffect(() => {
@@ -91,6 +102,21 @@ export function BracketPageClient({
     }
   }, [bracketId]);
 
+  useEffect(() => {
+    if (!serverRedactedPicks || !isOwner) return;
+    let cancelled = false;
+    fetch(`/api/bracket/${bracketId}`)
+      .then((r) => r.json())
+      .then((b: { picks?: Picks }) => {
+        if (cancelled || !b?.picks || typeof b.picks !== "object") return;
+        if (Object.keys(b.picks).length > 0) setPicks(b.picks);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [serverRedactedPicks, isOwner, bracketId]);
+
   const handlePick = useCallback((gameId: string, teamId: string) => {
     setPicks((prev) => {
       const next = { ...prev, [gameId]: teamId };
@@ -118,6 +144,27 @@ export function BracketPageClient({
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 font-mono text-sm animate-pulse">
         Loading bracket...
+      </div>
+    );
+  }
+
+  if (hideBracketTree) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-start justify-between flex-wrap gap-3">
+          <div>
+            <p className="font-mono text-court-500 text-xs uppercase tracking-widest mb-0.5">Private bracket</p>
+            <h1 className="font-display text-4xl md:text-5xl font-black uppercase tracking-tight text-white">
+              {bracketName}
+            </h1>
+          </div>
+        </div>
+        <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-10 text-center space-y-3 max-w-lg mx-auto">
+          <p className="text-gray-300 font-body">
+            This player has submitted a bracket. Picks and scores stay hidden until the pool locks.
+          </p>
+          {lockHint ? <p className="text-sm text-gray-500 font-mono">{lockHint}</p> : null}
+        </div>
       </div>
     );
   }

@@ -1,4 +1,13 @@
-import type { Bracket, Game, Team, Round, LeaderboardEntry, BracketStatus, CriticalGame } from "../types";
+import type {
+  Bracket,
+  Game,
+  Team,
+  Round,
+  LeaderboardEntry,
+  BracketStatus,
+  CriticalGame,
+  ScoringRules,
+} from "../types";
 
 const ROUND_BASE_POINTS: Record<Round, number> = {
   R64: 1,
@@ -8,6 +17,79 @@ const ROUND_BASE_POINTS: Record<Round, number> = {
   F4: 14,
   NCG: 22,
 };
+
+function baseForRound(round: Round, rules?: ScoringRules): number {
+  const fromRules = rules?.rounds[round]?.basePoints;
+  if (fromRules != null && fromRules > 0) return fromRules;
+  return ROUND_BASE_POINTS[round];
+}
+
+function upsetMultiplierForRound(round: Round, rules?: ScoringRules): number {
+  return rules?.rounds[round]?.upsetMultiplier ?? 0;
+}
+
+/** True if the game winner had a worse (higher) seed than the loser — NCAA 1 is best. */
+function isNcaaUpsetGame(game: Game, teams: Map<string, Team>): boolean {
+  if (!game.winnerId || !game.team1Id || !game.team2Id) return false;
+  const loserId = game.winnerId === game.team1Id ? game.team2Id : game.team1Id;
+  const ws = teams.get(game.winnerId)?.seed ?? 0;
+  const ls = teams.get(loserId)?.seed ?? 0;
+  return ws > ls;
+}
+
+function pointsForCorrectPick(game: Game, pickedTeamId: string, teams: Map<string, Team>, rules?: ScoringRules): number {
+  const pickedTeam = teams.get(pickedTeamId);
+  const seed = pickedTeam?.seed ?? 1;
+  const base = baseForRound(game.round, rules);
+  let pts = base * seed;
+  const um = upsetMultiplierForRound(game.round, rules);
+  if (um > 0 && isNcaaUpsetGame(game, teams)) {
+    pts *= 1 + um;
+  }
+  return pts;
+}
+
+function maxPointsForAlivePick(game: Game, teamId: string, teams: Map<string, Team>, rules?: ScoringRules): number {
+  const seed = teams.get(teamId)?.seed ?? 1;
+  return baseForRound(game.round, rules) * seed;
+}
+
+/**
+ * Points for a correct pick on a final game — same as scoreBracket (includes NCG champion bonus when rules define it).
+ */
+export function compareResolvedPointsForPick(
+  game: Game,
+  pick: string,
+  teams: Map<string, Team>,
+  rules?: ScoringRules,
+): number {
+  if (game.status !== "final" || !game.winnerId || pick !== game.winnerId) return 0;
+  let pts = pointsForCorrectPick(game, pick, teams, rules);
+  const champ = rules?.bonuses?.correctChampion ?? 0;
+  if (game.round === "NCG" && champ > 0) {
+    pts += champ;
+  }
+  return pts;
+}
+
+/**
+ * Remaining upside for this pick on a pending game — same base × seed as scoreBracket max path, plus champion bonus on open NCG.
+ */
+export function comparePendingPotentialForPick(
+  game: Game,
+  pick: string,
+  teams: Map<string, Team>,
+  eliminatedTeams: Set<string>,
+  rules?: ScoringRules,
+): number {
+  if (game.status === "final" || !pick || eliminatedTeams.has(pick)) return 0;
+  let pts = maxPointsForAlivePick(game, pick, teams, rules);
+  const champ = rules?.bonuses?.correctChampion ?? 0;
+  if (game.round === "NCG" && champ > 0) {
+    pts += champ;
+  }
+  return pts;
+}
 
 interface ScoreResult {
   score: number;
@@ -25,6 +107,7 @@ export function scoreBracket(
   bracket: Bracket,
   games: Game[],
   teams: Map<string, Team>,
+  scoringRules?: ScoringRules,
 ): ScoreResult {
   const roundBreakdown: Record<Round, number> = {
     R64: 0, R32: 0, S16: 0, E8: 0, F4: 0, NCG: 0,
@@ -51,13 +134,20 @@ export function scoreBracket(
 
     const userPick = bracket.picks[game.gameId];
     if (userPick === game.winnerId) {
-      const pickedTeam = teams.get(userPick);
-      const seed = pickedTeam?.seed ?? 1;
-      const pts = ROUND_BASE_POINTS[game.round] * seed;
+      const pts = pointsForCorrectPick(game, userPick, teams, scoringRules);
 
       score += pts;
       roundBreakdown[game.round] += pts;
       correctPicks++;
+    }
+  }
+
+  const champBonus = scoringRules?.bonuses?.correctChampion ?? 0;
+  if (champBonus > 0) {
+    const ncg = completedGames.find((g) => g.round === "NCG" && g.status === "final" && g.winnerId);
+    if (ncg && bracket.picks[ncg.gameId] === ncg.winnerId) {
+      score += champBonus;
+      roundBreakdown.NCG += champBonus;
     }
   }
 
@@ -68,9 +158,17 @@ export function scoreBracket(
     if (!userPick) continue;
 
     if (!eliminatedTeams.has(userPick)) {
-      const pickedTeam = teams.get(userPick);
-      const seed = pickedTeam?.seed ?? 1;
-      maxPossibleScore += ROUND_BASE_POINTS[game.round] * seed;
+      maxPossibleScore += maxPointsForAlivePick(game, userPick, teams, scoringRules);
+    }
+  }
+
+  if (champBonus > 0) {
+    const ncgPending = pendingGames.find((g) => g.round === "NCG");
+    if (ncgPending) {
+      const p = bracket.picks[ncgPending.gameId];
+      if (p && !eliminatedTeams.has(p)) {
+        maxPossibleScore += champBonus;
+      }
     }
   }
 
@@ -91,6 +189,7 @@ export function buildLeaderboard(
   users: Map<string, { name: string; picture: string }>,
   games: Game[],
   teams: Map<string, Team>,
+  scoringRules?: ScoringRules,
 ): LeaderboardEntry[] {
   const completedGames = games.filter((g) => g.status === "final");
   const pendingGames = games.filter((g) => g.status !== "final");
@@ -103,8 +202,8 @@ export function buildLeaderboard(
   }
 
   const entries: LeaderboardEntry[] = brackets.map((bracket) => {
-    const result = scoreBracket(bracket, games, teams);
-    const user = users.get(bracket.userId);
+    const result = scoreBracket(bracket, games, teams, scoringRules);
+    const user = users.get(String(bracket.userId));
     return {
       rank: 0,
       userId: bracket.userId,
@@ -162,6 +261,7 @@ export function buildLeaderboard(
       pendingGames,
       eliminatedTeams,
       teams,
+      scoringRules,
     );
   }
 
@@ -174,6 +274,7 @@ export function buildLeaderboard(
       pendingGames,
       eliminatedTeams,
       teams,
+      scoringRules,
     );
   }
 
@@ -188,6 +289,7 @@ function computeCriticalGames(
   pendingGames: Game[],
   eliminatedTeams: Set<string>,
   teams: Map<string, Team>,
+  scoringRules?: ScoringRules,
 ): CriticalGame[] {
   if (entryIndex === 0) return [];
 
@@ -205,7 +307,7 @@ function computeCriticalGames(
     if (!myPick || eliminatedTeams.has(myPick)) continue;
 
     const pickedTeam = teams.get(myPick);
-    const potentialPoints = ROUND_BASE_POINTS[game.round] * (pickedTeam?.seed ?? 1);
+    const potentialPoints = maxPointsForAlivePick(game, myPick, teams, scoringRules);
     const rivalsAheadWithDifferentPick = aheadRivals.reduce((count, rival) => {
       const rivalBracket = bracketMap.get(rival.bracketId);
       if (!rivalBracket) return count;
@@ -258,6 +360,7 @@ function computeStatusAgainstField(
   pendingGames: Game[],
   eliminatedTeams: Set<string>,
   teams: Map<string, Team>,
+  scoringRules?: ScoringRules,
 ): BracketStatus {
   const myBracket = bracketMap.get(entry.bracketId)!;
   let tightestCushion = Infinity;
@@ -278,8 +381,7 @@ function computeStatusAgainstField(
       if (!myPick || myPick === rivalPick) continue;
       if (eliminatedTeams.has(myPick)) continue;
 
-      const pickedTeam = teams.get(myPick);
-      bestCaseGain += ROUND_BASE_POINTS[game.round] * (pickedTeam?.seed ?? 1);
+      bestCaseGain += maxPointsForAlivePick(game, myPick, teams, scoringRules);
     }
 
     if (bestCaseGain < gap) {

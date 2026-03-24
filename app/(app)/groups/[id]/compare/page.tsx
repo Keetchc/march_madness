@@ -8,7 +8,7 @@ import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { getUser } from "@/lib/dynamo/queries/users";
 import { scoreBracket } from "@/lib/scoring/engine";
-import type { Bracket, Round } from "@/lib/types";
+import { ROUNDS_IN_ORDER, type Bracket } from "@/lib/types";
 import { computeBracketCompareDiffs, type CompareDiffGame } from "@/lib/compare-brackets";
 
 export const dynamic = "force-dynamic";
@@ -92,12 +92,12 @@ export default async function GroupComparePage({
     resolvedWinsB,
     pendingPotentialA,
     pendingPotentialB,
-  } = computeBracketCompareDiffs(bracketA, bracketB, games, teamsMap);
+  } = computeBracketCompareDiffs(bracketA, bracketB, games, teamsMap, group.scoringRules);
 
   const resolvedDiffs = diffs.filter((d) => d.status === "final");
   const pendingDiffs = diffs.filter((d) => d.status === "pending");
-  const scoreA = scoreBracket(bracketA, games, teamsMap);
-  const scoreB = scoreBracket(bracketB, games, teamsMap);
+  const scoreA = scoreBracket(bracketA, games, teamsMap, group.scoringRules);
+  const scoreB = scoreBracket(bracketB, games, teamsMap, group.scoringRules);
   const userA = usersMap.get(bracketA.userId)?.name ?? "Unknown";
   const userB = usersMap.get(bracketB.userId)?.name ?? "Unknown";
 
@@ -191,7 +191,7 @@ export default async function GroupComparePage({
         <div className="pt-2 border-t border-hardwood-600">
           <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-2">Differences by Round</p>
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(roundDiffCounts) as Round[]).map((round) => (
+            {ROUNDS_IN_ORDER.map((round) => (
               <span
                 key={round}
                 className="px-2 py-1 rounded-md bg-hardwood-700 text-xs font-mono text-gray-300 border border-hardwood-500"

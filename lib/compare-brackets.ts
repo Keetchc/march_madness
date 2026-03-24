@@ -1,13 +1,5 @@
-import type { Bracket, Game, Round, Team } from "./types";
-
-export const COMPARE_ROUND_BASE_POINTS: Record<Round, number> = {
-  R64: 1,
-  R32: 2,
-  S16: 4,
-  E8: 8,
-  F4: 14,
-  NCG: 22,
-};
+import type { Bracket, Game, Round, Team, ScoringRules } from "./types";
+import { comparePendingPotentialForPick, compareResolvedPointsForPick } from "./scoring/engine";
 
 export type CompareDiffGame = {
   gameId: string;
@@ -30,16 +22,16 @@ export function buildEliminatedTeams(games: Game[]): Set<string> {
   return eliminated;
 }
 
-function getPotentialPointsForPick(game: Game, teamId: string | undefined, teamsMap: Map<string, Team>) {
-  if (!teamId) return 0;
-  return COMPARE_ROUND_BASE_POINTS[game.round] * (teamsMap.get(teamId)?.seed ?? 1);
-}
-
+/**
+ * Head-to-head differing picks between two brackets. Point values match {@link scoreBracket} / group scoring rules.
+ * Omit `scoringRules` to use the engine’s default round weights (pool-wide / legacy compare).
+ */
 export function computeBracketCompareDiffs(
   bracketA: Bracket,
   bracketB: Bracket,
   games: Game[],
-  teamsMap: Map<string, Team>
+  teamsMap: Map<string, Team>,
+  scoringRules?: ScoringRules,
 ): {
   diffs: CompareDiffGame[];
   roundDiffCounts: Record<Round, number>;
@@ -74,10 +66,8 @@ export function computeBracketCompareDiffs(
     const bTeam = teamsMap.get(bPick);
 
     if (game.status === "final") {
-      const aWon = game.winnerId === aPick;
-      const bWon = game.winnerId === bPick;
-      const aPoints = aWon ? getPotentialPointsForPick(game, aPick, teamsMap) : 0;
-      const bPoints = bWon ? getPotentialPointsForPick(game, bPick, teamsMap) : 0;
+      const aPoints = compareResolvedPointsForPick(game, aPick, teamsMap, scoringRules);
+      const bPoints = compareResolvedPointsForPick(game, bPick, teamsMap, scoringRules);
       if (aPoints > bPoints) resolvedWinsA += 1;
       if (bPoints > aPoints) resolvedWinsB += 1;
       diffs.push({
@@ -93,10 +83,8 @@ export function computeBracketCompareDiffs(
       continue;
     }
 
-    const aAlive = !eliminatedTeams.has(aPick);
-    const bAlive = !eliminatedTeams.has(bPick);
-    const aPoints = aAlive ? getPotentialPointsForPick(game, aPick, teamsMap) : 0;
-    const bPoints = bAlive ? getPotentialPointsForPick(game, bPick, teamsMap) : 0;
+    const aPoints = comparePendingPotentialForPick(game, aPick, teamsMap, eliminatedTeams, scoringRules);
+    const bPoints = comparePendingPotentialForPick(game, bPick, teamsMap, eliminatedTeams, scoringRules);
     pendingPotentialA += aPoints;
     pendingPotentialB += bPoints;
     diffs.push({

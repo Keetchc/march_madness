@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import type { Group, LeaderboardEntry } from "@/lib/types";
+import { useState, useMemo } from "react";
+import { ROUNDS_IN_ORDER, type Group, type LeaderboardEntry } from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
 import { clsx } from "clsx";
@@ -11,14 +11,36 @@ interface GroupPageClientProps {
   leaderboard: LeaderboardEntry[];
   currentUserId: string;
   isGroupAdmin: boolean;
+  isAppAdmin: boolean;
+  /** When true, hide other members' scores / bracket names until picks lock (you still see your row). */
+  maskOpponentStandings: boolean;
+  gamesCompletedCount: number;
 }
 
-export function GroupPageClient({ group, leaderboard, currentUserId, isGroupAdmin }: GroupPageClientProps) {
+export function GroupPageClient({
+  group,
+  leaderboard,
+  currentUserId,
+  isGroupAdmin,
+  isAppAdmin,
+  maskOpponentStandings,
+  gamesCompletedCount,
+}: GroupPageClientProps) {
   const [inviteToken, setInviteToken] = useState(group.inviteToken);
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
   const inviteUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/groups/join/${inviteToken}`;
+
+  const canSeeEveryoneStats = !maskOpponentStandings || isGroupAdmin || isAppAdmin;
+
+  const displayLeaderboard = useMemo(() => {
+    if (canSeeEveryoneStats) return leaderboard;
+    const copy = [...leaderboard].sort((a, b) =>
+      a.userName.localeCompare(b.userName, undefined, { sensitivity: "base" })
+    );
+    return copy;
+  }, [leaderboard, canSeeEveryoneStats]);
 
   async function copyInvite() {
     await navigator.clipboard.writeText(inviteUrl);
@@ -122,6 +144,15 @@ export function GroupPageClient({ group, leaderboard, currentUserId, isGroupAdmi
           </h2>
         </div>
 
+        {maskOpponentStandings && !canSeeEveryoneStats && (
+          <p className="text-xs font-mono text-gray-500 mb-3 max-w-xl">
+            Until picks lock, you only see scores on your own row. Others appear with name only (no bracket title or stats).{" "}
+            {gamesCompletedCount === 0
+              ? "Scores stay at 0 until tournament games start finishing."
+              : "Scores use this group’s scoring rules as games finish."}
+          </p>
+        )}
+
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
           {leaderboard.length > 0 && (
             <>
@@ -146,11 +177,13 @@ export function GroupPageClient({ group, leaderboard, currentUserId, isGroupAdmi
             </div>
           ) : (
             <div className="divide-y divide-hardwood-700">
-              {leaderboard.map((entry) => (
+              {displayLeaderboard.map((entry, index) => (
                 <LeaderboardRow
                   key={entry.bracketId}
                   entry={entry}
-                  isCurrentUser={entry.userId === currentUserId}
+                  isCurrentUser={String(entry.userId) === String(currentUserId)}
+                  maskOthers={maskOpponentStandings && !canSeeEveryoneStats}
+                  displayRank={canSeeEveryoneStats ? entry.rank : index + 1}
                 />
               ))}
             </div>
@@ -160,19 +193,32 @@ export function GroupPageClient({ group, leaderboard, currentUserId, isGroupAdmi
 
       {/* Scoring rules summary */}
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-5">
-        <h2 className="font-display font-bold uppercase tracking-wide text-sm text-white mb-3">
+        <h2 className="font-display font-bold uppercase tracking-wide text-sm text-white mb-1">
           Scoring Rules
         </h2>
+        <p className="text-xs font-mono text-gray-500 mb-3">
+          Each correct pick: <span className="text-gray-400">base × team seed</span>
+          {Object.values(group.scoringRules.rounds).some((r) => r.upsetMultiplier > 0) ? (
+            <span className="text-gray-600">; upset rounds apply a multiplier when a worse seed wins</span>
+          ) : null}
+          {group.scoringRules.bonuses.correctChampion > 0 ? (
+            <span className="text-gray-600">; champion bonus if set</span>
+          ) : null}
+          .
+        </p>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-          {(Object.entries(group.scoringRules.rounds) as [string, any][]).map(([round, rule]) => (
-            <div key={round} className="text-center">
-              <p className="font-mono text-xs text-gray-600 mb-1">{round}</p>
-              <p className="font-display font-bold text-white text-lg">{rule.basePoints}</p>
-              {rule.upsetMultiplier > 0 && (
-                <p className="font-mono text-[10px] text-court-500">+upset×{rule.upsetMultiplier}</p>
-              )}
-            </div>
-          ))}
+          {ROUNDS_IN_ORDER.map((round) => {
+            const rule = group.scoringRules.rounds[round];
+            return (
+              <div key={round} className="text-center">
+                <p className="font-mono text-xs text-gray-600 mb-1">{round}</p>
+                <p className="font-display font-bold text-white text-lg">{rule.basePoints}</p>
+                {rule.upsetMultiplier > 0 && (
+                  <p className="font-mono text-[10px] text-court-500">+upset×{rule.upsetMultiplier}</p>
+                )}
+              </div>
+            );
+          })}
         </div>
         {group.scoringRules.bonuses.correctChampion > 0 && (
           <p className="text-xs font-mono text-gray-500 mt-3 pt-3 border-t border-hardwood-600">
@@ -184,60 +230,88 @@ export function GroupPageClient({ group, leaderboard, currentUserId, isGroupAdmi
   );
 }
 
-function LeaderboardRow({ entry, isCurrentUser }: { entry: LeaderboardEntry; isCurrentUser: boolean }) {
+function LeaderboardRow({
+  entry,
+  isCurrentUser,
+  maskOthers,
+  displayRank,
+}: {
+  entry: LeaderboardEntry;
+  isCurrentUser: boolean;
+  maskOthers: boolean;
+  displayRank: number;
+}) {
   const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+  const hideStats = maskOthers && !isCurrentUser;
+  const bracketSubtitle = hideStats ? "Bracket submitted" : entry.bracketName;
+  const rowClass = clsx(
+    "flex flex-col gap-0 px-4 py-3 md:px-6 md:py-4 md:grid md:grid-cols-[3rem_1fr_5rem_5rem_5rem] md:gap-4 md:items-center",
+    "transition-colors",
+    hideStats ? "cursor-default" : "hover:bg-hardwood-700 cursor-pointer",
+    isCurrentUser && "bg-court-500/5 hover:bg-court-500/10"
+  );
 
-  return (
-    <Link href={`/bracket/${entry.bracketId}`}>
-      <div className={clsx(
-        "flex flex-col gap-0 px-4 py-3 md:px-6 md:py-4 md:grid md:grid-cols-[3rem_1fr_5rem_5rem_5rem] md:gap-4 md:items-center",
-        "hover:bg-hardwood-700 transition-colors cursor-pointer",
-        isCurrentUser && "bg-court-500/5 hover:bg-court-500/10"
-      )}>
-        <div className="flex items-center gap-3 min-w-0 pb-3 md:contents md:pb-0">
-          <span className="font-display text-lg md:text-xl font-black text-gray-400 w-8 shrink-0 text-center md:w-auto">
-            {medals[entry.rank] ?? entry.rank}
-          </span>
+  const inner = (
+    <div className={rowClass}>
+      <div className="flex items-center gap-3 min-w-0 pb-3 md:contents md:pb-0">
+        <span className="font-display text-lg md:text-xl font-black text-gray-400 w-8 shrink-0 text-center md:w-auto">
+          {maskOthers && !isCurrentUser ? "—" : medals[displayRank] ?? displayRank}
+        </span>
 
-          <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
-            {entry.userPicture ? (
-              <Image src={entry.userPicture} alt={entry.userName} width={32} height={32} className="rounded-full flex-shrink-0" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-hardwood-600 flex-shrink-0" />
-            )}
-            <div className="min-w-0">
-              <p className={clsx(
+        <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
+          {entry.userPicture ? (
+            <Image src={entry.userPicture} alt={entry.userName} width={32} height={32} className="rounded-full flex-shrink-0" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-hardwood-600 flex-shrink-0" />
+          )}
+          <div className="min-w-0">
+            <p
+              className={clsx(
                 "font-display font-bold uppercase tracking-wide text-sm truncate",
                 isCurrentUser ? "text-court-400" : "text-white"
-              )}>
-                {entry.userName}
-                {isCurrentUser && <span className="ml-2 text-[10px] text-court-600 normal-case font-mono">you</span>}
-              </p>
-              <p className="text-xs text-gray-600 font-body truncate">{entry.bracketName}</p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className={clsx(
-            "grid grid-cols-3 gap-x-2 gap-y-1 text-center items-center md:contents",
-            "border-t border-hardwood-600/90 pt-3 mt-0",
-            "rounded-lg bg-hardwood-900/55 px-2 py-2.5 -mx-1 ring-1 ring-hardwood-600/40",
-            "md:mx-0 md:mt-0 md:pt-0 md:px-0 md:py-0 md:rounded-none md:border-t-0 md:bg-transparent md:ring-0"
-          )}
-        >
-          <div className="md:text-right">
-            <span className="font-mono text-lg md:text-xl font-bold text-white tabular-nums">{entry.score}</span>
-          </div>
-          <div className="md:text-right">
-            <span className="font-mono text-sm text-gray-500 tabular-nums">{entry.maxPossibleScore}</span>
-          </div>
-          <div className="md:text-right">
-            <span className="font-mono text-sm text-gray-400 tabular-nums">{entry.correctPicks}/{entry.gamesDecidedCount}</span>
+              )}
+            >
+              {entry.userName}
+              {isCurrentUser && (
+                <span className="ml-2 text-[10px] text-court-600 normal-case font-mono">you</span>
+              )}
+            </p>
+            <p className="text-xs text-gray-600 font-body truncate">{bracketSubtitle}</p>
           </div>
         </div>
       </div>
-    </Link>
+
+      <div
+        className={clsx(
+          "grid grid-cols-3 gap-x-2 gap-y-1 text-center items-center md:contents",
+          "border-t border-hardwood-600/90 pt-3 mt-0",
+          "rounded-lg bg-hardwood-900/55 px-2 py-2.5 -mx-1 ring-1 ring-hardwood-600/40",
+          "md:mx-0 md:mt-0 md:pt-0 md:px-0 md:py-0 md:rounded-none md:border-t-0 md:bg-transparent md:ring-0"
+        )}
+      >
+        <div className="md:text-right">
+          <span className="font-mono text-lg md:text-xl font-bold text-white tabular-nums">
+            {hideStats ? "—" : entry.score}
+          </span>
+        </div>
+        <div className="md:text-right">
+          <span className="font-mono text-sm text-gray-500 tabular-nums">
+            {hideStats ? "—" : entry.maxPossibleScore}
+          </span>
+        </div>
+        <div className="md:text-right">
+          <span className="font-mono text-sm text-gray-400 tabular-nums">
+            {hideStats ? "—" : `${entry.correctPicks}/${entry.gamesDecidedCount}`}
+          </span>
+        </div>
+      </div>
+    </div>
   );
+
+  if (hideStats) {
+    return inner;
+  }
+
+  return <Link href={`/bracket/${entry.bracketId}`}>{inner}</Link>;
 }
 
