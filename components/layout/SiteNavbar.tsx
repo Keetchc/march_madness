@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { UserAvatar } from "@/components/UserAvatar";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { clsx } from "clsx";
@@ -33,7 +33,8 @@ export function SiteNavbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session, status } = useSession();
-  const authed = status === "authenticated" && session?.user;
+  // Rely on status, not session.user — JWT/client hydration can briefly omit user while still authenticated.
+  const authed = status === "authenticated";
   const user = session?.user;
   const isAdmin = Boolean((user as { isAdmin?: boolean } | undefined)?.isAdmin);
 
@@ -109,13 +110,13 @@ export function SiteNavbar() {
                 ⚡ Admin
               </Link>
             )}
-            {authed && user?.image && (
-              <Image
+            {authed && user && (
+              <UserAvatar
                 src={user.image}
-                alt={user.name ?? ""}
+                name={user.name ?? "User"}
                 width={32}
                 height={32}
-                className="rounded-full ring-2 ring-hardwood-600 w-7 h-7 sm:w-8 sm:h-8 ml-1"
+                className="ml-1 rounded-full ring-2 ring-hardwood-600 w-7 h-7 sm:w-8 sm:h-8"
               />
             )}
             {authed && (
@@ -143,10 +144,10 @@ export function SiteNavbar() {
           </nav>
 
           <div className="flex items-center gap-2 md:hidden flex-shrink-0">
-            {authed && user?.image && (
-              <Image
+            {authed && user && (
+              <UserAvatar
                 src={user.image}
-                alt={user.name ?? ""}
+                name={user.name ?? "User"}
                 width={28}
                 height={28}
                 className="rounded-full ring-2 ring-hardwood-600 w-7 h-7"

@@ -138,14 +138,21 @@ export function getAuthOptions(): NextAuthOptions {
       },
 
       async session({ session, token }) {
-        if (session.user) {
-          // Prefer explicit userId from sign-in; fall back to JWT `sub` (stable for Google) for older sessions.
-          (session.user as any).userId = (token.userId as string | undefined) ?? token.sub;
-          (session.user as any).isAdmin = Boolean(token.isAdmin);
-          const te = (token as { email?: string }).email;
-          if (typeof te === "string" && te) {
-            session.user.email = te;
-          }
+        if (!session.user) {
+          const tok = token as { name?: string; email?: string; picture?: string; image?: string };
+          session.user = {
+            name: tok.name ?? null,
+            email: tok.email ?? null,
+            image: tok.picture ?? tok.image ?? null,
+          };
+        }
+        // Prefer explicit userId from sign-in; fall back to JWT `sub` (stable for Google) for older sessions.
+        (session.user as { userId?: string }).userId =
+          (token.userId as string | undefined) ?? token.sub ?? "";
+        (session.user as { isAdmin?: boolean }).isAdmin = Boolean(token.isAdmin);
+        const te = (token as { email?: string }).email;
+        if (typeof te === "string" && te) {
+          session.user.email = te;
         }
         return session;
       },

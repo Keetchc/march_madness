@@ -7,6 +7,8 @@ import type { GroupMember } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+
 // POST /api/groups/join — join via invite token
 export async function POST(req: Request) {
   const { session, error } = await requireSession();
@@ -27,12 +29,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ group, alreadyMember: true });
   }
 
-  // Validate bracketId belongs to this user
+  // Validate bracketId belongs to this user and matches group tournament
   if (bracketId) {
     const userBrackets = await getBracketsByUser(userId);
     const owned = userBrackets.find((b) => b.bracketId === bracketId);
     if (!owned) {
       return NextResponse.json({ error: "Bracket not found or not yours" }, { status: 400 });
+    }
+    const groupTid = group.tournamentId ?? TOURNAMENT_ID;
+    if (owned.tournamentId !== groupTid) {
+      return NextResponse.json(
+        { error: "That bracket is for a different tournament than this group." },
+        { status: 400 }
+      );
     }
   }
 

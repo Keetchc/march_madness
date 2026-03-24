@@ -1,9 +1,13 @@
 "use client";
-import { useState, useMemo } from "react";
-import { ROUNDS_IN_ORDER, type Group, type LeaderboardEntry } from "@/lib/types";
-import Image from "next/image";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ROUNDS_IN_ORDER, type Bracket, type Group, type LeaderboardEntry } from "@/lib/types";
 import Link from "next/link";
 import { clsx } from "clsx";
+import {
+  PoolLeaderboardRow,
+  PoolLeaderboardTableHeaders,
+} from "@/components/leaderboard/PoolLeaderboardRow";
 import { CopyIcon, CheckIcon, RefreshCwIcon, TrophyIcon, LinkIcon, SettingsIcon, GitCompareIcon, LayoutGridIcon } from "lucide-react";
 
 interface GroupPageClientProps {
@@ -12,9 +16,12 @@ interface GroupPageClientProps {
   currentUserId: string;
   isGroupAdmin: boolean;
   isAppAdmin: boolean;
+  /** True when the signed-in user is a member but has not linked a bracket yet (e.g. group creator). */
+  needsBracket: boolean;
   /** When true, hide other members' scores / bracket names until picks lock (you still see your row). */
   maskOpponentStandings: boolean;
   gamesCompletedCount: number;
+  tournamentName?: string | null;
 }
 
 export function GroupPageClient({
@@ -23,14 +30,17 @@ export function GroupPageClient({
   currentUserId,
   isGroupAdmin,
   isAppAdmin,
+  needsBracket,
   maskOpponentStandings,
   gamesCompletedCount,
+  tournamentName,
 }: GroupPageClientProps) {
   const [inviteToken, setInviteToken] = useState(group.inviteToken);
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
-  const inviteUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/groups/join/${inviteToken}`;
+  /** Relative path only — matches SSR so hydration never differs from using `window.location.origin` in the UI. */
+  const invitePath = `/groups/join/${inviteToken}`;
 
   const canSeeEveryoneStats = !maskOpponentStandings || isGroupAdmin || isAppAdmin;
 
@@ -43,7 +53,8 @@ export function GroupPageClient({
   }, [leaderboard, canSeeEveryoneStats]);
 
   async function copyInvite() {
-    await navigator.clipboard.writeText(inviteUrl);
+    const absolute = `${window.location.origin}${invitePath}`;
+    await navigator.clipboard.writeText(absolute);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -113,7 +124,7 @@ export function GroupPageClient({
         </p>
         <div className="flex gap-2">
           <div className="flex-1 bg-hardwood-700 border border-hardwood-500 rounded-lg px-3 py-2 font-mono text-xs text-gray-400 truncate">
-            {inviteUrl}
+            {invitePath}
           </div>
           <button
             onClick={copyInvite}
@@ -135,41 +146,41 @@ export function GroupPageClient({
         </div>
       </div>
 
+      {needsBracket && <LinkYourBracketCard groupId={group.groupId} />}
+
       {/* Leaderboard */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
-          <TrophyIcon className="w-5 h-5 text-court-500" />
-          <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-white">
-            Standings
-          </h2>
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-1">
+            <TrophyIcon className="w-5 h-5 text-court-500" />
+            <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wide text-white">
+              Standings
+            </h2>
+          </div>
+          <p className="font-mono text-xs text-court-500 uppercase tracking-widest">
+            {tournamentName ?? "Tournament"}
+          </p>
+          <p className="text-gray-500 text-sm font-mono mt-1">
+            {gamesCompletedCount} games complete — {leaderboard.length} brackets in this group
+          </p>
         </div>
 
         {maskOpponentStandings && !canSeeEveryoneStats && (
           <p className="text-xs font-mono text-gray-500 mb-3 max-w-xl">
-            Until picks lock, you only see scores on your own row. Others appear with name only (no bracket title or stats).{" "}
-            {gamesCompletedCount === 0
-              ? "Scores stay at 0 until tournament games start finishing."
-              : "Scores use this group’s scoring rules as games finish."}
+            Before the first game goes final, other members’ scores and bracket titles stay hidden so nobody scouts early
+            entries. You always see your own row; once games start finishing, everyone’s standings match the pool.
+          </p>
+        )}
+
+        {!maskOpponentStandings && leaderboard.length > 0 && gamesCompletedCount === 0 && (
+          <p className="text-xs font-mono text-amber-600/90 mb-3 max-w-xl">
+            Picks are locked, but there are no finished games in this pool yet — scores stay at 0 until games are
+            marked final (e.g. ESPN sync / admin tools). Max points can still show from your remaining picks.
           </p>
         )}
 
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
-          {leaderboard.length > 0 && (
-            <>
-              <div className="hidden md:grid grid-cols-[3rem_1fr_5rem_5rem_5rem] gap-4 px-6 py-3 border-b border-hardwood-600 bg-hardwood-700">
-                <span className="font-mono text-xs text-gray-600 uppercase">#</span>
-                <span className="font-mono text-xs text-gray-600 uppercase">Player</span>
-                <span className="font-mono text-xs text-gray-600 uppercase text-right">Score</span>
-                <span className="font-mono text-xs text-gray-600 uppercase text-right">Max</span>
-                <span className="font-mono text-xs text-gray-600 uppercase text-right">Correct</span>
-              </div>
-              <div className="md:hidden px-4 py-2.5 border-b border-hardwood-600 bg-hardwood-700/80 grid grid-cols-3 gap-2 text-center">
-                <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Score</span>
-                <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Max</span>
-                <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Correct</span>
-              </div>
-            </>
-          )}
+          {leaderboard.length > 0 && <PoolLeaderboardTableHeaders />}
 
           {leaderboard.length === 0 ? (
             <div className="p-12 text-center text-gray-600 font-body">
@@ -177,13 +188,13 @@ export function GroupPageClient({
             </div>
           ) : (
             <div className="divide-y divide-hardwood-700">
-              {displayLeaderboard.map((entry, index) => (
-                <LeaderboardRow
+              {displayLeaderboard.map((entry) => (
+                <PoolLeaderboardRow
                   key={entry.bracketId}
                   entry={entry}
                   isCurrentUser={String(entry.userId) === String(currentUserId)}
-                  maskOthers={maskOpponentStandings && !canSeeEveryoneStats}
-                  displayRank={canSeeEveryoneStats ? entry.rank : index + 1}
+                  maskStats={maskOpponentStandings && !canSeeEveryoneStats}
+                  rankDisplay={entry.rank}
                 />
               ))}
             </div>
@@ -230,88 +241,85 @@ export function GroupPageClient({
   );
 }
 
-function LeaderboardRow({
-  entry,
-  isCurrentUser,
-  maskOthers,
-  displayRank,
-}: {
-  entry: LeaderboardEntry;
-  isCurrentUser: boolean;
-  maskOthers: boolean;
-  displayRank: number;
-}) {
-  const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
-  const hideStats = maskOthers && !isCurrentUser;
-  const bracketSubtitle = hideStats ? "Bracket submitted" : entry.bracketName;
-  const rowClass = clsx(
-    "flex flex-col gap-0 px-4 py-3 md:px-6 md:py-4 md:grid md:grid-cols-[3rem_1fr_5rem_5rem_5rem] md:gap-4 md:items-center",
-    "transition-colors",
-    hideStats ? "cursor-default" : "hover:bg-hardwood-700 cursor-pointer",
-    isCurrentUser && "bg-court-500/5 hover:bg-court-500/10"
-  );
+function LinkYourBracketCard({ groupId }: { groupId: string }) {
+  const router = useRouter();
+  const [brackets, setBrackets] = useState<Bracket[]>([]);
+  const [selected, setSelected] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
 
-  const inner = (
-    <div className={rowClass}>
-      <div className="flex items-center gap-3 min-w-0 pb-3 md:contents md:pb-0">
-        <span className="font-display text-lg md:text-xl font-black text-gray-400 w-8 shrink-0 text-center md:w-auto">
-          {maskOthers && !isCurrentUser ? "—" : medals[displayRank] ?? displayRank}
-        </span>
+  useEffect(() => {
+    fetch("/api/bracket")
+      .then((r) => r.json())
+      .then((d) => setBrackets(Array.isArray(d) ? d : []));
+  }, []);
 
-        <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
-          {entry.userPicture ? (
-            <Image src={entry.userPicture} alt={entry.userName} width={32} height={32} className="rounded-full flex-shrink-0" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-hardwood-600 flex-shrink-0" />
-          )}
-          <div className="min-w-0">
-            <p
-              className={clsx(
-                "font-display font-bold uppercase tracking-wide text-sm truncate",
-                isCurrentUser ? "text-court-400" : "text-white"
-              )}
-            >
-              {entry.userName}
-              {isCurrentUser && (
-                <span className="ml-2 text-[10px] text-court-600 normal-case font-mono">you</span>
-              )}
-            </p>
-            <p className="text-xs text-gray-600 font-body truncate">{bracketSubtitle}</p>
-          </div>
-        </div>
-      </div>
-
-      <div
-        className={clsx(
-          "grid grid-cols-3 gap-x-2 gap-y-1 text-center items-center md:contents",
-          "border-t border-hardwood-600/90 pt-3 mt-0",
-          "rounded-lg bg-hardwood-900/55 px-2 py-2.5 -mx-1 ring-1 ring-hardwood-600/40",
-          "md:mx-0 md:mt-0 md:pt-0 md:px-0 md:py-0 md:rounded-none md:border-t-0 md:bg-transparent md:ring-0"
-        )}
-      >
-        <div className="md:text-right">
-          <span className="font-mono text-lg md:text-xl font-bold text-white tabular-nums">
-            {hideStats ? "—" : entry.score}
-          </span>
-        </div>
-        <div className="md:text-right">
-          <span className="font-mono text-sm text-gray-500 tabular-nums">
-            {hideStats ? "—" : entry.maxPossibleScore}
-          </span>
-        </div>
-        <div className="md:text-right">
-          <span className="font-mono text-sm text-gray-400 tabular-nums">
-            {hideStats ? "—" : `${entry.correctPicks}/${entry.gamesDecidedCount}`}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-
-  if (hideStats) {
-    return inner;
+  async function link() {
+    if (!selected) return;
+    setBusy(true);
+    setErr("");
+    try {
+      const res = await fetch(`/api/groups/${groupId}/link-bracket`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bracketId: selected }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setErr(data.error ?? "Could not link bracket.");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setErr("Network error.");
+    } finally {
+      setBusy(false);
+    }
   }
 
-  return <Link href={`/bracket/${entry.bracketId}`}>{inner}</Link>;
+  return (
+    <div className="bg-court-500/10 border border-court-500/40 rounded-2xl p-5">
+      <h2 className="font-display font-bold uppercase tracking-wide text-court-400 text-sm mb-2">
+        Add your bracket
+      </h2>
+      <p className="text-xs text-gray-400 font-body mb-4 max-w-xl">
+        You&apos;re in this group but no bracket is linked to your entry yet — group creators start here too.
+        Pick an existing bracket or create one; you can also use the invite link flow (&quot;join now, add later&quot;)
+        for the same options.
+      </p>
+      {brackets.length > 0 ? (
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <select
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            className="flex-1 min-w-0 bg-hardwood-700 border border-hardwood-500 focus:border-court-500 rounded-lg px-4 py-2.5 text-white font-body text-sm outline-none transition-colors"
+          >
+            <option value="">-- Choose a bracket --</option>
+            {brackets.map((b) => (
+              <option key={b.bracketId} value={b.bracketId}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={link}
+            disabled={busy || !selected}
+            className="shrink-0 bg-court-500 hover:bg-court-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-display font-bold uppercase text-xs tracking-wide px-4 py-2.5 rounded-lg transition-colors"
+          >
+            {busy ? "Linking..." : "Link to group"}
+          </button>
+        </div>
+      ) : (
+        <p className="text-sm text-gray-500 font-body mb-3">You don&apos;t have any brackets in this pool yet.</p>
+      )}
+      <Link
+        href={`/bracket/new?returnTo=${encodeURIComponent(`/groups/${groupId}`)}`}
+        className="inline-block mt-3 text-sm font-semibold text-court-400 hover:text-court-300 transition-colors"
+      >
+        Create a new bracket →
+      </Link>
+      {err ? <p className="text-red-400 text-xs font-mono mt-3">{err}</p> : null}
+    </div>
+  );
 }
-

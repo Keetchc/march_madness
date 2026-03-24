@@ -88,9 +88,9 @@ export function PicksLockPanel({ tournament: initial, onSaved }: Props) {
           Bracket picks
         </h2>
         <p className="text-sm text-gray-500 font-body">
-          Control when players can create brackets and change picks. Tournament status is still{" "}
-          <span className="font-mono text-gray-400">{initial.status}</span> — this only affects the pick
-          window.
+          Control when players can create brackets and change picks. Tournament status (
+          <span className="font-mono text-gray-400">{initial.status}</span>) is separate — lock time alone
+          closes the pick window and unlocks group standings visibility.
         </p>
       </div>
 
@@ -113,8 +113,8 @@ export function PicksLockPanel({ tournament: initial, onSaved }: Props) {
             {override
               ? "Override is on — picks stay open until you turn it off."
               : previewClosed
-                ? "Lock time has passed (and status is not pending)."
-                : "Before picks close time, or tournament still pending."}
+                ? "Lock time has passed — picks are closed."
+                : "Before picks close time."}
           </p>
         </div>
       </div>

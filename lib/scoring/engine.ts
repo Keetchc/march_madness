@@ -7,7 +7,27 @@ import type {
   BracketStatus,
   CriticalGame,
   ScoringRules,
+  Picks,
 } from "../types";
+
+/** Dynamo / APIs may use different casing; scoring must treat completed games consistently. */
+export function isGameFinalStatus(status: Game["status"] | string | undefined): boolean {
+  return String(status ?? "").toLowerCase() === "final";
+}
+
+/** Normalize picks map (missing picks, non-string values, key types). */
+export function coerceBracketPicks(picks: Picks | undefined | null): Record<string, string> {
+  if (!picks || typeof picks !== "object") return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(picks)) {
+    if (typeof v === "string" && v.length > 0) out[String(k)] = v;
+  }
+  return out;
+}
+
+export function getPickForGame(picks: Record<string, string>, gameId: string): string | undefined {
+  return picks[gameId] ?? picks[String(gameId)];
+}
 
 const ROUND_BASE_POINTS: Record<Round, number> = {
   R64: 1,
@@ -63,7 +83,7 @@ export function compareResolvedPointsForPick(
   teams: Map<string, Team>,
   rules?: ScoringRules,
 ): number {
-  if (game.status !== "final" || !game.winnerId || pick !== game.winnerId) return 0;
+  if (!isGameFinalStatus(game.status) || !game.winnerId || pick !== game.winnerId) return 0;
   let pts = pointsForCorrectPick(game, pick, teams, rules);
   const champ = rules?.bonuses?.correctChampion ?? 0;
   if (game.round === "NCG" && champ > 0) {
@@ -82,7 +102,7 @@ export function comparePendingPotentialForPick(
   eliminatedTeams: Set<string>,
   rules?: ScoringRules,
 ): number {
-  if (game.status === "final" || !pick || eliminatedTeams.has(pick)) return 0;
+  if (isGameFinalStatus(game.status) || !pick || eliminatedTeams.has(pick)) return 0;
   let pts = maxPointsForAlivePick(game, pick, teams, rules);
   const champ = rules?.bonuses?.correctChampion ?? 0;
   if (game.round === "NCG" && champ > 0) {
@@ -109,6 +129,8 @@ export function scoreBracket(
   teams: Map<string, Team>,
   scoringRules?: ScoringRules,
 ): ScoreResult {
+  const picksMap = coerceBracketPicks(bracket.picks);
+
   const roundBreakdown: Record<Round, number> = {
     R64: 0, R32: 0, S16: 0, E8: 0, F4: 0, NCG: 0,
   };
@@ -117,8 +139,8 @@ export function scoreBracket(
   let correctPicks = 0;
   let totalCompletedGames = 0;
 
-  const completedGames = games.filter((g) => g.status === "final");
-  const pendingGames = games.filter((g) => g.status !== "final");
+  const completedGames = games.filter((g) => isGameFinalStatus(g.status));
+  const pendingGames = games.filter((g) => !isGameFinalStatus(g.status));
 
   // Build a set of eliminated team IDs (lost a game)
   const eliminatedTeams = new Set<string>();
@@ -132,7 +154,7 @@ export function scoreBracket(
     if (!game.winnerId) continue;
     totalCompletedGames++;
 
-    const userPick = bracket.picks[game.gameId];
+    const userPick = getPickForGame(picksMap, game.gameId);
     if (userPick === game.winnerId) {
       const pts = pointsForCorrectPick(game, userPick, teams, scoringRules);
 
@@ -144,8 +166,8 @@ export function scoreBracket(
 
   const champBonus = scoringRules?.bonuses?.correctChampion ?? 0;
   if (champBonus > 0) {
-    const ncg = completedGames.find((g) => g.round === "NCG" && g.status === "final" && g.winnerId);
-    if (ncg && bracket.picks[ncg.gameId] === ncg.winnerId) {
+    const ncg = completedGames.find((g) => g.round === "NCG" && isGameFinalStatus(g.status) && g.winnerId);
+    if (ncg && getPickForGame(picksMap, ncg.gameId) === ncg.winnerId) {
       score += champBonus;
       roundBreakdown.NCG += champBonus;
     }
@@ -154,7 +176,7 @@ export function scoreBracket(
   // Max possible: current score + potential points from remaining games
   let maxPossibleScore = score;
   for (const game of pendingGames) {
-    const userPick = bracket.picks[game.gameId];
+    const userPick = getPickForGame(picksMap, game.gameId);
     if (!userPick) continue;
 
     if (!eliminatedTeams.has(userPick)) {
@@ -165,7 +187,7 @@ export function scoreBracket(
   if (champBonus > 0) {
     const ncgPending = pendingGames.find((g) => g.round === "NCG");
     if (ncgPending) {
-      const p = bracket.picks[ncgPending.gameId];
+      const p = getPickForGame(picksMap, ncgPending.gameId);
       if (p && !eliminatedTeams.has(p)) {
         maxPossibleScore += champBonus;
       }
@@ -191,8 +213,8 @@ export function buildLeaderboard(
   teams: Map<string, Team>,
   scoringRules?: ScoringRules,
 ): LeaderboardEntry[] {
-  const completedGames = games.filter((g) => g.status === "final");
-  const pendingGames = games.filter((g) => g.status !== "final");
+  const completedGames = games.filter((g) => isGameFinalStatus(g.status));
+  const pendingGames = games.filter((g) => !isGameFinalStatus(g.status));
 
   const eliminatedTeams = new Set<string>();
   for (const game of completedGames) {
@@ -291,30 +313,56 @@ function computeCriticalGames(
   teams: Map<string, Team>,
   scoringRules?: ScoringRules,
 ): CriticalGame[] {
-  if (entryIndex === 0) return [];
-
   const myBracket = bracketMap.get(entry.bracketId);
   if (!myBracket) return [];
 
-  const gapToLeader = entries[0].score - entry.score;
-  if (gapToLeader <= 0) return [];
+  const myPicks = coerceBracketPicks(myBracket.picks);
+  const leaderScore = entries.length > 0 ? entries[0].score : 0;
+  const myScore = entry.score;
 
-  const aheadRivals = entries.slice(0, entryIndex);
+  const otherCoLeaders = entries.filter(
+    (_, j) => j !== entryIndex && entries[j].score === leaderScore,
+  );
+  const tiedForFirst = myScore === leaderScore && otherCoLeaders.length > 0;
+
+  let rivalPicksList: (Record<string, string> | null)[];
+  /** Points “behind” the comparison set; for ties we use 1 so must-have highlights still apply. */
+  let gapForMustHave: number;
+
+  if (tiedForFirst) {
+    rivalPicksList = otherCoLeaders.map((rival) => {
+      const rb = bracketMap.get(rival.bracketId);
+      return rb ? coerceBracketPicks(rb.picks) : null;
+    });
+    gapForMustHave = 1;
+  } else {
+    if (entryIndex === 0) return [];
+    gapForMustHave = leaderScore - myScore;
+    if (gapForMustHave <= 0) return [];
+
+    const aheadRivals = entries.slice(0, entryIndex);
+    rivalPicksList = aheadRivals.map((rival) => {
+      const rb = bracketMap.get(rival.bracketId);
+      return rb ? coerceBracketPicks(rb.picks) : null;
+    });
+  }
+
   const games: CriticalGame[] = [];
 
   for (const game of pendingGames) {
-    const myPick = myBracket.picks[game.gameId];
+    const myPick = getPickForGame(myPicks, game.gameId);
     if (!myPick || eliminatedTeams.has(myPick)) continue;
 
     const pickedTeam = teams.get(myPick);
     const potentialPoints = maxPointsForAlivePick(game, myPick, teams, scoringRules);
-    const rivalsAheadWithDifferentPick = aheadRivals.reduce((count, rival) => {
-      const rivalBracket = bracketMap.get(rival.bracketId);
-      if (!rivalBracket) return count;
-      return rivalBracket.picks[game.gameId] !== myPick ? count + 1 : count;
+    const rivalsAheadWithDifferentPick = rivalPicksList.reduce((count, rp) => {
+      if (!rp) return count;
+      return getPickForGame(rp, game.gameId) !== myPick ? count + 1 : count;
     }, 0);
 
-    // Weight by how many brackets above them can lose relative ground.
+    if (tiedForFirst && rivalsAheadWithDifferentPick === 0) continue;
+
+    // Weight by how many rivals in the comparison set disagree on this game.
     const swingScore = potentialPoints * (1 + rivalsAheadWithDifferentPick * 0.6);
     games.push({
       gameId: game.gameId,
@@ -332,7 +380,7 @@ function computeCriticalGames(
 
   let covered = 0;
   for (const game of games) {
-    if (covered < gapToLeader) {
+    if (covered < gapForMustHave) {
       game.isMustHave = true;
       covered += game.potentialPoints;
     }
@@ -363,6 +411,7 @@ function computeStatusAgainstField(
   scoringRules?: ScoringRules,
 ): BracketStatus {
   const myBracket = bracketMap.get(entry.bracketId)!;
+  const myPicks = coerceBracketPicks(myBracket.picks);
   let tightestCushion = Infinity;
   let tightestGap = 0;
 
@@ -372,11 +421,12 @@ function computeStatusAgainstField(
     if (gap <= 0) continue;
 
     const rivalBracket = bracketMap.get(rival.bracketId)!;
+    const rivalPicks = coerceBracketPicks(rivalBracket.picks);
     let bestCaseGain = 0;
 
     for (const game of pendingGames) {
-      const myPick = myBracket.picks[game.gameId];
-      const rivalPick = rivalBracket.picks[game.gameId];
+      const myPick = getPickForGame(myPicks, game.gameId);
+      const rivalPick = getPickForGame(rivalPicks, game.gameId);
 
       if (!myPick || myPick === rivalPick) continue;
       if (eliminatedTeams.has(myPick)) continue;

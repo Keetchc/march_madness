@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { BracketView } from "@/components/bracket/BracketView";
 import type { Game, Team, Picks, Tournament } from "@/lib/types";
 import { projectPicksOntoGames } from "@/lib/bracket-utils";
+import { picksClosedByTournament } from "@/lib/picks-lock";
 import { SaveIcon, LockIcon, RefreshCwIcon } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -54,9 +55,7 @@ export function BracketPageClient({
   const isOwner =
     resolvedViewerId !== "" &&
     String(resolvedViewerId) === String(bracketUserId);
-  const lockedBySchedule = tournament
-    ? new Date() > new Date(tournament.lockDate) && tournament.status !== "pending"
-    : false;
+  const lockedBySchedule = tournament ? picksClosedByTournament(tournament) : false;
   const picksOpenByAdmin = tournament?.picksOpenOverride === true;
   const isLocked = picksOpenByAdmin ? false : lockedBySchedule;
   const canEdit = isOwner && !isLocked;

@@ -1,9 +1,12 @@
 import type { Tournament } from "./types";
 
-/** True if lockDate has passed and tournament is not still in `pending` (pre-event) status. */
+/**
+ * True after the configured picks-close time. Does not use `tournament.status` — seeded pools often
+ * stay `pending` until tipoff; admins only set `lockDate` in /admin, and that must drive lock behavior.
+ */
 export function picksClosedByTournament(tournament: Tournament | null | undefined): boolean {
   if (!tournament) return false;
-  return new Date() > new Date(tournament.lockDate) && tournament.status !== "pending";
+  return new Date() > new Date(tournament.lockDate);
 }
 
 /** True when players cannot create or edit brackets (honours `picksOpenOverride` on the tournament). */

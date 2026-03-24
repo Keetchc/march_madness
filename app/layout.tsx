@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
 import "./globals.css";
 import { Providers } from "./providers";
+import { getAuthOptions } from "@/lib/auth";
 import { hydrateAuthEnvFromDisk } from "@/lib/hydrate-auth-env";
 import { serverEnv } from "@/lib/server-env";
 
@@ -48,7 +50,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(getAuthOptions());
+
   return (
     <html lang="en" className="dark">
       <head>
@@ -60,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-hardwood-900 text-white font-body antialiased">
-        <Providers>{children}</Providers>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   );

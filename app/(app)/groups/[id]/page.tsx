@@ -5,7 +5,8 @@ import { getGroup, getGroupMembers, getGroupMembership } from "@/lib/dynamo/quer
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
-import { buildLeaderboard } from "@/lib/scoring/engine";
+import { buildLeaderboard, isGameFinalStatus } from "@/lib/scoring/engine";
+import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import type { Bracket } from "@/lib/types";
 import { GroupPageClient } from "./GroupPageClient";
@@ -27,13 +28,17 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
     redirect("/dashboard");
   }
 
+  const bracketLinked = String(membership?.bracketId ?? "").trim();
+  const needsBracket =
+    (group.adminUserId === userId || Boolean(membership)) && !bracketLinked;
+
   const members = await getGroupMembers(params.id);
 
   const bracketIds = members.map((m) => m.bracketId).filter(Boolean);
   const bracketsRaw = await Promise.all(bracketIds.map((id) => getBracket(id)));
   const brackets = bracketsRaw.filter((b): b is Bracket => b != null);
 
-  const tid = group.tournamentId ?? TOURNAMENT_ID;
+  const tid = scoringTournamentIdForGroup(group.tournamentId, brackets, TOURNAMENT_ID);
   const [games, teams, tournament] = await Promise.all([
     getAllGames(tid),
     getAllTeams(tid),
@@ -61,6 +66,9 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   const leaderboard = buildLeaderboard(brackets, usersMap, games, teamsMap, group.scoringRules);
 
   const standingsLocked = picksEffectivelyClosed(tournament);
+  const gamesCompletedCount = games.filter((g) => isGameFinalStatus(g.status)).length;
+  /** Match public leaderboard visibility: hide others’ stats only before the tournament starts (no finals yet). */
+  const maskOpponentStandings = !standingsLocked && gamesCompletedCount === 0;
 
   return (
     <GroupPageClient
@@ -69,8 +77,10 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
       currentUserId={userId}
       isGroupAdmin={group.adminUserId === userId || isAppAdmin}
       isAppAdmin={isAppAdmin}
-      maskOpponentStandings={!standingsLocked}
-      gamesCompletedCount={games.filter((g) => g.status === "final").length}
+      needsBracket={needsBracket}
+      maskOpponentStandings={maskOpponentStandings}
+      gamesCompletedCount={gamesCompletedCount}
+      tournamentName={tournament?.name}
     />
   );
 }

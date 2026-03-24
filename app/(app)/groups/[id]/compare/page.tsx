@@ -8,6 +8,7 @@ import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { scoreBracket } from "@/lib/scoring/engine";
+import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { ROUNDS_IN_ORDER, type Bracket } from "@/lib/types";
 import { computeBracketCompareDiffs, type CompareDiffGame } from "@/lib/compare-brackets";
 
@@ -40,7 +41,7 @@ export default async function GroupComparePage({
   const bracketIds = members.map((m) => m.bracketId).filter(Boolean);
   const brackets = (await Promise.all(bracketIds.map((id) => getBracket(id)))).filter(Boolean) as Bracket[];
 
-  const tid = group.tournamentId ?? TOURNAMENT_ID;
+  const tid = scoringTournamentIdForGroup(group.tournamentId, brackets, TOURNAMENT_ID);
   const [games, teams, tournament] = await Promise.all([
     getAllGames(tid),
     getAllTeams(tid),

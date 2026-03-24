@@ -1,5 +1,11 @@
 import type { Bracket, Game, Round, Team, ScoringRules } from "./types";
-import { comparePendingPotentialForPick, compareResolvedPointsForPick } from "./scoring/engine";
+import {
+  comparePendingPotentialForPick,
+  compareResolvedPointsForPick,
+  coerceBracketPicks,
+  getPickForGame,
+  isGameFinalStatus,
+} from "./scoring/engine";
 
 export type CompareDiffGame = {
   gameId: string;
@@ -15,7 +21,7 @@ export type CompareDiffGame = {
 export function buildEliminatedTeams(games: Game[]): Set<string> {
   const eliminated = new Set<string>();
   for (const game of games) {
-    if (game.status !== "final" || !game.winnerId) continue;
+    if (!isGameFinalStatus(game.status) || !game.winnerId) continue;
     if (game.team1Id && game.team1Id !== game.winnerId) eliminated.add(game.team1Id);
     if (game.team2Id && game.team2Id !== game.winnerId) eliminated.add(game.team2Id);
   }
@@ -40,6 +46,8 @@ export function computeBracketCompareDiffs(
   pendingPotentialA: number;
   pendingPotentialB: number;
 } {
+  const picksA = coerceBracketPicks(bracketA.picks);
+  const picksB = coerceBracketPicks(bracketB.picks);
   const eliminatedTeams = buildEliminatedTeams(games);
   const diffs: CompareDiffGame[] = [];
   const roundDiffCounts: Record<Round, number> = {
@@ -57,15 +65,15 @@ export function computeBracketCompareDiffs(
   let pendingPotentialB = 0;
 
   for (const game of games) {
-    const aPick = bracketA.picks[game.gameId];
-    const bPick = bracketB.picks[game.gameId];
+    const aPick = getPickForGame(picksA, game.gameId);
+    const bPick = getPickForGame(picksB, game.gameId);
     if (!aPick || !bPick || aPick === bPick) continue;
 
     roundDiffCounts[game.round] += 1;
     const aTeam = teamsMap.get(aPick);
     const bTeam = teamsMap.get(bPick);
 
-    if (game.status === "final") {
+    if (isGameFinalStatus(game.status)) {
       const aPoints = compareResolvedPointsForPick(game, aPick, teamsMap, scoringRules);
       const bPoints = compareResolvedPointsForPick(game, bPick, teamsMap, scoringRules);
       if (aPoints > bPoints) resolvedWinsA += 1;

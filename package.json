@@ -7,6 +7,7 @@
     "predev": "node scripts/predev-sync.mjs",
     "dev:sync": "npm run pull-dev-to-local && next dev",
     "pull-dev-to-local": "ts-node --project tsconfig.scripts.json scripts/pull-dynamo-dev-to-local.ts",
+    "push-local-to-dev": "ts-node --project tsconfig.scripts.json scripts/push-local-to-dev.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -14,7 +15,9 @@
     "setup:dev-tables": "ts-node --project tsconfig.scripts.json scripts/create-tables.ts --prefix=mm-dev",
     "clone-dynamo-to-dev": "ts-node --project tsconfig.scripts.json scripts/clone-dynamo-tables.ts",
     "seed": "ts-node --project tsconfig.scripts.json scripts/seed-tournament.ts",
-    "poll": "ts-node --project tsconfig.scripts.json scripts/poll-espn.ts"
+    "poll": "ts-node --project tsconfig.scripts.json scripts/poll-espn.ts",
+    "inspect-bracket": "ts-node --project tsconfig.scripts.json scripts/inspect-bracket-picks.ts",
+    "backfill-bracket-finals": "ts-node --project tsconfig.scripts.json scripts/backfill-bracket-picks-from-finals.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.540.0",

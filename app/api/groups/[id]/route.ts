@@ -16,6 +16,7 @@ import { getBracket, getBracketsByTournament } from "@/lib/dynamo/queries/bracke
 import { getAllGames, getAllTeams } from "@/lib/dynamo/queries/games";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { buildLeaderboard } from "@/lib/scoring/engine";
+import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { v4 as uuidv4 } from "uuid";
 
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
@@ -46,7 +47,7 @@ export async function GET(
   const brackets = await Promise.all(bracketIds.map((id) => getBracket(id)));
   const validBrackets = brackets.filter(Boolean) as NonNullable<Awaited<ReturnType<typeof getBracket>>>[];
 
-  const tid = group.tournamentId ?? TOURNAMENT_ID;
+  const tid = scoringTournamentIdForGroup(group.tournamentId, validBrackets, TOURNAMENT_ID);
   const [games, teams] = await Promise.all([getAllGames(tid), getAllTeams(tid)]);
 
   const userIdSet = new Set<string>();

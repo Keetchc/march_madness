@@ -135,6 +135,21 @@ export async function updateMemberScore(
   );
 }
 
+export async function updateMemberBracketId(
+  groupId: string,
+  userId: string,
+  bracketId: string
+): Promise<void> {
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: TABLES.GROUPS,
+      Key: { pk: `GROUP#${groupId}`, sk: `MEMBER#${userId}` },
+      UpdateExpression: "SET bracketId = :b",
+      ExpressionAttributeValues: { ":b": bracketId },
+    })
+  );
+}
+
 export async function removeMember(groupId: string, userId: string): Promise<void> {
   await dynamo.send(
     new DeleteCommand({

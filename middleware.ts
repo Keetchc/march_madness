@@ -26,6 +26,8 @@ function isPublicPagePath(pathname: string): boolean {
   for (const p of PUBLIC_PAGE_PREFIXES) {
     if (pathname === p || pathname.startsWith(`${p}/`)) return true;
   }
+  // Invite links: show group name before sign-in; joining still requires auth on the client
+  if (pathname.startsWith("/groups/join/")) return true;
   // View any bracket by id (share links); keep /bracket and /bracket/new behind auth
   if (pathname.startsWith("/bracket/") && !pathname.startsWith("/bracket/new")) return true;
   return false;
@@ -36,6 +38,7 @@ function isPublicApiGet(pathname: string, method: string): boolean {
   if (method !== "GET") return false;
   if (pathname === "/api/tournament") return true;
   if (/^\/api\/bracket\/[^/]+$/.test(pathname)) return true;
+  if (/^\/api\/groups\/invite\/[^/]+$/.test(pathname)) return true;
   return false;
 }
 
