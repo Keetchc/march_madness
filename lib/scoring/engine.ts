@@ -1,4 +1,13 @@
-import type { Bracket, Game, Team, Round, LeaderboardEntry, BracketStatus, CriticalGame } from "../types";
+import {
+  ROUNDS_IN_ORDER,
+  type Bracket,
+  type Game,
+  type Team,
+  type Round,
+  type LeaderboardEntry,
+  type BracketStatus,
+  type CriticalGame,
+} from "../types";
 
 const ROUND_BASE_POINTS: Record<Round, number> = {
   R64: 1,
@@ -8,6 +17,10 @@ const ROUND_BASE_POINTS: Record<Round, number> = {
   F4: 14,
   NCG: 22,
 };
+
+function pickForGame(picks: Bracket["picks"], gameId: string): string | undefined {
+  return picks[gameId] ?? picks[String(gameId)];
+}
 
 interface ScoreResult {
   score: number;
@@ -119,6 +132,8 @@ export function buildLeaderboard(
       gamesDecidedCount: result.totalCompletedGames,
       status: "alive" as BracketStatus,
       criticalGames: [],
+      nextSliceRound: null,
+      nextSliceCriticalGames: [],
     };
   });
 
@@ -192,7 +207,89 @@ export function buildLeaderboard(
     }
   }
 
+  const nextSliceRound = firstRoundWithPendingGames(games);
+  const slicePendingGames =
+    nextSliceRound != null ? pendingGames.filter((g) => g.round === nextSliceRound) : [];
+
+  for (let i = 0; i < entries.length; i++) {
+    entries[i].nextSliceRound = nextSliceRound;
+    entries[i].nextSliceCriticalGames =
+      slicePendingGames.length > 0
+        ? computeNextSliceCriticalGames(
+            entries[i],
+            entries,
+            bracketMap,
+            slicePendingGames,
+            eliminatedTeams,
+            teams,
+          )
+        : [];
+  }
+
   return entries;
+}
+
+function firstRoundWithPendingGames(allGames: Game[]): Round | null {
+  for (const r of ROUNDS_IN_ORDER) {
+    if (allGames.some((g) => g.round === r && g.status !== "final")) {
+      return r;
+    }
+  }
+  return null;
+}
+
+/** Pending games in the “next” open round vs everyone else in this leaderboard (not only people ahead of you). */
+function computeNextSliceCriticalGames(
+  entry: LeaderboardEntry,
+  entries: LeaderboardEntry[],
+  bracketMap: Map<string, Bracket>,
+  slicePendingGames: Game[],
+  eliminatedTeams: Set<string>,
+  teams: Map<string, Team>,
+): CriticalGame[] {
+  if (slicePendingGames.length === 0) return [];
+
+  const myBracket = bracketMap.get(entry.bracketId);
+  if (!myBracket) return [];
+
+  const otherPicksList = entries
+    .filter((e) => e.bracketId !== entry.bracketId)
+    .map((e) => bracketMap.get(e.bracketId));
+
+  const out: CriticalGame[] = [];
+
+  for (const game of slicePendingGames) {
+    const myPick = pickForGame(myBracket.picks, game.gameId);
+    if (!myPick || eliminatedTeams.has(myPick)) continue;
+
+    const pickedTeam = teams.get(myPick);
+    const potentialPoints = ROUND_BASE_POINTS[game.round] * (pickedTeam?.seed ?? 1);
+
+    let rivalsWithDifferentPick = 0;
+    for (const b of otherPicksList) {
+      if (!b) continue;
+      const theirPick = pickForGame(b.picks, game.gameId);
+      if (!theirPick) continue;
+      if (theirPick !== myPick) rivalsWithDifferentPick++;
+    }
+
+    if (entries.length > 1 && rivalsWithDifferentPick === 0) continue;
+
+    const swingScore = potentialPoints * (1 + rivalsWithDifferentPick * 0.6);
+    out.push({
+      gameId: game.gameId,
+      round: game.round,
+      teamId: myPick,
+      teamName: pickedTeam?.shortName ?? pickedTeam?.name ?? "TBD",
+      potentialPoints,
+      swingScore: Math.round(swingScore * 10) / 10,
+      rivalsAheadWithDifferentPick: rivalsWithDifferentPick,
+      isMustHave: false,
+    });
+  }
+
+  out.sort((a, b) => b.swingScore - a.swingScore);
+  return out.slice(0, 5);
 }
 
 /** Remaining picks with the most points at stake and the most disagreement with the rest of the field. */
