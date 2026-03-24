@@ -4,7 +4,7 @@ import type { Group, LeaderboardEntry } from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
 import { clsx } from "clsx";
-import { CopyIcon, CheckIcon, RefreshCwIcon, TrophyIcon, LinkIcon, SettingsIcon } from "lucide-react";
+import { CopyIcon, CheckIcon, RefreshCwIcon, TrophyIcon, LinkIcon, SettingsIcon, GitCompareIcon, LayoutGridIcon } from "lucide-react";
 
 interface GroupPageClientProps {
   group: Group;
@@ -51,15 +51,31 @@ export function GroupPageClient({ group, leaderboard, currentUserId, isGroupAdmi
             {group.name}
           </h1>
         </div>
-        {isGroupAdmin && (
+        <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={`/groups/${group.groupId}/settings`}
+            href={`/groups/${group.groupId}/brackets`}
             className="flex items-center gap-2 bg-hardwood-700 hover:bg-hardwood-600 border border-hardwood-500 text-gray-300 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
           >
-            <SettingsIcon className="w-4 h-4" />
-            Settings
+            <LayoutGridIcon className="w-4 h-4" />
+            All brackets
           </Link>
-        )}
+          <Link
+            href={`/groups/${group.groupId}/compare`}
+            className="flex items-center gap-2 bg-hardwood-700 hover:bg-hardwood-600 border border-hardwood-500 text-gray-300 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          >
+            <GitCompareIcon className="w-4 h-4" />
+            Compare
+          </Link>
+          {isGroupAdmin && (
+            <Link
+              href={`/groups/${group.groupId}/settings`}
+              className="flex items-center gap-2 bg-hardwood-700 hover:bg-hardwood-600 border border-hardwood-500 text-gray-300 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+            >
+              <SettingsIcon className="w-4 h-4" />
+              Settings
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Invite link card */}

@@ -18,8 +18,6 @@ function nextAuthSecretForEdge(): string | undefined {
 
 const PUBLIC_PAGE_PREFIXES = [
   "/leaderboard",
-  "/compare",
-  "/brackets",
   "/rules",
   "/official-bracket",
 ] as const;

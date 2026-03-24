@@ -10,8 +10,6 @@ import { Menu, X } from "lucide-react";
 
 const PUBLIC_LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/compare", label: "Compare" },
-  { href: "/brackets", label: "All Brackets" },
   { href: "/official-bracket", label: "Official Bracket" },
   { href: "/rules", label: "Rules" },
 ] as const;

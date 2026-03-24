@@ -57,12 +57,9 @@ export default async function PublicLeaderboardPage() {
         <p className="text-gray-500 text-sm font-mono mt-1">
           {completedGames} games complete -- {brackets.length} brackets
         </p>
-        <Link
-          href="/compare"
-          className="inline-flex mt-3 text-xs font-mono text-court-400 hover:text-court-300 transition-colors"
-        >
-          Compare any two brackets →
-        </Link>
+        <p className="text-gray-600 text-xs font-mono mt-3 max-w-md">
+          Pool-wide view. To browse or compare picks with your crew, open a group from your dashboard.
+        </p>
       </div>
 
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
