@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getGame, getAllTeams, getTournament, setGameResult, advanceWinner } from "@/lib/dynamo/queries/games";
 import { getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
-import { getUser } from "@/lib/dynamo/queries/users";
+import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import type { GamePicksResponse } from "@/lib/types";
 
@@ -31,13 +31,13 @@ export async function GET(
         const pickedTeamId = bracket.picks[game.gameId];
         if (!pickedTeamId) return null;
 
-        const user = await getUser(bracket.userId);
+        const user = await resolveUserDisplayProfile(bracket.userId);
         const pickedTeam = teamMap.get(pickedTeamId);
 
         return {
           userId: bracket.userId,
-          userName: user?.name ?? "Unknown",
-          userPicture: user?.picture ?? "",
+          userName: user.name,
+          userPicture: user.picture,
           pickedTeamId,
           pickedTeamName: pickedTeam?.name ?? "Unknown",
           isCorrect:

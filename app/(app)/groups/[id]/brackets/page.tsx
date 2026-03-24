@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getGroup, getGroupMembers, getGroupMembership } from "@/lib/dynamo/queries/groups";
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
-import { getUser } from "@/lib/dynamo/queries/users";
+import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import type { Bracket } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -37,8 +37,8 @@ export default async function GroupBracketsPage({ params }: { params: { id: stri
 
   const enriched = await Promise.all(
     brackets.map(async (b) => {
-      const user = await getUser(b.userId);
-      return { ...b, userName: user?.name ?? "Unknown" };
+      const user = await resolveUserDisplayProfile(b.userId);
+      return { ...b, userName: user.name };
     })
   );
 

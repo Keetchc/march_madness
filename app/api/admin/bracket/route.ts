@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { upsertUser } from "@/lib/dynamo/queries/users";
-import { getUser } from "@/lib/dynamo/queries/users";
+import { upsertUser, resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { createBracket, getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { v4 as uuidv4 } from "uuid";
 
@@ -22,12 +21,12 @@ export async function GET() {
 
   const enriched = await Promise.all(
     brackets.map(async (b) => {
-      const user = await getUser(b.userId);
+      const user = await resolveUserDisplayProfile(b.userId);
       return {
         bracketId: b.bracketId,
         userId: b.userId,
         name: b.name,
-        userName: user?.name ?? b.userId,
+        userName: user.name !== "Unknown" ? user.name : b.userId,
         pickCount: Object.keys(b.picks).length,
       };
     })

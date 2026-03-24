@@ -22,8 +22,7 @@ function parsePrefixFromArgv(): string | undefined {
 async function main() {
   const prefix =
     parsePrefixFromArgv() ??
-    process.env.DYNAMO_TABLE_PREFIX?.trim() ||
-    "mm";
+    (process.env.DYNAMO_TABLE_PREFIX?.trim() || "mm");
 
   console.log(`🏀 Setting up DynamoDB tables (prefix: ${prefix})...\n`);
 

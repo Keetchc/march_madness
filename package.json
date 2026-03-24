@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "node scripts/predev-sync.mjs",
+    "dev:sync": "npm run pull-dev-to-local && next dev",
+    "pull-dev-to-local": "ts-node --project tsconfig.scripts.json scripts/pull-dynamo-dev-to-local.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -17,15 +20,15 @@
     "@aws-sdk/client-dynamodb": "^3.540.0",
     "@aws-sdk/lib-dynamodb": "^3.540.0",
     "@next-auth/dynamodb-adapter": "^1.2.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "lucide-react": "^0.378.0",
     "next": "14.2.3",
     "next-auth": "^4.24.7",
     "react": "^18",
     "react-dom": "^18",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^2.3.0",
-    "lucide-react": "^0.378.0",
-    "uuid": "^9.0.1",
-    "date-fns": "^3.6.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -33,10 +36,10 @@
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.0.1",
+    "dotenv": "^17.3.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
-

@@ -1,5 +1,5 @@
 import { getBracket } from "@/lib/dynamo/queries/brackets";
-import { getUser } from "@/lib/dynamo/queries/users";
+import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -28,8 +28,8 @@ export default async function PublicBracketPage({ params }: { params: { id: stri
     sessionUserId !== "" && String(sessionUserId).trim() === String(bracket.userId).trim();
   const picksHiddenUntilLock = !picksClosed && !isOwner && !isAppAdmin;
 
-  const user = await getUser(bracket.userId);
-  const displayName = user?.name ? `${user.name}'s Bracket` : bracket.name;
+  const { name } = await resolveUserDisplayProfile(bracket.userId);
+  const displayName = name !== "Unknown" ? `${name}'s Bracket` : bracket.name;
 
   const lockHint = tournament?.lockDate
     ? `Picks become visible to the group after lock (${new Date(tournament.lockDate).toLocaleString()}).`

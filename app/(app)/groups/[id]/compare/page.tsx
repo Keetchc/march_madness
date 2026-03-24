@@ -6,7 +6,7 @@ import { redirect, notFound } from "next/navigation";
 import { getGroup, getGroupMembers, getGroupMembership } from "@/lib/dynamo/queries/groups";
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
-import { getUser } from "@/lib/dynamo/queries/users";
+import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { scoreBracket } from "@/lib/scoring/engine";
 import { ROUNDS_IN_ORDER, type Bracket } from "@/lib/types";
 import { computeBracketCompareDiffs, type CompareDiffGame } from "@/lib/compare-brackets";
@@ -50,8 +50,8 @@ export default async function GroupComparePage({
   const usersMap = new Map(
     await Promise.all(
       brackets.map(async (b) => {
-        const u = await getUser(b.userId);
-        return [b.userId, { name: u?.name ?? "Unknown" }] as const;
+        const u = await resolveUserDisplayProfile(b.userId);
+        return [b.userId, { name: u.name }] as const;
       })
     )
   );

@@ -14,7 +14,7 @@ import {
 } from "@/lib/dynamo/queries/groups";
 import { getBracket, getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams } from "@/lib/dynamo/queries/games";
-import { getUser } from "@/lib/dynamo/queries/users";
+import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { buildLeaderboard } from "@/lib/scoring/engine";
 import { v4 as uuidv4 } from "uuid";
 
@@ -59,8 +59,8 @@ export async function GET(
 
   const userRecords = await Promise.all(
     Array.from(userIdSet).map(async (uid) => {
-      const u = await getUser(uid);
-      return [uid, { name: u?.name ?? "Unknown", picture: u?.picture ?? "" }] as const;
+      const u = await resolveUserDisplayProfile(uid);
+      return [uid, { name: u.name, picture: u.picture }] as const;
     })
   );
   const usersMap = new Map(userRecords);
