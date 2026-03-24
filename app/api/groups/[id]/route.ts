@@ -58,7 +58,7 @@ export async function GET(
   }
 
   const userRecords = await Promise.all(
-    [...userIdSet].map(async (uid) => {
+    Array.from(userIdSet).map(async (uid) => {
       const u = await getUser(uid);
       return [uid, { name: u?.name ?? "Unknown", picture: u?.picture ?? "" }] as const;
     })
