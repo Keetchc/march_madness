@@ -5,7 +5,8 @@ import { getGroup, getGroupMembership } from "@/lib/dynamo/queries/groups";
 import { isGroupAdmin } from "@/lib/group-permissions";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { GroupAreaShell } from "@/components/groups/GroupAreaShell";
-import { defaultTournamentId } from "@/lib/viewing-tournament";
+import { defaultTournamentId, getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
+import { SeasonMismatchNotice } from "@/components/tournament/SeasonMismatchNotice";
 
 export default async function GroupSectionLayout({
   children,
@@ -28,9 +29,23 @@ export default async function GroupSectionLayout({
     redirect("/dashboard");
   }
 
+  const viewingId = await getViewingTournamentIdFromCookies();
   const fallback = defaultTournamentId();
-  const tid = (group.tournamentId ?? fallback).trim() || fallback;
-  const tournament = await getTournament(tid);
+  const groupTid = (group.tournamentId ?? fallback).trim() || fallback;
+  if (groupTid !== viewingId.trim()) {
+    return (
+      <div className="container mx-auto px-3 sm:px-5 md:px-6 max-w-[min(100%,2000px)] py-6">
+        <SeasonMismatchNotice
+          kind="group"
+          resourceTitle={group.name}
+          resourceTournamentId={groupTid}
+          viewingTournamentId={viewingId.trim()}
+        />
+      </div>
+    );
+  }
+
+  const tournament = await getTournament(groupTid);
   const tournamentLockPick = tournament
     ? { lockDate: tournament.lockDate, picksOpenOverride: tournament.picksOpenOverride }
     : undefined;

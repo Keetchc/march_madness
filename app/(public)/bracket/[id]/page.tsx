@@ -9,7 +9,8 @@ import { getUserId } from "@/lib/session";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { BracketPageClient } from "@/app/(app)/bracket/[id]/BracketPageClient";
-import { defaultTournamentId } from "@/lib/viewing-tournament";
+import { defaultTournamentId, getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
+import { SeasonMismatchNotice } from "@/components/tournament/SeasonMismatchNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,19 @@ export default async function PublicBracketPage({
 }) {
   const bracket = await getBracket(params.id);
   if (!bracket) notFound();
+
+  const viewingId = await getViewingTournamentIdFromCookies();
+  const bracketTid = (bracket.tournamentId ?? DEFAULT_TOURNAMENT_ID).trim();
+  if (bracketTid !== viewingId.trim()) {
+    return (
+      <SeasonMismatchNotice
+        kind="bracket"
+        resourceTitle={bracket.name}
+        resourceTournamentId={bracketTid}
+        viewingTournamentId={viewingId.trim()}
+      />
+    );
+  }
 
   const session = await getServerSession(getAuthOptions());
   const sessionUserId = session?.user ? (getUserId(session) ?? "") : "";
