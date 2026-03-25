@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
+import { resolveTournamentIdFromRequestUrl } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
 
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
-
-export async function GET() {
+export async function GET(req: Request) {
+  const tournamentId = resolveTournamentIdFromRequestUrl(req);
   const [tournament, games, teams] = await Promise.all([
-    getTournament(TOURNAMENT_ID),
-    getAllGames(TOURNAMENT_ID),
-    getAllTeams(TOURNAMENT_ID),
+    getTournament(tournamentId),
+    getAllGames(tournamentId),
+    getAllTeams(tournamentId),
   ]);
 
   if (!tournament) {

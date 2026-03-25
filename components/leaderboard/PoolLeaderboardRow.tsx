@@ -19,12 +19,16 @@ export function StatusBadge({ status }: { status: BracketStatus }) {
   );
 }
 
-export function PoolLeaderboardTableHeaders() {
+export function PoolLeaderboardTableHeaders({
+  identityColumnLabel = "Player",
+}: {
+  identityColumnLabel?: string;
+} = {}) {
   return (
     <>
       <div className="hidden md:grid grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] gap-6 px-8 py-4 border-b border-hardwood-600 bg-hardwood-700">
         <span className="font-mono text-sm text-ink-400 uppercase">#</span>
-        <span className="font-mono text-sm text-ink-400 uppercase">Player</span>
+        <span className="font-mono text-sm text-ink-400 uppercase">{identityColumnLabel}</span>
         <span className="font-mono text-sm text-ink-400 uppercase text-right">Score</span>
         <span className="font-mono text-sm text-ink-400 uppercase text-right">Max</span>
         <span
@@ -62,6 +66,8 @@ type PoolLeaderboardRowProps = {
   rankDisplay: number;
   /** Appended to bracket URL (e.g. `?fromGroup=…`) for pool-aware what-if. */
   bracketHrefQuery?: string;
+  /** Global leaderboard: show bracket title only, no account name or profile photo. */
+  bracketNameOnly?: boolean;
 };
 
 export function PoolLeaderboardRow({
@@ -70,6 +76,7 @@ export function PoolLeaderboardRow({
   maskStats = false,
   rankDisplay,
   bracketHrefQuery = "",
+  bracketNameOnly = false,
 }: PoolLeaderboardRowProps) {
   const reduced = Boolean(maskStats && !isCurrentUser);
   const bracketSubtitle = reduced ? "Bracket submitted" : entry.bracketName;
@@ -93,14 +100,22 @@ export function PoolLeaderboardRow({
             —
           </span>
           <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
-            <UserAvatar
-              src={entry.userPicture}
-              name={entry.userName}
-              width={48}
-              height={48}
-              fallbackVariant="muted"
-              className="w-10 h-10 md:w-12 md:h-12 ring-2 ring-hardwood-600"
-            />
+            {bracketNameOnly ? (
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-court-800 border-2 border-hardwood-600 flex-shrink-0 flex items-center justify-center">
+                <span className="font-display text-lg md:text-xl font-bold text-court-200">
+                  {(entry.bracketName || "?").charAt(0).toUpperCase()}
+                </span>
+              </div>
+            ) : (
+              <UserAvatar
+                src={entry.userPicture}
+                name={entry.userName}
+                width={48}
+                height={48}
+                fallbackVariant="muted"
+                className="w-10 h-10 md:w-12 md:h-12 ring-2 ring-hardwood-600"
+              />
+            )}
             <div className="min-w-0">
               <p
                 className={clsx(
@@ -108,9 +123,13 @@ export function PoolLeaderboardRow({
                   isCurrentUser ? "text-court-400" : "text-white"
                 )}
               >
-                {entry.userName}
+                {bracketNameOnly ? entry.bracketName : entry.userName}
               </p>
-              <p className="text-xs md:text-sm text-ink-400 font-body truncate">{bracketSubtitle}</p>
+              {!bracketNameOnly ? (
+                <p className="text-xs md:text-sm text-ink-400 font-body truncate">{bracketSubtitle}</p>
+              ) : isCurrentUser ? (
+                <p className="text-[10px] md:text-xs text-court-600 font-mono normal-case">you</p>
+              ) : null}
             </div>
           </div>
         </div>
@@ -162,13 +181,21 @@ export function PoolLeaderboardRow({
         </span>
 
         <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
-          <UserAvatar
-            src={entry.userPicture}
-            name={entry.userName}
-            width={48}
-            height={48}
-            className="w-10 h-10 md:w-12 md:h-12 ring-2 ring-hardwood-600"
-          />
+          {bracketNameOnly ? (
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-court-800 border-2 border-hardwood-600 flex-shrink-0 flex items-center justify-center">
+              <span className="font-display text-lg md:text-xl font-bold text-court-200">
+                {(entry.bracketName || "?").charAt(0).toUpperCase()}
+              </span>
+            </div>
+          ) : (
+            <UserAvatar
+              src={entry.userPicture}
+              name={entry.userName}
+              width={48}
+              height={48}
+              className="w-10 h-10 md:w-12 md:h-12 ring-2 ring-hardwood-600"
+            />
+          )}
           <div className="min-w-0">
             <p
               className={clsx(
@@ -176,12 +203,25 @@ export function PoolLeaderboardRow({
                 isCurrentUser ? "text-court-400" : "text-white"
               )}
             >
-              {entry.userName}
-              {isCurrentUser && (
-                <span className="ml-2 text-[10px] md:text-xs text-court-600 normal-case font-mono">you</span>
+              {bracketNameOnly ? (
+                <>
+                  {entry.bracketName}
+                  {isCurrentUser && (
+                    <span className="ml-2 text-[10px] md:text-xs text-court-600 normal-case font-mono">you</span>
+                  )}
+                </>
+              ) : (
+                <>
+                  {entry.userName}
+                  {isCurrentUser && (
+                    <span className="ml-2 text-[10px] md:text-xs text-court-600 normal-case font-mono">you</span>
+                  )}
+                </>
               )}
             </p>
-            <p className="text-xs md:text-sm text-ink-400 font-body truncate">{bracketSubtitle}</p>
+            {!bracketNameOnly ? (
+              <p className="text-xs md:text-sm text-ink-400 font-body truncate">{bracketSubtitle}</p>
+            ) : null}
           </div>
         </div>
       </div>

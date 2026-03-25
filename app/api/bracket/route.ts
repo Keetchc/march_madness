@@ -7,8 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export const dynamic = "force-dynamic";
 import type { Bracket } from "@/lib/types";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+import { getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
 
 // GET /api/bracket — list my brackets
 export async function GET(req: Request) {
@@ -33,7 +32,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bracket name is required" }, { status: 400 });
   }
 
-  const tournament = await getTournament(TOURNAMENT_ID);
+  const viewingId = getViewingTournamentIdFromCookies();
+  const tournament = await getTournament(viewingId);
   if (picksEffectivelyClosed(tournament)) {
     return NextResponse.json({ error: "Tournament is locked. No new brackets." }, { status: 403 });
   }
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   const bracket: Bracket = {
     bracketId: uuidv4(),
     userId,
-    tournamentId: TOURNAMENT_ID,
+    tournamentId: viewingId,
     name: name.trim(),
     picks: {},
     score: 0,

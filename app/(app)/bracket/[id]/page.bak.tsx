@@ -3,6 +3,7 @@ import { getAuthOptions } from "@/lib/auth";
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { notFound, redirect } from "next/navigation";
 import { BracketPageClient } from "./BracketPageClient";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export default async function BracketPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(getAuthOptions());
@@ -25,6 +26,7 @@ export default async function BracketPage({ params }: { params: { id: string } }
       bracketUserId={bracket.userId}
       bracketName={bracket.name}
       initialPicks={bracket.picks}
+      bracketTournamentId={bracket.tournamentId ?? defaultTournamentId()}
     />
   );
 }

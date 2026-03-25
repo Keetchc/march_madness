@@ -5,8 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export const dynamic = "force-dynamic";
 import type { Bracket, AppUser, Picks } from "@/lib/types";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+import { getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
 
 function slugify(name: string): string {
   return name
@@ -17,7 +16,8 @@ function slugify(name: string): string {
 }
 
 export async function GET() {
-  const brackets = await getBracketsByTournament(TOURNAMENT_ID);
+  const viewingId = getViewingTournamentIdFromCookies();
+  const brackets = await getBracketsByTournament(viewingId);
 
   const enriched = await Promise.all(
     brackets.map(async (b) => {
@@ -58,10 +58,11 @@ export async function POST(req: Request) {
   };
   await upsertUser(user);
 
+  const viewingId = getViewingTournamentIdFromCookies();
   const bracket: Bracket = {
     bracketId: uuidv4(),
     userId,
-    tournamentId: TOURNAMENT_ID,
+    tournamentId: viewingId,
     name: `${name.trim()}'s Bracket`,
     picks,
     score: 0,

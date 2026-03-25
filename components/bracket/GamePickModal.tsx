@@ -10,21 +10,56 @@ interface GamePickModalProps {
   teams: Map<string, Team>;
   onClose: () => void;
   hidePickStatus?: boolean;
+  groupId?: string;
+  pickListMode?: "users" | "aggregate";
+  /** Season partition for this bracket (game ids repeat across years). */
+  tournamentId?: string;
 }
 
-export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, teams, onClose, hidePickStatus = false }: GamePickModalProps) {
+function pctLabel(count: number, total: number): string {
+  if (total <= 0) return "0%";
+  const p = (Math.round((count / total) * 1000) / 10).toFixed(1);
+  return `${p}%`;
+}
+
+export function GamePickModal({
+  gameId,
+  projectedTeam1Id,
+  projectedTeam2Id,
+  teams,
+  onClose,
+  hidePickStatus = false,
+  groupId,
+  pickListMode = "users",
+  tournamentId,
+}: GamePickModalProps) {
   const [data, setData] = useState<GamePicksResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!gameId) return;
     setLoading(true);
     setData(null);
-    fetch(`/api/games/${gameId}`)
-      .then((r) => r.json())
-      .then(setData)
+    setLoadError(null);
+    const sp = new URLSearchParams();
+    if (groupId) sp.set("groupId", groupId);
+    if (tournamentId) sp.set("tournamentId", tournamentId);
+    const qs = sp.toString();
+    fetch(`/api/games/${encodeURIComponent(gameId)}${qs ? `?${qs}` : ""}`)
+      .then(async (r) => {
+        const j = await r.json();
+        if (!r.ok || j == null || typeof j !== "object" || !("game" in j)) {
+          setLoadError(typeof j?.error === "string" ? j.error : "Could not load picks.");
+          return;
+        }
+        setData(j as GamePicksResponse);
+      })
+      .catch(() => {
+        setLoadError("Could not load picks.");
+      })
       .finally(() => setLoading(false));
-  }, [gameId]);
+  }, [gameId, groupId, tournamentId]);
 
   if (!gameId) return null;
 
@@ -56,8 +91,9 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
     }
   }
 
-  const totalPicks = (data?.picks.length ?? 0);
+  const totalPicks = data?.picks.length ?? 0;
   const isProjected = !hasActualTeams && (effectiveTeam1Id != null || effectiveTeam2Id != null);
+  const aggregate = pickListMode === "aggregate";
 
   return (
     <div
@@ -92,17 +128,17 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
         </div>
 
         {/* Game status */}
-        {isGameFinal && (
+        {data && isGameFinal && (
           <div className="px-5 py-3 bg-hardwood-700 border-b border-hardwood-600">
             <p className="text-sm font-mono text-ink-200">
               Final:{" "}
               <span className="text-white font-semibold">
-                {team1?.name} {data!.game.score1} --{" "}
-                {data!.game.score2} {team2?.name}
+                {team1?.name} {data.game.score1} --{" "}
+                {data.game.score2} {team2?.name}
               </span>
               {" -- "}
               <span className="text-green-400">
-                Winner: {data!.game.winnerId === actualTeam1Id
+                Winner: {data.game.winnerId === actualTeam1Id
                   ? team1?.name
                   : team2?.name}
               </span>
@@ -116,7 +152,11 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
           </div>
         )}
 
-        {data && !loading && (
+        {loadError && !loading && (
+          <div className="p-8 text-center text-red-400 text-sm font-body">{loadError}</div>
+        )}
+
+        {data && !loading && !loadError && (
           <div className="p-5">
             {data.picksHidden ? (
               <p className="text-ink-300 text-sm text-center py-4 font-body">
@@ -126,6 +166,88 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
               <p className="text-ink-300 text-sm text-center py-4 font-body">
                 No one has picked this game yet.
               </p>
+            ) : aggregate ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <AggregatePickColumn
+                    teamName={team1?.name ?? "TBD"}
+                    seed={team1?.seed}
+                    count={team1Picks.length}
+                    total={totalPicks}
+                    isWinner={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam1Id}
+                    isLoser={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam2Id}
+                    hidePickStatus={hidePickStatus}
+                  />
+                  <AggregatePickColumn
+                    teamName={team2?.name ?? "TBD"}
+                    seed={team2?.seed}
+                    count={team2Picks.length}
+                    total={totalPicks}
+                    isWinner={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam2Id}
+                    isLoser={!hidePickStatus && isGameFinal && data.game.winnerId === actualTeam1Id}
+                    hidePickStatus={hidePickStatus}
+                  />
+                </div>
+
+                {otherByTeam.size > 0 && (
+                  <div className="mt-4 pt-4 border-t border-hardwood-600">
+                    <p className={`font-mono text-xs uppercase tracking-widest mb-3 ${hidePickStatus ? "text-ink-300" : "text-red-400/80"}`}>
+                      {hidePickStatus ? "Other picks" : "Eliminated picks"}
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      {Array.from(otherByTeam.entries()).map(([teamId, { teamName, picks }]) => (
+                        <AggregatePickColumn
+                          key={teamId}
+                          teamName={teamName}
+                          count={picks.length}
+                          total={totalPicks}
+                          isWinner={false}
+                          isLoser={!hidePickStatus}
+                          forceIncorrect={!hidePickStatus}
+                          hidePickStatus={hidePickStatus}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-hardwood-600">
+                  <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs font-mono text-ink-300">
+                    <span>
+                      {pctLabel(team1Picks.length, totalPicks)} {team1?.shortName ?? "T1"}
+                    </span>
+                    <span>·</span>
+                    <span>
+                      {pctLabel(team2Picks.length, totalPicks)} {team2?.shortName ?? "T2"}
+                    </span>
+                    {otherPicks.length > 0 && (
+                      <>
+                        <span>·</span>
+                        <span className={hidePickStatus ? "text-ink-300" : "text-red-400/60"}>
+                          {pctLabel(otherPicks.length, totalPicks)} other
+                        </span>
+                      </>
+                    )}
+                    <span className="text-ink-500">({totalPicks} brackets)</span>
+                  </div>
+                  <div className="mt-2 h-2 bg-hardwood-700 rounded-full overflow-hidden flex">
+                    <div
+                      className="h-full bg-court-500 transition-all duration-500"
+                      style={{ width: `${(team1Picks.length / totalPicks) * 100}%` }}
+                    />
+                    <div
+                      className="h-full bg-court-700 transition-all duration-500"
+                      style={{ width: `${(team2Picks.length / totalPicks) * 100}%` }}
+                    />
+                    {otherPicks.length > 0 && (
+                      <div
+                        className="h-full bg-red-900/60 transition-all duration-500"
+                        style={{ width: `${(otherPicks.length / totalPicks) * 100}%` }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-4">
@@ -213,6 +335,46 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
   );
 }
 
+function AggregatePickColumn({
+  teamName,
+  seed,
+  count,
+  total,
+  isWinner,
+  isLoser,
+  forceIncorrect,
+  hidePickStatus,
+}: {
+  teamName: string;
+  seed?: number;
+  count: number;
+  total: number;
+  isWinner: boolean;
+  isLoser: boolean;
+  forceIncorrect?: boolean;
+  hidePickStatus?: boolean;
+}) {
+  return (
+    <div>
+      <div
+        className={`text-xs font-display font-bold uppercase tracking-wide mb-2 flex items-center gap-1 ${
+          hidePickStatus ? "text-ink-200" :
+          isWinner ? "text-green-400" : isLoser || forceIncorrect ? "text-red-400" : "text-ink-200"
+        }`}
+      >
+        {seed != null ? <span className="text-ink-400">#{seed}</span> : null}
+        {teamName}
+        {!hidePickStatus && isWinner && <CheckCircleIcon className="w-3 h-3" />}
+        {!hidePickStatus && (isLoser || forceIncorrect) && <XCircleIcon className="w-3 h-3" />}
+      </div>
+      <p className="font-display text-3xl font-black text-white tabular-nums">{pctLabel(count, total)}</p>
+      <p className="text-xs font-mono text-ink-400 mt-0.5">
+        {count} bracket{count === 1 ? "" : "s"}
+      </p>
+    </div>
+  );
+}
+
 function PickColumn({
   teamName,
   seed,
@@ -238,7 +400,7 @@ function PickColumn({
           isWinner ? "text-green-400" : isLoser || forceIncorrect ? "text-red-400" : "text-ink-200"
         }`}
       >
-        {seed && <span className="text-ink-400">#{seed}</span>}
+        {seed != null ? <span className="text-ink-400">#{seed}</span> : null}
         {teamName}
         {!hidePickStatus && isWinner && <CheckCircleIcon className="w-3 h-3" />}
         {!hidePickStatus && (isLoser || forceIncorrect) && <XCircleIcon className="w-3 h-3" />}

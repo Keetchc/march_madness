@@ -8,10 +8,9 @@ import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import type { Bracket } from "@/lib/types";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function GroupBracketsPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(getAuthOptions());
@@ -34,7 +33,7 @@ export default async function GroupBracketsPage({ params }: { params: { id: stri
     (b): b is Bracket => b != null
   );
 
-  const tournament = await getTournament(group.tournamentId ?? TOURNAMENT_ID);
+  const tournament = await getTournament(group.tournamentId ?? defaultTournamentId());
 
   const enriched = await Promise.all(
     brackets.map(async (b) => {

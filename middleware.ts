@@ -16,11 +16,7 @@ function nextAuthSecretForEdge(): string | undefined {
   return undefined;
 }
 
-const PUBLIC_PAGE_PREFIXES = [
-  "/leaderboard",
-  "/rules",
-  "/official-bracket",
-] as const;
+const PUBLIC_PAGE_PREFIXES = ["/leaderboard", "/official-bracket"] as const;
 
 function isPublicPagePath(pathname: string): boolean {
   for (const p of PUBLIC_PAGE_PREFIXES) {
@@ -37,12 +33,16 @@ function isPublicPagePath(pathname: string): boolean {
 function isPublicApiGet(pathname: string, method: string): boolean {
   if (method !== "GET") return false;
   if (pathname === "/api/tournament") return true;
+  if (pathname === "/api/viewing-tournament") return true;
+  /** Game detail + aggregate picks (official bracket, share views). POST still requires auth. */
+  if (/^\/api\/games\/[^/]+$/.test(pathname)) return true;
   if (/^\/api\/bracket\/[^/]+$/.test(pathname)) return true;
   if (/^\/api\/groups\/invite\/[^/]+$/.test(pathname)) return true;
   return false;
 }
 
 function isPublicPath(pathname: string, method: string): boolean {
+  if (pathname === "/api/viewing-tournament" && method === "POST") return true;
   if (pathname.startsWith("/api/auth")) return true;
   if (pathname === "/api/runtime-env-check") return true;
   if (pathname === "/api/espn/sync") return true;

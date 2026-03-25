@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { BracketView } from "@/components/bracket/BracketView";
 import { BracketWhatIfPanel } from "@/components/bracket/BracketWhatIfPanel";
 import type { Game, Team, Picks, Tournament, ScoringRules } from "@/lib/types";
 import { LockCountdownBadge } from "@/components/layout/LockCountdownBadge";
 import { projectPicksOntoGames } from "@/lib/bracket-utils";
 import { picksClosedByTournament } from "@/lib/picks-lock";
-import { SaveIcon, LockIcon, RefreshCwIcon } from "lucide-react";
+import { SaveIcon, LockIcon, RefreshCwIcon, ArrowLeftIcon } from "lucide-react";
 import { clsx } from "clsx";
 
 interface BracketPageClientProps {
@@ -24,6 +25,12 @@ interface BracketPageClientProps {
   /** When opened from a group the user belongs to, what-if uses this pool’s scoring rules. */
   whatIfScoringRules?: ScoringRules;
   whatIfScoringSourceLabel?: string;
+  /** When set, “who picked this game” is limited to brackets linked in that group. */
+  fromGroupId?: string;
+  /** Present when opened with `?fromGroup=` and the pool exists — link back to group hub. */
+  groupReturn?: { id: string; name: string };
+  /** Dynamo tournament partition for this bracket. */
+  bracketTournamentId: string;
 }
 
 type SaveState = "saved" | "saving" | "unsaved" | "error";
@@ -39,6 +46,9 @@ export function BracketPageClient({
   serverRedactedPicks = false,
   whatIfScoringRules,
   whatIfScoringSourceLabel,
+  fromGroupId,
+  groupReturn,
+  bracketTournamentId,
 }: BracketPageClientProps) {
   const { data: session, status: sessionStatus } = useSession();
   const [games, setGames] = useState<Game[]>([]);
@@ -70,9 +80,11 @@ export function BracketPageClient({
   /** Server may not have had session; hide others’ picks until lock unless client knows you’re the owner. */
   const hideBracketTree = picksHiddenUntilLock && !isOwner;
 
+  const tournamentQuery = `/api/tournament?tournamentId=${encodeURIComponent(bracketTournamentId)}`;
+
   // Load tournament data
   useEffect(() => {
-    fetch("/api/tournament")
+    fetch(tournamentQuery)
       .then((r) => r.json())
       .then(({ tournament, games, teams: teamsArr }) => {
         setTournament(tournament);
@@ -80,18 +92,18 @@ export function BracketPageClient({
         setTeams(new Map((teamsArr ?? []).map((t: Team) => [t.id, t])));
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [tournamentQuery]);
 
   // Poll for game updates every 60s when tournament is active
   useEffect(() => {
     if (tournament?.status !== "active") return;
     const interval = setInterval(() => {
-      fetch("/api/tournament")
+      fetch(tournamentQuery)
         .then((r) => r.json())
         .then(({ games }) => setGames(games ?? []));
     }, 60_000);
     return () => clearInterval(interval);
-  }, [tournament?.status]);
+  }, [tournament?.status, tournamentQuery]);
 
   // Auto-save picks with 800ms debounce
   const savePicks = useCallback(async (newPicks: Picks) => {
@@ -148,8 +160,11 @@ export function BracketPageClient({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-ink-300 font-mono text-sm animate-pulse">
-        Loading bracket...
+      <div className="space-y-4">
+        {groupReturn ? <GroupBackLink groupReturn={groupReturn} /> : null}
+        <div className="flex items-center justify-center h-64 text-ink-300 font-mono text-sm animate-pulse">
+          Loading bracket...
+        </div>
       </div>
     );
   }
@@ -157,6 +172,7 @@ export function BracketPageClient({
   if (hideBracketTree) {
     return (
       <div className="space-y-4">
+        {groupReturn ? <GroupBackLink groupReturn={groupReturn} /> : null}
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
             <p className="font-mono text-court-500 text-xs uppercase tracking-widest mb-0.5">Private bracket</p>
@@ -177,6 +193,7 @@ export function BracketPageClient({
 
   return (
     <div className="space-y-4">
+      {groupReturn ? <GroupBackLink groupReturn={groupReturn} /> : null}
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
@@ -228,6 +245,8 @@ export function BracketPageClient({
         actualTeamOverrides={actualTeamOverrides}
         onPick={canEdit ? handlePick : undefined}
         isReadOnly={!canEdit}
+        gamePicksGroupId={fromGroupId}
+        tournamentId={bracketTournamentId}
       />
 
       <BracketWhatIfPanel
@@ -238,6 +257,20 @@ export function BracketPageClient({
         scoringSourceLabel={whatIfScoringSourceLabel}
       />
     </div>
+  );
+}
+
+function GroupBackLink({ groupReturn }: { groupReturn: { id: string; name: string } }) {
+  return (
+    <Link
+      href={`/groups/${groupReturn.id}`}
+      className="inline-flex items-center gap-1.5 text-sm font-mono text-court-400 hover:text-court-300 transition-colors -mt-1"
+    >
+      <ArrowLeftIcon className="w-4 h-4 shrink-0" aria-hidden />
+      <span>
+        Back to <span className="text-ink-100 font-semibold">{groupReturn.name}</span>
+      </span>
+    </Link>
   );
 }
 

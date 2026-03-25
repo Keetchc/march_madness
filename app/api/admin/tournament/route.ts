@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/session";
 import { getTournament, updateTournamentPicksSettings } from "@/lib/dynamo/queries/games";
+import { getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 // PATCH /api/admin/tournament — lockDate + picksOpenOverride (site admins only)
 export async function PATCH(req: Request) {
@@ -14,7 +13,8 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const existing = await getTournament(TOURNAMENT_ID);
+  const viewingId = getViewingTournamentIdFromCookies();
+  const existing = await getTournament(viewingId);
   if (!existing) {
     return NextResponse.json({ error: "Tournament not found" }, { status: 404 });
   }
@@ -35,11 +35,11 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Invalid lockDate" }, { status: 400 });
   }
 
-  await updateTournamentPicksSettings(TOURNAMENT_ID, {
+  await updateTournamentPicksSettings(viewingId, {
     ...(body.lockDate !== undefined ? { lockDate: body.lockDate } : {}),
     ...(body.picksOpenOverride !== undefined ? { picksOpenOverride: body.picksOpenOverride } : {}),
   });
 
-  const tournament = await getTournament(TOURNAMENT_ID);
+  const tournament = await getTournament(viewingId);
   return NextResponse.json({ tournament });
 }

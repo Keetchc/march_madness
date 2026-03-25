@@ -12,8 +12,7 @@ import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import type { Bracket } from "@/lib/types";
 import { GroupStandingsClient } from "./GroupStandingsClient";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(getAuthOptions());
@@ -39,7 +38,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   const bracketsRaw = await Promise.all(bracketIds.map((id) => getBracket(id)));
   const brackets = bracketsRaw.filter((b): b is Bracket => b != null);
 
-  const tid = scoringTournamentIdForGroup(group.tournamentId, brackets, TOURNAMENT_ID);
+  const tid = scoringTournamentIdForGroup(group.tournamentId, brackets, defaultTournamentId());
   const [games, teams, tournament] = await Promise.all([
     getAllGames(tid),
     getAllTeams(tid),

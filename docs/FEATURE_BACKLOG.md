@@ -18,8 +18,23 @@ Running list of ideas we might add later. Check things off or move them to a “
 
 - [ ] **Head-to-head vs leader (or vs you)** — One-row summary on the group page: games you still disagree on and rough swing remaining (beyond full compare).
 - [ ] **What-if using group scoring rules** — When opening a bracket from a group context, pass that group’s `scoringRules` into the simulator so it matches the pool.
-- [ ] **“If this pick wins” single-game drill-down** — For the next few high-leverage games, show marginal impact on max score.
+- [ ] **“If this pick wins” single-game drill-down** — For the next few high-leverage games, show marginal impact on max score, current score, and rough rank vs key opponents (label heuristics clearly).
 - [ ] **Sparklines / trend** — Tiny visual of rank or score over time (needs historical snapshots or event log).
+
+---
+
+## Stats-nerd lane (analytics & field view)
+
+Ideas that lean into statistics-heavy bracket play; many compose with customizable scoring and what-ifs.
+
+- [ ] **Group “Insights” strip** — One place on the group page: next high-needle games for *you*, quick vs-leader disagreement summary, optional “what changed since last score sync” (pairs well with audit trail).
+- [ ] **Expected swing / equity heuristics** — For upcoming games, approximate impact narrative (e.g. uniqueness in pool, max path, rough title “equity”) with explicit “model is rough” copy; no need for perfect win probability on day one.
+- [ ] **Pick overlap / consensus view** — Pool-wide % (or counts) on teams by region/round; optional “your picks vs field” overlay (chalk vs contrarian at a glance).
+- [ ] **Contrarian index** — Simple score for how far a bracket is from pool consensus; optional badge on leaderboard or bracket card.
+- [ ] **Round attribution** — Beyond round mini-leaderboard: points *gained* that round, max points *lost* to busts, short copy so nerds can explain standings.
+- [ ] **Max vs realized / path remaining** — Persistent summary: current score, max still possible, which outcomes killed max (ties into what-if).
+- [ ] **Scoring sensitivity** — What-if presets or slider: “if upset bonus were +N, your rank would be ~X” using same engine as custom rules.
+- [ ] **CSV export** — Picks, per-round points, standings snapshot or history columns for spreadsheet people (export is trust + depth).
 
 ---
 
@@ -58,5 +73,3 @@ Running list of ideas we might add later. Check things off or move them to a “
 ## Add new ideas below
 
 <!-- Append bullets here as they come up -->
-
-- [ ] *(add your idea here)*

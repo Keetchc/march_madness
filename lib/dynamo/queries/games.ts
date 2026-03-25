@@ -67,17 +67,24 @@ export async function getTeam(tournamentId: string, teamId: string): Promise<Tea
 }
 
 export async function getAllTeams(tournamentId: string): Promise<Team[]> {
-  const res = await dynamo.send(
-    new QueryCommand({
-      TableName: TABLES.TOURNAMENT,
-      KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
-      ExpressionAttributeValues: {
-        ":pk": `TOURNAMENT#${tournamentId}`,
-        ":prefix": "TEAM#",
-      },
-    })
-  );
-  return (res.Items ?? []) as Team[];
+  const items: Team[] = [];
+  let startKey: Record<string, unknown> | undefined;
+  do {
+    const res = await dynamo.send(
+      new QueryCommand({
+        TableName: TABLES.TOURNAMENT,
+        KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+        ExpressionAttributeValues: {
+          ":pk": `TOURNAMENT#${tournamentId}`,
+          ":prefix": "TEAM#",
+        },
+        ExclusiveStartKey: startKey,
+      })
+    );
+    items.push(...((res.Items ?? []) as Team[]));
+    startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (startKey);
+  return items;
 }
 
 export async function upsertTeam(tournamentId: string, team: Team): Promise<void> {
@@ -106,17 +113,24 @@ export async function getGame(tournamentId: string, gameId: string): Promise<Gam
 }
 
 export async function getAllGames(tournamentId: string): Promise<Game[]> {
-  const res = await dynamo.send(
-    new QueryCommand({
-      TableName: TABLES.TOURNAMENT,
-      KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
-      ExpressionAttributeValues: {
-        ":pk": `TOURNAMENT#${tournamentId}`,
-        ":prefix": "GAME#",
-      },
-    })
-  );
-  return (res.Items ?? []) as Game[];
+  const items: Game[] = [];
+  let startKey: Record<string, unknown> | undefined;
+  do {
+    const res = await dynamo.send(
+      new QueryCommand({
+        TableName: TABLES.TOURNAMENT,
+        KeyConditionExpression: "pk = :pk AND begins_with(sk, :prefix)",
+        ExpressionAttributeValues: {
+          ":pk": `TOURNAMENT#${tournamentId}`,
+          ":prefix": "GAME#",
+        },
+        ExclusiveStartKey: startKey,
+      })
+    );
+    items.push(...((res.Items ?? []) as Game[]));
+    startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (startKey);
+  return items;
 }
 
 export async function upsertGame(tournamentId: string, game: Game): Promise<void> {

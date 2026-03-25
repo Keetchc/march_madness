@@ -4,10 +4,9 @@ import { getGroupByInviteToken, addMember, getGroupMembership } from "@/lib/dyna
 import { getBracketsByUser } from "@/lib/dynamo/queries/brackets";
 import { upsertUser } from "@/lib/dynamo/queries/users";
 import type { GroupMember } from "@/lib/types";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 // POST /api/groups/join — join via invite token
 export async function POST(req: Request) {
@@ -36,7 +35,7 @@ export async function POST(req: Request) {
     if (!owned) {
       return NextResponse.json({ error: "Bracket not found or not yours" }, { status: 400 });
     }
-    const groupTid = group.tournamentId ?? TOURNAMENT_ID;
+    const groupTid = group.tournamentId ?? defaultTournamentId();
     if (owned.tournamentId !== groupTid) {
       return NextResponse.json(
         { error: "That bracket is for a different tournament than this group." },

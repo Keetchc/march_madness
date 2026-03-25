@@ -6,8 +6,7 @@ import type { Group, GroupMember } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 import { DEFAULT_SCORING_RULES } from "@/lib/types";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+import { getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
 
 // GET /api/groups — list groups I belong to
 export async function GET() {
@@ -32,11 +31,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Group name is required" }, { status: 400 });
   }
 
+  const viewingId = getViewingTournamentIdFromCookies();
   const group: Group = {
     groupId: uuidv4(),
     name: name.trim(),
     adminUserId: userId,
-    tournamentId: TOURNAMENT_ID,
+    tournamentId: viewingId,
     inviteToken: uuidv4(),
     scoringRules: scoringRules ?? DEFAULT_SCORING_RULES,
     createdAt: new Date().toISOString(),

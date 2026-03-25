@@ -1,3 +1,5 @@
+import "./bootstrap-env";
+
 /**
  * Seed the tournament structure into DynamoDB.
  *
@@ -33,41 +35,60 @@ import type { Tournament, Team, Game } from "../lib/types";
 const BRACKET_FILE = process.env.BRACKET_FILE
   ?? path.join(__dirname, "bracket-2026.json");
 
+interface BracketGameInput {
+  gameId: string;
+  round: Game["round"];
+  region: Game["region"];
+  bracketSlot: number;
+  team1Id: string | null;
+  team2Id: string | null;
+  nextGameId: string | null;
+  nextGameSlot: Game["nextGameSlot"];
+  espnGameId?: string;
+  /** When set (historical / completed tournaments), overrides seed defaults. */
+  winnerId?: string | null;
+  score1?: number | null;
+  score2?: number | null;
+  status?: Game["status"];
+  scheduledAt?: string | null;
+  completedAt?: string | null;
+}
+
 interface BracketFile {
   tournamentId: string;
   name: string;
   year: number;
   lockDate: string;
+  /** When set (e.g. `complete` for past seasons), overrides default `pending`. */
+  tournamentStatus?: Tournament["status"];
   teams: Team[];
-  games: Omit<Game, "winnerId" | "score1" | "score2" | "status" | "scheduledAt" | "completedAt" | "tournamentId">[];
+  games: BracketGameInput[];
 }
 
-async function main() {
-  if (!fs.existsSync(BRACKET_FILE)) {
-    console.error(`\n❌ Bracket file not found: ${BRACKET_FILE}`);
-    console.log("\nCreate a bracket JSON file or set BRACKET_FILE env var.");
-    console.log("See scripts/bracket-template.json for the format.\n");
-    process.exit(1);
+export async function seedBracketFromFile(bracketFilePath: string): Promise<void> {
+  if (!fs.existsSync(bracketFilePath)) {
+    throw new Error(
+      `Bracket file not found: ${bracketFilePath}\n` +
+        "Create a bracket JSON or set BRACKET_FILE. See scripts/bracket-template.json.",
+    );
   }
 
-  const raw = fs.readFileSync(BRACKET_FILE, "utf-8");
+  const raw = fs.readFileSync(bracketFilePath, "utf-8");
   const data: BracketFile = JSON.parse(raw);
 
   console.log(`\n🏀 Seeding tournament: ${data.name} (${data.tournamentId})\n`);
 
-  // 1. Upsert tournament record
   const tournament: Tournament = {
     tournamentId: data.tournamentId,
     name: data.name,
     year: data.year,
-    status: "pending",
+    status: data.tournamentStatus ?? "pending",
     lockDate: data.lockDate,
     createdAt: new Date().toISOString(),
   };
   await upsertTournament(tournament);
   console.log(`  ✅ Tournament: ${data.name}`);
 
-  // 2. Upsert all teams
   console.log(`\n  Seeding ${data.teams.length} teams...`);
   for (const team of data.teams) {
     await upsertTeam(data.tournamentId, team);
@@ -75,18 +96,30 @@ async function main() {
   }
   console.log(` done`);
 
-  // 3. Upsert all games (with defaults for unplayed fields)
   console.log(`\n  Seeding ${data.games.length} games...`);
   for (const gameInput of data.games) {
+    const hasResult =
+      gameInput.winnerId != null &&
+      gameInput.score1 != null &&
+      gameInput.score2 != null &&
+      gameInput.status === "final";
     const game: Game = {
-      ...gameInput,
+      gameId: gameInput.gameId,
+      round: gameInput.round,
+      region: gameInput.region,
+      bracketSlot: gameInput.bracketSlot,
+      team1Id: gameInput.team1Id,
+      team2Id: gameInput.team2Id,
+      nextGameId: gameInput.nextGameId,
+      nextGameSlot: gameInput.nextGameSlot,
       tournamentId: data.tournamentId,
-      winnerId: null,
-      score1: null,
-      score2: null,
-      status: "scheduled",
-      scheduledAt: null,
-      completedAt: null,
+      winnerId: hasResult ? gameInput.winnerId! : null,
+      score1: hasResult ? gameInput.score1! : null,
+      score2: hasResult ? gameInput.score2! : null,
+      status: hasResult ? "final" : "scheduled",
+      scheduledAt: gameInput.scheduledAt ?? null,
+      completedAt: hasResult ? (gameInput.completedAt ?? null) : null,
+      ...(gameInput.espnGameId != null ? { espnGameId: gameInput.espnGameId } : {}),
     };
     await upsertGame(data.tournamentId, game);
     process.stdout.write(".");
@@ -96,12 +129,18 @@ async function main() {
   console.log(`\n✅ Seed complete!`);
   console.log(`   Teams: ${data.teams.length}`);
   console.log(`   Games: ${data.games.length}`);
+}
+
+async function main() {
+  await seedBracketFromFile(BRACKET_FILE);
   console.log(`\nNow open http://localhost:3001 (DynamoDB Admin) to verify the data.`);
   console.log(`Or visit http://localhost:3000/dashboard to start picking.\n`);
 }
 
-main().catch((err) => {
-  console.error("\n❌ Seed failed:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error("\n❌ Seed failed:", err);
+    process.exit(1);
+  });
+}
 

@@ -3,6 +3,7 @@
   "name": "NCAA Tournament 2026",
   "year": 2026,
   "lockDate": "2026-03-19T12:00:00Z",
+  "tournamentStatus": "active",
   "teams": [
     {
       "id": "duke",
@@ -14,12 +15,54 @@
       "color": "#00539b"
     },
     {
-      "id": "siena",
-      "name": "Siena",
-      "shortName": "SIEN",
-      "seed": 16,
+      "id": "uconn",
+      "name": "UConn",
+      "shortName": "UCON",
+      "seed": 2,
       "region": "East",
-      "espnId": "2561"
+      "espnId": "41"
+    },
+    {
+      "id": "michst",
+      "name": "Michigan St.",
+      "shortName": "MIST",
+      "seed": 3,
+      "region": "East",
+      "espnId": "127",
+      "color": "#173f35"
+    },
+    {
+      "id": "kansas",
+      "name": "Kansas",
+      "shortName": "KU",
+      "seed": 4,
+      "region": "East",
+      "espnId": "2305"
+    },
+    {
+      "id": "stjohns",
+      "name": "St. John's",
+      "shortName": "STJ",
+      "seed": 5,
+      "region": "East",
+      "espnId": "2599"
+    },
+    {
+      "id": "louisville",
+      "name": "Louisville",
+      "shortName": "LOU",
+      "seed": 6,
+      "region": "East",
+      "espnId": "97",
+      "color": "#c9001f"
+    },
+    {
+      "id": "ucla",
+      "name": "UCLA",
+      "shortName": "UCLA",
+      "seed": 7,
+      "region": "East",
+      "espnId": "26"
     },
     {
       "id": "ohiost",
@@ -39,45 +82,12 @@
       "color": "#4d1979"
     },
     {
-      "id": "stjohns",
-      "name": "St. John's",
-      "shortName": "STJ",
-      "seed": 5,
+      "id": "ucf",
+      "name": "UCF",
+      "shortName": "UCF",
+      "seed": 10,
       "region": "East",
-      "espnId": "2599"
-    },
-    {
-      "id": "niowa",
-      "name": "N. Iowa",
-      "shortName": "NIOW",
-      "seed": 12,
-      "region": "East",
-      "espnId": "2460"
-    },
-    {
-      "id": "kansas",
-      "name": "Kansas",
-      "shortName": "KU",
-      "seed": 4,
-      "region": "East",
-      "espnId": "2305"
-    },
-    {
-      "id": "calbaptist",
-      "name": "Cal Baptist",
-      "shortName": "CBAP",
-      "seed": 13,
-      "region": "East",
-      "espnId": "2856"
-    },
-    {
-      "id": "louisville",
-      "name": "Louisville",
-      "shortName": "LOU",
-      "seed": 6,
-      "region": "East",
-      "espnId": "97",
-      "color": "#c9001f"
+      "espnId": "2116"
     },
     {
       "id": "sfla",
@@ -88,13 +98,20 @@
       "espnId": "58"
     },
     {
-      "id": "michst",
-      "name": "Michigan St.",
-      "shortName": "MIST",
-      "seed": 3,
+      "id": "niowa",
+      "name": "N. Iowa",
+      "shortName": "NIOW",
+      "seed": 12,
       "region": "East",
-      "espnId": "127",
-      "color": "#173f35"
+      "espnId": "2460"
+    },
+    {
+      "id": "calbaptist",
+      "name": "Cal Baptist",
+      "shortName": "CBAP",
+      "seed": 13,
+      "region": "East",
+      "espnId": "2856"
     },
     {
       "id": "ndakst",
@@ -105,36 +122,20 @@
       "espnId": "2449"
     },
     {
-      "id": "ucla",
-      "name": "UCLA",
-      "shortName": "UCLA",
-      "seed": 7,
-      "region": "East",
-      "espnId": "26"
-    },
-    {
-      "id": "ucf",
-      "name": "UCF",
-      "shortName": "UCF",
-      "seed": 10,
-      "region": "East",
-      "espnId": "2116"
-    },
-    {
-      "id": "uconn",
-      "name": "UConn",
-      "shortName": "UCON",
-      "seed": 2,
-      "region": "East",
-      "espnId": "41"
-    },
-    {
       "id": "furman",
       "name": "Furman",
       "shortName": "FUR",
       "seed": 15,
       "region": "East",
       "espnId": "231"
+    },
+    {
+      "id": "siena",
+      "name": "Siena",
+      "shortName": "SIEN",
+      "seed": 16,
+      "region": "East",
+      "espnId": "2561"
     },
     {
       "id": "florida",
@@ -145,12 +146,55 @@
       "espnId": "57"
     },
     {
-      "id": "pvam",
-      "name": "Prairie View",
-      "shortName": "PVAM",
-      "seed": 16,
+      "id": "houston",
+      "name": "Houston",
+      "shortName": "HOU",
+      "seed": 2,
       "region": "South",
-      "espnId": "2504"
+      "espnId": "248",
+      "color": "#c8102e"
+    },
+    {
+      "id": "illinois",
+      "name": "Illinois",
+      "shortName": "ILL",
+      "seed": 3,
+      "region": "South",
+      "espnId": "356",
+      "color": "#ff5f05"
+    },
+    {
+      "id": "nebraska",
+      "name": "Nebraska",
+      "shortName": "NEB",
+      "seed": 4,
+      "region": "South",
+      "espnId": "158",
+      "color": "#e31937"
+    },
+    {
+      "id": "vanderbilt",
+      "name": "Vanderbilt",
+      "shortName": "VAN",
+      "seed": 5,
+      "region": "South",
+      "espnId": "238"
+    },
+    {
+      "id": "ncarolina",
+      "name": "N. Carolina",
+      "shortName": "UNC",
+      "seed": 6,
+      "region": "South",
+      "espnId": "153"
+    },
+    {
+      "id": "stmarys",
+      "name": "Saint Mary's",
+      "shortName": "SMC",
+      "seed": 7,
+      "region": "South",
+      "espnId": "2608"
     },
     {
       "id": "clemson",
@@ -169,45 +213,13 @@
       "espnId": "2294"
     },
     {
-      "id": "vanderbilt",
-      "name": "Vanderbilt",
-      "shortName": "VAN",
-      "seed": 5,
+      "id": "texasam",
+      "name": "Texas A&M",
+      "shortName": "TXAM",
+      "seed": 10,
       "region": "South",
-      "espnId": "238"
-    },
-    {
-      "id": "mcneese",
-      "name": "McNeese",
-      "shortName": "MCNS",
-      "seed": 12,
-      "region": "South",
-      "espnId": "2377"
-    },
-    {
-      "id": "nebraska",
-      "name": "Nebraska",
-      "shortName": "NEB",
-      "seed": 4,
-      "region": "South",
-      "espnId": "158",
-      "color": "#e31937"
-    },
-    {
-      "id": "troy",
-      "name": "Troy",
-      "shortName": "TROY",
-      "seed": 13,
-      "region": "South",
-      "espnId": "2653"
-    },
-    {
-      "id": "ncarolina",
-      "name": "N. Carolina",
-      "shortName": "UNC",
-      "seed": 6,
-      "region": "South",
-      "espnId": "153"
+      "espnId": "245",
+      "color": "#500000"
     },
     {
       "id": "vcu",
@@ -219,13 +231,20 @@
       "color": "#ffaf00"
     },
     {
-      "id": "illinois",
-      "name": "Illinois",
-      "shortName": "ILL",
-      "seed": 3,
+      "id": "mcneese",
+      "name": "McNeese",
+      "shortName": "MCNS",
+      "seed": 12,
       "region": "South",
-      "espnId": "356",
-      "color": "#ff5f05"
+      "espnId": "2377"
+    },
+    {
+      "id": "troy",
+      "name": "Troy",
+      "shortName": "TROY",
+      "seed": 13,
+      "region": "South",
+      "espnId": "2653"
     },
     {
       "id": "penn",
@@ -236,38 +255,20 @@
       "espnId": "219"
     },
     {
-      "id": "stmarys",
-      "name": "Saint Mary's",
-      "shortName": "SMC",
-      "seed": 7,
-      "region": "South",
-      "espnId": "2608"
-    },
-    {
-      "id": "texasam",
-      "name": "Texas A&M",
-      "shortName": "TXAM",
-      "seed": 10,
-      "region": "South",
-      "espnId": "245",
-      "color": "#500000"
-    },
-    {
-      "id": "houston",
-      "name": "Houston",
-      "shortName": "HOU",
-      "seed": 2,
-      "region": "South",
-      "espnId": "248",
-      "color": "#c8102e"
-    },
-    {
       "id": "idaho",
       "name": "Idaho",
       "shortName": "IDHO",
       "seed": 15,
       "region": "South",
       "espnId": "70"
+    },
+    {
+      "id": "pvam",
+      "name": "Prairie View",
+      "shortName": "PVAM",
+      "seed": 16,
+      "region": "South",
+      "espnId": "2504"
     },
     {
       "id": "arizona",
@@ -278,12 +279,54 @@
       "espnId": "12"
     },
     {
-      "id": "liu",
-      "name": "LIU",
-      "shortName": "LIU",
-      "seed": 16,
+      "id": "purdue",
+      "name": "Purdue",
+      "shortName": "PUR",
+      "seed": 2,
       "region": "West",
-      "espnId": "112358"
+      "espnId": "2509"
+    },
+    {
+      "id": "gonzaga",
+      "name": "Gonzaga",
+      "shortName": "GONZ",
+      "seed": 3,
+      "region": "West",
+      "espnId": "2250",
+      "color": "#041e42"
+    },
+    {
+      "id": "arkansas",
+      "name": "Arkansas",
+      "shortName": "ARK",
+      "seed": 4,
+      "region": "West",
+      "espnId": "8",
+      "color": "#a32136"
+    },
+    {
+      "id": "wisconsin",
+      "name": "Wisconsin",
+      "shortName": "WISC",
+      "seed": 5,
+      "region": "West",
+      "espnId": "275"
+    },
+    {
+      "id": "byu",
+      "name": "BYU",
+      "shortName": "BYU",
+      "seed": 6,
+      "region": "West",
+      "espnId": "252"
+    },
+    {
+      "id": "miami",
+      "name": "Miami",
+      "shortName": "MIA",
+      "seed": 7,
+      "region": "West",
+      "espnId": "2390"
     },
     {
       "id": "villanova",
@@ -302,46 +345,12 @@
       "espnId": "328"
     },
     {
-      "id": "wisconsin",
-      "name": "Wisconsin",
-      "shortName": "WISC",
-      "seed": 5,
+      "id": "missouri",
+      "name": "Missouri",
+      "shortName": "MIZZ",
+      "seed": 10,
       "region": "West",
-      "espnId": "275"
-    },
-    {
-      "id": "highpoint",
-      "name": "High Point",
-      "shortName": "HPT",
-      "seed": 12,
-      "region": "West",
-      "espnId": "2272",
-      "color": "#330072"
-    },
-    {
-      "id": "arkansas",
-      "name": "Arkansas",
-      "shortName": "ARK",
-      "seed": 4,
-      "region": "West",
-      "espnId": "8",
-      "color": "#a32136"
-    },
-    {
-      "id": "hawaii",
-      "name": "Hawaii",
-      "shortName": "HAW",
-      "seed": 13,
-      "region": "West",
-      "espnId": "62"
-    },
-    {
-      "id": "byu",
-      "name": "BYU",
-      "shortName": "BYU",
-      "seed": 6,
-      "region": "West",
-      "espnId": "252"
+      "espnId": "142"
     },
     {
       "id": "texas",
@@ -353,13 +362,21 @@
       "color": "#af5c37"
     },
     {
-      "id": "gonzaga",
-      "name": "Gonzaga",
-      "shortName": "GONZ",
-      "seed": 3,
+      "id": "highpoint",
+      "name": "High Point",
+      "shortName": "HPT",
+      "seed": 12,
       "region": "West",
-      "espnId": "2250",
-      "color": "#041e42"
+      "espnId": "2272",
+      "color": "#330072"
+    },
+    {
+      "id": "hawaii",
+      "name": "Hawaii",
+      "shortName": "HAW",
+      "seed": 13,
+      "region": "West",
+      "espnId": "62"
     },
     {
       "id": "kensaw",
@@ -370,36 +387,20 @@
       "espnId": "338"
     },
     {
-      "id": "miami",
-      "name": "Miami",
-      "shortName": "MIA",
-      "seed": 7,
-      "region": "West",
-      "espnId": "2390"
-    },
-    {
-      "id": "missouri",
-      "name": "Missouri",
-      "shortName": "MIZZ",
-      "seed": 10,
-      "region": "West",
-      "espnId": "142"
-    },
-    {
-      "id": "purdue",
-      "name": "Purdue",
-      "shortName": "PUR",
-      "seed": 2,
-      "region": "West",
-      "espnId": "2509"
-    },
-    {
       "id": "queens",
       "name": "Queens",
       "shortName": "QUNS",
       "seed": 15,
       "region": "West",
       "espnId": "2511"
+    },
+    {
+      "id": "liu",
+      "name": "LIU",
+      "shortName": "LIU",
+      "seed": 16,
+      "region": "West",
+      "espnId": "112358"
     },
     {
       "id": "michigan",
@@ -411,12 +412,52 @@
       "color": "#00274c"
     },
     {
-      "id": "howard",
-      "name": "Howard",
-      "shortName": "HOW",
-      "seed": 16,
+      "id": "iowast",
+      "name": "Iowa St.",
+      "shortName": "IAST",
+      "seed": 2,
       "region": "Midwest",
-      "espnId": "47"
+      "espnId": "66"
+    },
+    {
+      "id": "virginia",
+      "name": "Virginia",
+      "shortName": "UVA",
+      "seed": 3,
+      "region": "Midwest",
+      "espnId": "258"
+    },
+    {
+      "id": "alabama",
+      "name": "Alabama",
+      "shortName": "ALA",
+      "seed": 4,
+      "region": "Midwest",
+      "espnId": "333"
+    },
+    {
+      "id": "texastech",
+      "name": "Texas Tech",
+      "shortName": "TTU",
+      "seed": 5,
+      "region": "Midwest",
+      "espnId": "2641"
+    },
+    {
+      "id": "tennessee",
+      "name": "Tennessee",
+      "shortName": "TENN",
+      "seed": 6,
+      "region": "Midwest",
+      "espnId": "2633"
+    },
+    {
+      "id": "kentucky",
+      "name": "Kentucky",
+      "shortName": "KNTK",
+      "seed": 7,
+      "region": "Midwest",
+      "espnId": "96"
     },
     {
       "id": "georgia",
@@ -436,44 +477,12 @@
       "color": "#00539C"
     },
     {
-      "id": "texastech",
-      "name": "Texas Tech",
-      "shortName": "TTU",
-      "seed": 5,
+      "id": "santaclara",
+      "name": "Santa Clara",
+      "shortName": "SCU",
+      "seed": 10,
       "region": "Midwest",
-      "espnId": "2641"
-    },
-    {
-      "id": "akron",
-      "name": "Akron",
-      "shortName": "AKR",
-      "seed": 12,
-      "region": "Midwest",
-      "espnId": "2006"
-    },
-    {
-      "id": "alabama",
-      "name": "Alabama",
-      "shortName": "ALA",
-      "seed": 4,
-      "region": "Midwest",
-      "espnId": "333"
-    },
-    {
-      "id": "hofstra",
-      "name": "Hofstra",
-      "shortName": "HOF",
-      "seed": 13,
-      "region": "Midwest",
-      "espnId": "2275"
-    },
-    {
-      "id": "tennessee",
-      "name": "Tennessee",
-      "shortName": "TENN",
-      "seed": 6,
-      "region": "Midwest",
-      "espnId": "2633"
+      "espnId": "2541"
     },
     {
       "id": "miaoh",
@@ -484,12 +493,20 @@
       "espnId": "193"
     },
     {
-      "id": "virginia",
-      "name": "Virginia",
-      "shortName": "UVA",
-      "seed": 3,
+      "id": "akron",
+      "name": "Akron",
+      "shortName": "AKR",
+      "seed": 12,
       "region": "Midwest",
-      "espnId": "258"
+      "espnId": "2006"
+    },
+    {
+      "id": "hofstra",
+      "name": "Hofstra",
+      "shortName": "HOF",
+      "seed": 13,
+      "region": "Midwest",
+      "espnId": "2275"
     },
     {
       "id": "wrightst",
@@ -500,36 +517,20 @@
       "espnId": "2750"
     },
     {
-      "id": "kentucky",
-      "name": "Kentucky",
-      "shortName": "KNTK",
-      "seed": 7,
-      "region": "Midwest",
-      "espnId": "96"
-    },
-    {
-      "id": "santaclara",
-      "name": "Santa Clara",
-      "shortName": "SCU",
-      "seed": 10,
-      "region": "Midwest",
-      "espnId": "2541"
-    },
-    {
-      "id": "iowast",
-      "name": "Iowa St.",
-      "shortName": "IAST",
-      "seed": 2,
-      "region": "Midwest",
-      "espnId": "66"
-    },
-    {
       "id": "tennstate",
       "name": "Tenn. State",
       "shortName": "TNST",
       "seed": 15,
       "region": "Midwest",
       "espnId": "2634"
+    },
+    {
+      "id": "howard",
+      "name": "Howard",
+      "shortName": "HOW",
+      "seed": 16,
+      "region": "Midwest",
+      "espnId": "47"
     }
   ],
   "games": [
@@ -542,7 +543,13 @@
       "team2Id": "siena",
       "nextGameId": "east-r32-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856478"
+      "espnGameId": "401856478",
+      "score1": 71,
+      "score2": 65,
+      "winnerId": "duke",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r64-2",
@@ -553,7 +560,13 @@
       "team2Id": "tcu",
       "nextGameId": "east-r32-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856479"
+      "espnGameId": "401856479",
+      "score1": 64,
+      "score2": 66,
+      "winnerId": "tcu",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r64-3",
@@ -564,7 +577,13 @@
       "team2Id": "niowa",
       "nextGameId": "east-r32-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856494"
+      "espnGameId": "401856494",
+      "score1": 79,
+      "score2": 53,
+      "winnerId": "stjohns",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r64-4",
@@ -575,7 +594,13 @@
       "team2Id": "calbaptist",
       "nextGameId": "east-r32-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856495"
+      "espnGameId": "401856495",
+      "score1": 68,
+      "score2": 60,
+      "winnerId": "kansas",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r64-5",
@@ -586,7 +611,13 @@
       "team2Id": "sfla",
       "nextGameId": "east-r32-3",
       "nextGameSlot": 1,
-      "espnGameId": "401856482"
+      "espnGameId": "401856482",
+      "score1": 83,
+      "score2": 79,
+      "winnerId": "louisville",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r64-6",
@@ -597,7 +628,13 @@
       "team2Id": "ndakst",
       "nextGameId": "east-r32-3",
       "nextGameSlot": 2,
-      "espnGameId": "401856483"
+      "espnGameId": "401856483",
+      "score1": 92,
+      "score2": 67,
+      "winnerId": "michst",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r64-7",
@@ -608,7 +645,13 @@
       "team2Id": "ucf",
       "nextGameId": "east-r32-4",
       "nextGameSlot": 1,
-      "espnGameId": "401856496"
+      "espnGameId": "401856496",
+      "score1": 75,
+      "score2": 71,
+      "winnerId": "ucla",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r64-8",
@@ -619,71 +662,111 @@
       "team2Id": "furman",
       "nextGameId": "east-r32-4",
       "nextGameSlot": 2,
-      "espnGameId": "401856497"
+      "espnGameId": "401856497",
+      "score1": 82,
+      "score2": 71,
+      "winnerId": "uconn",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r32-1",
       "round": "R32",
       "region": "East",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "duke",
+      "team2Id": "tcu",
       "nextGameId": "east-s16-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856530"
+      "espnGameId": "401856530",
+      "score1": 81,
+      "score2": 58,
+      "winnerId": "duke",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r32-2",
       "round": "R32",
       "region": "East",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "stjohns",
+      "team2Id": "kansas",
       "nextGameId": "east-s16-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856558"
+      "espnGameId": "401856558",
+      "score1": 67,
+      "score2": 65,
+      "winnerId": "stjohns",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r32-3",
       "round": "R32",
       "region": "East",
       "bracketSlot": 3,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "louisville",
+      "team2Id": "michst",
       "nextGameId": "east-s16-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856531"
+      "espnGameId": "401856531",
+      "score1": 69,
+      "score2": 77,
+      "winnerId": "michst",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-r32-4",
       "round": "R32",
       "region": "East",
       "bracketSlot": 4,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "ucla",
+      "team2Id": "uconn",
       "nextGameId": "east-s16-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856559"
+      "espnGameId": "401856559",
+      "score1": 57,
+      "score2": 73,
+      "winnerId": "uconn",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "east-s16-1",
       "round": "S16",
       "region": "East",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "duke",
+      "team2Id": "stjohns",
       "nextGameId": "east-e8-1",
-      "nextGameSlot": 1
+      "nextGameSlot": 1,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "east-s16-2",
       "round": "S16",
       "region": "East",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "michst",
+      "team2Id": "uconn",
       "nextGameId": "east-e8-1",
-      "nextGameSlot": 2
+      "nextGameSlot": 2,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "east-e8-1",
@@ -693,7 +776,12 @@
       "team1Id": null,
       "team2Id": null,
       "nextGameId": "f4-1",
-      "nextGameSlot": 1
+      "nextGameSlot": 1,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "south-r64-1",
@@ -704,7 +792,13 @@
       "team2Id": "pvam",
       "nextGameId": "south-r32-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856523"
+      "espnGameId": "401856523",
+      "score1": 114,
+      "score2": 55,
+      "winnerId": "florida",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r64-2",
@@ -715,7 +809,13 @@
       "team2Id": "iowa",
       "nextGameId": "south-r32-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856522"
+      "espnGameId": "401856522",
+      "score1": 61,
+      "score2": 67,
+      "winnerId": "iowa",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r64-3",
@@ -726,7 +826,13 @@
       "team2Id": "mcneese",
       "nextGameId": "south-r32-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856488"
+      "espnGameId": "401856488",
+      "score1": 78,
+      "score2": 68,
+      "winnerId": "vanderbilt",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r64-4",
@@ -737,7 +843,13 @@
       "team2Id": "troy",
       "nextGameId": "south-r32-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856489"
+      "espnGameId": "401856489",
+      "score1": 76,
+      "score2": 47,
+      "winnerId": "nebraska",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r64-5",
@@ -748,7 +860,13 @@
       "team2Id": "vcu",
       "nextGameId": "south-r32-3",
       "nextGameSlot": 1,
-      "espnGameId": "401856490"
+      "espnGameId": "401856490",
+      "score1": 78,
+      "score2": 82,
+      "winnerId": "vcu",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r64-6",
@@ -759,7 +877,13 @@
       "team2Id": "penn",
       "nextGameId": "south-r32-3",
       "nextGameSlot": 2,
-      "espnGameId": "401856491"
+      "espnGameId": "401856491",
+      "score1": 105,
+      "score2": 70,
+      "winnerId": "illinois",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r64-7",
@@ -770,7 +894,13 @@
       "team2Id": "texasam",
       "nextGameId": "south-r32-4",
       "nextGameSlot": 1,
-      "espnGameId": "401856492"
+      "espnGameId": "401856492",
+      "score1": 50,
+      "score2": 63,
+      "winnerId": "texasam",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r64-8",
@@ -781,71 +911,111 @@
       "team2Id": "idaho",
       "nextGameId": "south-r32-4",
       "nextGameSlot": 2,
-      "espnGameId": "401856493"
+      "espnGameId": "401856493",
+      "score1": 78,
+      "score2": 47,
+      "winnerId": "houston",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r32-1",
       "round": "R32",
       "region": "South",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "florida",
+      "team2Id": "iowa",
       "nextGameId": "south-s16-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856563"
+      "espnGameId": "401856563",
+      "score1": 72,
+      "score2": 73,
+      "winnerId": "iowa",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r32-2",
       "round": "R32",
       "region": "South",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "vanderbilt",
+      "team2Id": "nebraska",
       "nextGameId": "south-s16-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856534"
+      "espnGameId": "401856534",
+      "score1": 72,
+      "score2": 74,
+      "winnerId": "nebraska",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r32-3",
       "round": "R32",
       "region": "South",
       "bracketSlot": 3,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "vcu",
+      "team2Id": "illinois",
       "nextGameId": "south-s16-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856533"
+      "espnGameId": "401856533",
+      "score1": 55,
+      "score2": 76,
+      "winnerId": "illinois",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-r32-4",
       "round": "R32",
       "region": "South",
       "bracketSlot": 4,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "texasam",
+      "team2Id": "houston",
       "nextGameId": "south-s16-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856535"
+      "espnGameId": "401856535",
+      "score1": 57,
+      "score2": 88,
+      "winnerId": "houston",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "south-s16-1",
       "round": "S16",
       "region": "South",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "iowa",
+      "team2Id": "nebraska",
       "nextGameId": "south-e8-1",
-      "nextGameSlot": 1
+      "nextGameSlot": 1,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "south-s16-2",
       "round": "S16",
       "region": "South",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "illinois",
+      "team2Id": "houston",
       "nextGameId": "south-e8-1",
-      "nextGameSlot": 2
+      "nextGameSlot": 2,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "south-e8-1",
@@ -855,7 +1025,12 @@
       "team1Id": null,
       "team2Id": null,
       "nextGameId": "f4-1",
-      "nextGameSlot": 2
+      "nextGameSlot": 2,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "west-r64-1",
@@ -866,7 +1041,13 @@
       "team2Id": "liu",
       "nextGameId": "west-r32-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856529"
+      "espnGameId": "401856529",
+      "score1": 92,
+      "score2": 58,
+      "winnerId": "arizona",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r64-2",
@@ -877,7 +1058,13 @@
       "team2Id": "utahst",
       "nextGameId": "west-r32-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856528"
+      "espnGameId": "401856528",
+      "score1": 76,
+      "score2": 86,
+      "winnerId": "utahst",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r64-3",
@@ -888,7 +1075,13 @@
       "team2Id": "highpoint",
       "nextGameId": "west-r32-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856480"
+      "espnGameId": "401856480",
+      "score1": 82,
+      "score2": 83,
+      "winnerId": "highpoint",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r64-4",
@@ -899,7 +1092,13 @@
       "team2Id": "hawaii",
       "nextGameId": "west-r32-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856481"
+      "espnGameId": "401856481",
+      "score1": 97,
+      "score2": 78,
+      "winnerId": "arkansas",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r64-5",
@@ -910,7 +1109,13 @@
       "team2Id": "texas",
       "nextGameId": "west-r32-3",
       "nextGameSlot": 1,
-      "espnGameId": "401856484"
+      "espnGameId": "401856484",
+      "score1": 71,
+      "score2": 79,
+      "winnerId": "texas",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r64-6",
@@ -921,7 +1126,13 @@
       "team2Id": "kensaw",
       "nextGameId": "west-r32-3",
       "nextGameSlot": 2,
-      "espnGameId": "401856485"
+      "espnGameId": "401856485",
+      "score1": 73,
+      "score2": 64,
+      "winnerId": "gonzaga",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r64-7",
@@ -932,7 +1143,13 @@
       "team2Id": "missouri",
       "nextGameId": "west-r32-4",
       "nextGameSlot": 1,
-      "espnGameId": "401856518"
+      "espnGameId": "401856518",
+      "score1": 80,
+      "score2": 66,
+      "winnerId": "miami",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r64-8",
@@ -943,71 +1160,111 @@
       "team2Id": "queens",
       "nextGameId": "west-r32-4",
       "nextGameSlot": 2,
-      "espnGameId": "401856519"
+      "espnGameId": "401856519",
+      "score1": 104,
+      "score2": 71,
+      "winnerId": "purdue",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r32-1",
       "round": "R32",
       "region": "West",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "arizona",
+      "team2Id": "utahst",
       "nextGameId": "west-s16-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856565"
+      "espnGameId": "401856565",
+      "score1": 78,
+      "score2": 66,
+      "winnerId": "arizona",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r32-2",
       "round": "R32",
       "region": "West",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "highpoint",
+      "team2Id": "arkansas",
       "nextGameId": "west-s16-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856536"
+      "espnGameId": "401856536",
+      "score1": 88,
+      "score2": 94,
+      "winnerId": "arkansas",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r32-3",
       "round": "R32",
       "region": "West",
       "bracketSlot": 3,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "texas",
+      "team2Id": "gonzaga",
       "nextGameId": "west-s16-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856537"
+      "espnGameId": "401856537",
+      "score1": 74,
+      "score2": 68,
+      "winnerId": "texas",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-r32-4",
       "round": "R32",
       "region": "West",
       "bracketSlot": 4,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "miami",
+      "team2Id": "purdue",
       "nextGameId": "west-s16-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856564"
+      "espnGameId": "401856564",
+      "score1": 69,
+      "score2": 79,
+      "winnerId": "purdue",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "west-s16-1",
       "round": "S16",
       "region": "West",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "arizona",
+      "team2Id": "arkansas",
       "nextGameId": "west-e8-1",
-      "nextGameSlot": 1
+      "nextGameSlot": 1,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "west-s16-2",
       "round": "S16",
       "region": "West",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "texas",
+      "team2Id": "purdue",
       "nextGameId": "west-e8-1",
-      "nextGameSlot": 2
+      "nextGameSlot": 2,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "west-e8-1",
@@ -1017,7 +1274,12 @@
       "team1Id": null,
       "team2Id": null,
       "nextGameId": "f4-2",
-      "nextGameSlot": 1
+      "nextGameSlot": 1,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "mid-r64-1",
@@ -1028,7 +1290,13 @@
       "team2Id": "howard",
       "nextGameId": "mid-r32-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856486"
+      "espnGameId": "401856486",
+      "score1": 101,
+      "score2": 80,
+      "winnerId": "michigan",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r64-2",
@@ -1039,7 +1307,13 @@
       "team2Id": "saintlouis",
       "nextGameId": "mid-r32-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856487"
+      "espnGameId": "401856487",
+      "score1": 77,
+      "score2": 102,
+      "winnerId": "saintlouis",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r64-3",
@@ -1050,7 +1324,13 @@
       "team2Id": "akron",
       "nextGameId": "mid-r32-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856520"
+      "espnGameId": "401856520",
+      "score1": 91,
+      "score2": 71,
+      "winnerId": "texastech",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r64-4",
@@ -1061,7 +1341,13 @@
       "team2Id": "hofstra",
       "nextGameId": "mid-r32-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856521"
+      "espnGameId": "401856521",
+      "score1": 90,
+      "score2": 70,
+      "winnerId": "alabama",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r64-5",
@@ -1072,7 +1358,13 @@
       "team2Id": "miaoh",
       "nextGameId": "mid-r32-3",
       "nextGameSlot": 1,
-      "espnGameId": "401856527"
+      "espnGameId": "401856527",
+      "score1": 78,
+      "score2": 56,
+      "winnerId": "tennessee",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r64-6",
@@ -1083,7 +1375,13 @@
       "team2Id": "wrightst",
       "nextGameId": "mid-r32-3",
       "nextGameSlot": 2,
-      "espnGameId": "401856526"
+      "espnGameId": "401856526",
+      "score1": 82,
+      "score2": 73,
+      "winnerId": "virginia",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r64-7",
@@ -1094,7 +1392,13 @@
       "team2Id": "santaclara",
       "nextGameId": "mid-r32-4",
       "nextGameSlot": 1,
-      "espnGameId": "401856525"
+      "espnGameId": "401856525",
+      "score1": 89,
+      "score2": 84,
+      "winnerId": "kentucky",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r64-8",
@@ -1105,71 +1409,111 @@
       "team2Id": "tennstate",
       "nextGameId": "mid-r32-4",
       "nextGameSlot": 2,
-      "espnGameId": "401856524"
+      "espnGameId": "401856524",
+      "score1": 108,
+      "score2": 74,
+      "winnerId": "iowast",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r32-1",
       "round": "R32",
       "region": "Midwest",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "michigan",
+      "team2Id": "saintlouis",
       "nextGameId": "mid-s16-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856532"
+      "espnGameId": "401856532",
+      "score1": 95,
+      "score2": 72,
+      "winnerId": "michigan",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r32-2",
       "round": "R32",
       "region": "Midwest",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "texastech",
+      "team2Id": "alabama",
       "nextGameId": "mid-s16-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856560"
+      "espnGameId": "401856560",
+      "score1": 65,
+      "score2": 90,
+      "winnerId": "alabama",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r32-3",
       "round": "R32",
       "region": "Midwest",
       "bracketSlot": 3,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "tennessee",
+      "team2Id": "virginia",
       "nextGameId": "mid-s16-2",
       "nextGameSlot": 1,
-      "espnGameId": "401856562"
+      "espnGameId": "401856562",
+      "score1": 79,
+      "score2": 72,
+      "winnerId": "tennessee",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-r32-4",
       "round": "R32",
       "region": "Midwest",
       "bracketSlot": 4,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "kentucky",
+      "team2Id": "iowast",
       "nextGameId": "mid-s16-2",
       "nextGameSlot": 2,
-      "espnGameId": "401856561"
+      "espnGameId": "401856561",
+      "score1": 63,
+      "score2": 82,
+      "winnerId": "iowast",
+      "status": "final",
+      "scheduledAt": null,
+      "completedAt": "2026-03-23T04:00:00.000Z"
     },
     {
       "gameId": "mid-s16-1",
       "round": "S16",
       "region": "Midwest",
       "bracketSlot": 1,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "michigan",
+      "team2Id": "alabama",
       "nextGameId": "mid-e8-1",
-      "nextGameSlot": 1
+      "nextGameSlot": 1,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "mid-s16-2",
       "round": "S16",
       "region": "Midwest",
       "bracketSlot": 2,
-      "team1Id": null,
-      "team2Id": null,
+      "team1Id": "tennessee",
+      "team2Id": "iowast",
       "nextGameId": "mid-e8-1",
-      "nextGameSlot": 2
+      "nextGameSlot": 2,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "mid-e8-1",
@@ -1179,7 +1523,12 @@
       "team1Id": null,
       "team2Id": null,
       "nextGameId": "f4-2",
-      "nextGameSlot": 2
+      "nextGameSlot": 2,
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "f4-1",
@@ -1190,7 +1539,12 @@
       "team2Id": null,
       "nextGameId": "ncg-1",
       "nextGameSlot": 1,
-      "espnGameId": "401856598"
+      "espnGameId": "401856598",
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "f4-2",
@@ -1201,7 +1555,12 @@
       "team2Id": null,
       "nextGameId": "ncg-1",
       "nextGameSlot": 2,
-      "espnGameId": "401856599"
+      "espnGameId": "401856599",
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     },
     {
       "gameId": "ncg-1",
@@ -1212,7 +1571,12 @@
       "team2Id": null,
       "nextGameId": null,
       "nextGameSlot": null,
-      "espnGameId": "401856600"
+      "espnGameId": "401856600",
+      "score1": null,
+      "score2": null,
+      "winnerId": null,
+      "status": "scheduled",
+      "completedAt": null
     }
   ],
   "_cameron_keetch_picks": {

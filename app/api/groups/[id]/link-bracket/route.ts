@@ -9,10 +9,9 @@ import {
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import type { GroupMember } from "@/lib/types";
 import { isGroupAdmin } from "@/lib/group-permissions";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 // POST /api/groups/[id]/link-bracket — set or change the caller's bracket for this group
 export async function POST(
@@ -45,7 +44,7 @@ export async function POST(
     return NextResponse.json({ error: "Bracket not found or not yours" }, { status: 400 });
   }
 
-  const groupTid = group.tournamentId ?? TOURNAMENT_ID;
+  const groupTid = group.tournamentId ?? defaultTournamentId();
   if (bracket.tournamentId !== groupTid) {
     return NextResponse.json(
       { error: "That bracket is for a different tournament than this group." },

@@ -5,8 +5,7 @@ import { getGroup, getGroupMembership } from "@/lib/dynamo/queries/groups";
 import { isGroupAdmin } from "@/lib/group-permissions";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { GroupAreaShell } from "@/components/groups/GroupAreaShell";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export default async function GroupSectionLayout({
   children,
@@ -29,7 +28,8 @@ export default async function GroupSectionLayout({
     redirect("/dashboard");
   }
 
-  const tid = (group.tournamentId ?? TOURNAMENT_ID).trim() || TOURNAMENT_ID;
+  const fallback = defaultTournamentId();
+  const tid = (group.tournamentId ?? fallback).trim() || fallback;
   const tournament = await getTournament(tid);
   const tournamentLockPick = tournament
     ? { lockDate: tournament.lockDate, picksOpenOverride: tournament.picksOpenOverride }

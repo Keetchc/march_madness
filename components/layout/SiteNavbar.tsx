@@ -8,12 +8,12 @@ import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { Menu, X } from "lucide-react";
 import { LockCountdownBadge } from "@/components/layout/LockCountdownBadge";
+import { SeasonSelector } from "@/components/layout/SeasonSelector";
 import type { Tournament } from "@/lib/types";
 
 const PUBLIC_LINKS = [
   { href: "/leaderboard", label: "Global Leaderboard" },
   { href: "/official-bracket", label: "Official Bracket" },
-  { href: "/rules", label: "Rules" },
 ] as const;
 
 const AUTH_PRIMARY_LINKS = [
@@ -98,7 +98,7 @@ export function SiteNavbar() {
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-0.5 flex-shrink-0 flex-wrap justify-end">
+          <nav className="hidden md:flex items-center gap-0.5 flex-shrink-0 flex-wrap justify-end ml-auto">
             {authed &&
               AUTH_PRIMARY_LINKS.map((link) => {
                 const active = linkActive(link.href, pathname);
@@ -137,6 +137,7 @@ export function SiteNavbar() {
                 ⚡ Admin
               </Link>
             )}
+            <SeasonSelector className="shrink-0" />
             {authed && (
               <LockCountdownBadge tournament={tournamentLockPick ?? undefined} variant="compact" className="hidden md:inline-flex ml-0.5" />
             )}
@@ -208,6 +209,9 @@ export function SiteNavbar() {
             onClick={() => setMenuOpen(false)}
           />
           <nav className="md:hidden absolute left-0 right-0 top-full border-b border-hardwood-600 bg-hardwood-800 shadow-xl z-50 flex flex-col py-2 px-2 gap-0.5 max-h-[calc(100dvh-2.75rem)] overflow-y-auto">
+            <div className="px-3 py-2 border-b border-hardwood-700 mb-1">
+              <SeasonSelector />
+            </div>
             {authed &&
               AUTH_PRIMARY_LINKS.map((link) => {
                 const active = linkActive(link.href, pathname);

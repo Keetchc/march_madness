@@ -107,7 +107,11 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
 
       {/* Tab content */}
       {adminTab === "results" ? (
-        <GameResultsPanel games={games} teamsMap={teamsMap} />
+        <GameResultsPanel
+          games={games}
+          teamsMap={teamsMap}
+          tournamentId={tournament?.tournamentId ?? games[0]?.tournamentId ?? ""}
+        />
       ) : adminTab === "add-bracket" ? (
         <AdminBracketBuilder games={games} teams={teamsMap} />
       ) : tournament ? (
@@ -119,8 +123,19 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
   );
 }
 
-function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<string, Team> }) {
+function GameResultsPanel({
+  games,
+  teamsMap,
+  tournamentId,
+}: {
+  games: Game[];
+  teamsMap: Map<string, Team>;
+  tournamentId: string;
+}) {
   const [localGames, setLocalGames] = useState<Game[]>(games);
+  useEffect(() => {
+    setLocalGames(games);
+  }, [games]);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -173,6 +188,7 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
           winnerId,
           score1,
           score2,
+          tournamentId: tournamentId || undefined,
         }),
       });
       if (res.ok) {

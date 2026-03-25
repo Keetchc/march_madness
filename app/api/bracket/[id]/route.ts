@@ -5,10 +5,11 @@ import { getAuthOptions } from "@/lib/auth";
 import { getBracket, updatePicks, deleteBracket } from "@/lib/dynamo/queries/brackets";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
 
-const DEFAULT_TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+const DEFAULT_TOURNAMENT_ID = defaultTournamentId();
 
 // GET /api/bracket/[id] — full bracket for owner/admin after lock; others get redacted picks before lock
 export async function GET(

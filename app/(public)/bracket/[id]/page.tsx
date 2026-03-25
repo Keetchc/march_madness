@@ -9,10 +9,11 @@ import { getUserId } from "@/lib/session";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { BracketPageClient } from "@/app/(app)/bracket/[id]/BracketPageClient";
+import { defaultTournamentId } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
 
-const DEFAULT_TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
+const DEFAULT_TOURNAMENT_ID = defaultTournamentId();
 
 export default async function PublicBracketPage({
   params,
@@ -44,15 +45,24 @@ export default async function PublicBracketPage({
     : "Picks become visible to the group after the pool locks.";
 
   const fromGroup = typeof searchParams.fromGroup === "string" ? searchParams.fromGroup.trim() : "";
+  const groupFromQuery = fromGroup ? await getGroup(fromGroup) : null;
+  const groupReturn =
+    groupFromQuery != null
+      ? { id: groupFromQuery.groupId, name: groupFromQuery.name }
+      : undefined;
+
   let whatIfScoringRules: import("@/lib/types").ScoringRules | undefined;
   let whatIfScoringSourceLabel: string | undefined;
-  if (fromGroup && sessionUserId) {
-    const g = await getGroup(fromGroup);
+  let fromGroupIdForPicks: string | undefined;
+  if (fromGroup && sessionUserId && groupFromQuery) {
+    const g = groupFromQuery;
     const mem = await getGroupMembership(fromGroup, sessionUserId);
-    if (g && mem) {
+    const inGroupContext = Boolean(g && (mem || isAppAdmin));
+    if (inGroupContext && g) {
+      fromGroupIdForPicks = g.groupId;
       const bracketTid = (bracket.tournamentId ?? DEFAULT_TOURNAMENT_ID).trim();
       const resolvedTid = scoringTournamentIdForGroup(g.tournamentId, [bracket], DEFAULT_TOURNAMENT_ID);
-      if (resolvedTid === bracketTid) {
+      if (resolvedTid === bracketTid && mem) {
         whatIfScoringRules = g.scoringRules;
         whatIfScoringSourceLabel = g.name;
       }
@@ -71,6 +81,9 @@ export default async function PublicBracketPage({
       serverRedactedPicks={picksHiddenUntilLock}
       whatIfScoringRules={whatIfScoringRules}
       whatIfScoringSourceLabel={whatIfScoringSourceLabel}
+      fromGroupId={fromGroupIdForPicks}
+      groupReturn={groupReturn}
+      bracketTournamentId={tid}
     />
   );
 }

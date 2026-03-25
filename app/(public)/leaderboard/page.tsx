@@ -9,10 +9,10 @@ import {
   PoolLeaderboardTableHeaders,
 } from "@/components/leaderboard/PoolLeaderboardRow";
 import { RoundMiniLeaderboard } from "@/components/leaderboard/RoundMiniLeaderboard";
+import { GlobalLeaderboardScoringSummary } from "@/components/leaderboard/GlobalLeaderboardScoringSummary";
+import { getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
-
-const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function PublicLeaderboardPage() {
   const session = await getServerSession(getAuthOptions());
@@ -21,11 +21,12 @@ export default async function PublicLeaderboardPage() {
       ? ((session.user as { userId?: string }).userId ?? "")
       : "";
 
+  const viewingId = getViewingTournamentIdFromCookies();
   const [brackets, games, teams, tournament] = await Promise.all([
-    getBracketsByTournament(TOURNAMENT_ID),
-    getAllGames(TOURNAMENT_ID),
-    getAllTeams(TOURNAMENT_ID),
-    getTournament(TOURNAMENT_ID),
+    getBracketsByTournament(viewingId),
+    getAllGames(viewingId),
+    getAllTeams(viewingId),
+    getTournament(viewingId),
   ]);
 
   const userRecords = await Promise.all(
@@ -56,10 +57,15 @@ export default async function PublicLeaderboardPage() {
         <p className="text-ink-400 text-xs font-mono mt-3 max-w-md">
           Pool-wide view. To browse or compare picks with your crew, open a group from your dashboard.
         </p>
+        <div className="mt-3">
+          <GlobalLeaderboardScoringSummary />
+        </div>
       </div>
 
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
-        {leaderboard.length > 0 && <PoolLeaderboardTableHeaders />}
+        {leaderboard.length > 0 && (
+          <PoolLeaderboardTableHeaders identityColumnLabel="Bracket" />
+        )}
 
         {leaderboard.length === 0 ? (
           <div className="p-12 text-center text-ink-400 font-body">No brackets submitted yet.</div>
@@ -72,6 +78,7 @@ export default async function PublicLeaderboardPage() {
                 isCurrentUser={!!currentUserId && entry.userId === currentUserId}
                 maskStats={false}
                 rankDisplay={entry.rank}
+                bracketNameOnly
               />
             ))}
           </div>
@@ -80,10 +87,11 @@ export default async function PublicLeaderboardPage() {
 
       {leaderboard.length > 0 && (
         <div className="mt-6 space-y-2">
-          <p className="text-[10px] text-ink-400 font-mono max-w-xl">
-            Round scores below use the site default scoring rules, not a private group&apos;s custom rules.
-          </p>
-          <RoundMiniLeaderboard leaderboard={leaderboard} />
+          <RoundMiniLeaderboard
+            leaderboard={leaderboard}
+            useBracketNames
+            subtitle="Top scorers per NCAA round among finished games, using the same default rules as the global table above."
+          />
         </div>
       )}
     </div>

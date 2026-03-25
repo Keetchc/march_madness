@@ -42,6 +42,10 @@ function inferDynamoPrefixFromAmplifyBranch(): string | undefined {
 }
 
 function dynamoTablePrefix(): string {
+  /** CLI scripts (`scripts/bootstrap-env.ts`) set this so `.env.local` wins over `.next/amplify-auth.json`. */
+  if (rawEnv("MM_CLI_SCRIPT") === "1") {
+    return normalizePrefix(rawEnv("DYNAMO_TABLE_PREFIX") ?? "mm");
+  }
   const fromArtifact = serverEnvFromArtifactOnly("DYNAMO_TABLE_PREFIX");
   if (fromArtifact) {
     return normalizePrefix(fromArtifact);

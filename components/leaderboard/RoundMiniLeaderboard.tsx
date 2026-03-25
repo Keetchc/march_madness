@@ -11,9 +11,20 @@ import {
 
 type Props = {
   leaderboard: LeaderboardEntry[];
+  /** Use bracket titles instead of account names (e.g. global leaderboard privacy). */
+  useBracketNames?: boolean;
+  /** Override the blurb under the title (e.g. global page vs group pool). */
+  subtitle?: string;
 };
 
-export function RoundMiniLeaderboard({ leaderboard }: Props) {
+const DEFAULT_SUBTITLE =
+  "Who scored the most from games that finished in each NCAA round (using this pool's rules).";
+
+export function RoundMiniLeaderboard({
+  leaderboard,
+  useBracketNames = false,
+  subtitle = DEFAULT_SUBTITLE,
+}: Props) {
   const [round, setRound] = useState<Round>("R64");
 
   const rows = useMemo(() => {
@@ -34,9 +45,7 @@ export function RoundMiniLeaderboard({ leaderboard }: Props) {
       <h2 className="font-display font-bold uppercase tracking-wide text-sm text-white mb-1">
         Points by round
       </h2>
-      <p className="text-xs text-ink-300 font-body mb-3">
-        Who scored the most from games that finished in each NCAA round (using this pool&apos;s rules).
-      </p>
+      <p className="text-xs text-ink-300 font-body mb-3">{subtitle}</p>
       <div className="flex flex-wrap gap-1.5 mb-4">
         {ROUNDS_IN_ORDER.map((r) => (
           <button
@@ -64,7 +73,9 @@ export function RoundMiniLeaderboard({ leaderboard }: Props) {
               className="flex items-center justify-between gap-3 text-sm font-mono border-b border-hardwood-700/80 pb-2 last:border-0 last:pb-0"
             >
               <span className="text-ink-300 w-6 shrink-0">{i + 1}</span>
-              <span className="text-white truncate flex-1 min-w-0 font-body">{entry.userName}</span>
+              <span className="text-white truncate flex-1 min-w-0 font-body">
+                {useBracketNames ? entry.bracketName : entry.userName}
+              </span>
               <span className="text-court-400 tabular-nums shrink-0">{pts} pts</span>
             </li>
           ))}
