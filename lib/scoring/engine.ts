@@ -174,6 +174,24 @@ export function scoreBracket(
     }
   }
 
+  const perfectRoundBonus = scoringRules?.bonuses?.perfectRound ?? 0;
+  if (perfectRoundBonus > 0) {
+    for (const round of ROUNDS_IN_ORDER) {
+      const inRound = games.filter((g) => g.round === round);
+      if (inRound.length === 0) continue;
+      const allFinal = inRound.every((g) => isGameFinalStatus(g.status) && g.winnerId);
+      if (!allFinal) continue;
+      const allCorrect = inRound.every((g) => {
+        const p = getPickForGame(picksMap, g.gameId);
+        return Boolean(p && p === g.winnerId);
+      });
+      if (allCorrect) {
+        score += perfectRoundBonus;
+        roundBreakdown[round] += perfectRoundBonus;
+      }
+    }
+  }
+
   // Max possible: current score + potential points from remaining games
   let maxPossibleScore = score;
   for (const game of pendingGames) {

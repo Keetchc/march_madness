@@ -2,14 +2,16 @@ import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { getGroup, getGroupMembers, getGroupMembership } from "@/lib/dynamo/queries/groups";
+import { isGroupAdmin } from "@/lib/group-permissions";
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { buildLeaderboard, isGameFinalStatus } from "@/lib/scoring/engine";
+import { computeVsLeaderSnapshot } from "@/lib/scoring/vs-leader";
 import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import type { Bracket } from "@/lib/types";
-import { GroupPageClient } from "./GroupPageClient";
+import { GroupStandingsClient } from "./GroupStandingsClient";
 
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
@@ -24,13 +26,12 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   if (!group) notFound();
 
   const membership = await getGroupMembership(params.id, userId);
-  if (!membership && group.adminUserId !== userId && !isAppAdmin) {
+  if (!membership && !isGroupAdmin(group, userId) && !isAppAdmin) {
     redirect("/dashboard");
   }
 
   const bracketLinked = String(membership?.bracketId ?? "").trim();
-  const needsBracket =
-    (group.adminUserId === userId || Boolean(membership)) && !bracketLinked;
+  const needsBracket = (isGroupAdmin(group, userId) || Boolean(membership)) && !bracketLinked;
 
   const members = await getGroupMembers(params.id);
 
@@ -57,7 +58,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
     Array.from(userIdSet).map(async (uid) => {
       const u = await resolveUserDisplayProfile(uid);
       return [uid, { name: u.name, picture: u.picture }] as const;
-    })
+    }),
   );
 
   const usersMap = new Map(userRecords);
@@ -65,23 +66,40 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
 
   const leaderboard = buildLeaderboard(brackets, usersMap, games, teamsMap, group.scoringRules);
 
+  const bracketByUserId = new Map<string, Bracket>();
+  for (const b of brackets) {
+    const uid = String(b.userId ?? "").trim();
+    if (uid) bracketByUserId.set(uid, b);
+  }
+
   const standingsLocked = picksEffectivelyClosed(tournament);
   const gamesCompletedCount = games.filter((g) => isGameFinalStatus(g.status)).length;
-  /** Match public leaderboard visibility: hide others’ stats only before the tournament starts (no finals yet). */
   const maskOpponentStandings = !standingsLocked && gamesCompletedCount === 0;
 
+  const canSeeEveryoneStats =
+    !maskOpponentStandings || isGroupAdmin(group, userId) || isAppAdmin;
+  const vsLeader = canSeeEveryoneStats
+    ? computeVsLeaderSnapshot(userId, leaderboard, bracketByUserId, games, teamsMap, group.scoringRules)
+    : null;
+  const myBracketId =
+    String(bracketLinked).trim() ||
+    leaderboard.find((e) => String(e.userId) === String(userId))?.bracketId ||
+    "";
+
   return (
-    <GroupPageClient
+    <GroupStandingsClient
       group={group}
+      members={members}
       leaderboard={leaderboard}
       currentUserId={userId}
-      isGroupAdmin={group.adminUserId === userId || isAppAdmin}
+      isGroupAdmin={isGroupAdmin(group, userId) || isAppAdmin}
       isAppAdmin={isAppAdmin}
       needsBracket={needsBracket}
       maskOpponentStandings={maskOpponentStandings}
       gamesCompletedCount={gamesCompletedCount}
       tournamentName={tournament?.name}
+      vsLeader={vsLeader}
+      myBracketId={myBracketId}
     />
   );
 }
-

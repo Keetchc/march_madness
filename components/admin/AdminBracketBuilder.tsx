@@ -247,16 +247,16 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
               "px-4 py-2 rounded-lg font-display text-xs font-bold uppercase tracking-wide transition-colors",
               mode === "new"
                 ? "bg-court-500 text-white"
-                : "bg-hardwood-700 text-gray-400 hover:text-white hover:bg-hardwood-600"
+                : "bg-hardwood-700 text-ink-200 hover:text-white hover:bg-hardwood-600"
             )}
           >
             New Bracket
           </button>
-          <span className="text-gray-600 font-mono text-xs">or edit existing:</span>
+          <span className="text-ink-400 font-mono text-xs">or edit existing:</span>
         </div>
 
         {loadingBrackets ? (
-          <p className="font-mono text-xs text-gray-600 animate-pulse">Loading brackets...</p>
+          <p className="font-mono text-xs text-ink-400 animate-pulse">Loading brackets...</p>
         ) : existingBrackets.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {existingBrackets.map((b) => (
@@ -268,27 +268,27 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
                   "px-3 py-1.5 rounded-lg text-xs font-body transition-colors border",
                   editingBracketId === b.bracketId
                     ? "bg-court-500/20 border-court-500 text-court-400"
-                    : "bg-hardwood-700 border-hardwood-500 text-gray-300 hover:border-court-600 hover:text-white"
+                    : "bg-hardwood-700 border-hardwood-500 text-ink-100 hover:border-court-600 hover:text-white"
                 )}
               >
                 {b.userName}
-                <span className="ml-1.5 font-mono text-gray-500">{b.pickCount} picks</span>
+                <span className="ml-1.5 font-mono text-ink-300">{b.pickCount} picks</span>
               </button>
             ))}
           </div>
         ) : (
-          <p className="font-mono text-xs text-gray-600">No existing brackets.</p>
+          <p className="font-mono text-xs text-ink-400">No existing brackets.</p>
         )}
       </div>
 
       {loadingPicks && (
-        <p className="font-mono text-sm text-gray-400 animate-pulse">Loading bracket picks...</p>
+        <p className="font-mono text-sm text-ink-200 animate-pulse">Loading bracket picks...</p>
       )}
 
       {/* Name input (only for new) */}
       {mode === "new" && (
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-xl p-4">
-          <label className="block font-display text-sm font-bold uppercase tracking-wide text-gray-400 mb-2">
+          <label className="block font-display text-sm font-bold uppercase tracking-wide text-ink-200 mb-2">
             Person's Name
           </label>
           <input
@@ -296,7 +296,7 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Brian Dastrup"
-            className="w-full max-w-sm bg-hardwood-700 border border-hardwood-500 rounded-lg px-4 py-2.5 text-white font-body text-sm outline-none focus:border-court-500 placeholder:text-gray-600"
+            className="w-full max-w-sm bg-hardwood-700 border border-hardwood-500 rounded-lg px-4 py-2.5 text-white font-body text-sm outline-none focus:border-court-500 placeholder:text-ink-400"
           />
         </div>
       )}
@@ -306,7 +306,7 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
           <p className="font-display text-sm font-bold uppercase tracking-wide text-court-400">
             Editing: {name}
           </p>
-          <p className="font-mono text-xs text-gray-500 mt-1">
+          <p className="font-mono text-xs text-ink-300 mt-1">
             Bracket ID: {editingBracketId}
           </p>
         </div>
@@ -315,7 +315,7 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
       {/* Progress + Save */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-sm text-gray-400">
+          <span className="font-mono text-sm text-ink-200">
             {pickedCount}/{totalGames} picks
           </span>
           <div className="w-48 h-2 bg-hardwood-700 rounded-full overflow-hidden">
@@ -360,13 +360,13 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
                 "flex-shrink-0 px-4 py-2.5 text-sm font-display font-bold uppercase tracking-wide transition-colors border-b-2 -mb-px whitespace-nowrap",
                 activeRound === round
                   ? "text-court-400 border-court-500"
-                  : "text-gray-500 border-transparent hover:text-gray-300"
+                  : "text-ink-300 border-transparent hover:text-ink-100"
               )}
             >
               {ROUND_LABELS[round]}
               <span className={clsx(
                 "ml-2 text-[10px] font-mono",
-                done === count && count > 0 ? "text-green-500" : "text-gray-600"
+                done === count && count > 0 ? "text-green-500" : "text-ink-400"
               )}>
                 {done}/{count}
               </span>
@@ -406,7 +406,7 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
                 currentPick ? "border-green-900/40" : "border-hardwood-600",
               )}>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="font-mono text-[10px] text-gray-600 uppercase">
+                  <span className="font-mono text-[10px] text-ink-400 uppercase">
                     {game.gameId}
                   </span>
                   {currentPick && (
@@ -422,7 +422,7 @@ export function AdminBracketBuilder({ games: rawGames, teams }: AdminBracketBuil
                     disabled={!bothTeamsKnown}
                     onClick={() => t1Id && handlePick(game.gameId, t1Id)}
                   />
-                  <span className="text-gray-600 font-mono text-xs self-center px-1">vs</span>
+                  <span className="text-ink-400 font-mono text-xs self-center px-1">vs</span>
                   <TeamButton
                     team={team2}
                     teamId={t2Id}
@@ -462,15 +462,15 @@ function TeamButton({
         isPicked
           ? "bg-court-500/20 border-court-500 text-white"
           : disabled
-            ? "bg-hardwood-700/50 border-hardwood-700 text-gray-600 cursor-not-allowed"
-            : "bg-hardwood-700 border-hardwood-500 text-gray-300 hover:border-court-600 hover:text-white cursor-pointer",
+            ? "bg-hardwood-700/50 border-hardwood-700 text-ink-400 cursor-not-allowed"
+            : "bg-hardwood-700 border-hardwood-500 text-ink-100 hover:border-court-600 hover:text-white cursor-pointer",
       )}
     >
       {team ? (
         <>
           <span className={clsx(
             "font-mono text-xs flex-shrink-0",
-            isPicked ? "text-court-400" : "text-gray-500",
+            isPicked ? "text-court-400" : "text-ink-300",
           )}>
             {team.seed}
           </span>
@@ -484,7 +484,7 @@ function TeamButton({
           )}
         </>
       ) : (
-        <span className="font-mono text-xs text-gray-600 italic">
+        <span className="font-mono text-xs text-ink-400 italic">
           {teamId ? teamId : "TBD -- pick earlier rounds first"}
         </span>
       )}

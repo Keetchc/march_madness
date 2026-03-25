@@ -2,10 +2,12 @@ import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
 import { getBracketsByUser } from "@/lib/dynamo/queries/brackets";
 import { getGroupsByUser } from "@/lib/dynamo/queries/groups";
+import { isGroupAdmin } from "@/lib/group-permissions";
 import { getTournament } from "@/lib/dynamo/queries/games";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
 import Link from "next/link";
 import { TrophyIcon, UsersIcon, PlusIcon } from "lucide-react";
+import { LockCountdownBadge } from "@/components/layout/LockCountdownBadge";
 
 const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
@@ -24,21 +26,24 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Header */}
-      <div>
-        <p className="font-mono text-court-500 text-xs uppercase tracking-widest mb-1">
-          Welcome back
-        </p>
-        <h1 className="font-display text-5xl font-black uppercase tracking-tight text-white">
-          {session!.user?.name?.split(" ")[0]}'s Dashboard
-        </h1>
-        {tournament && (
-          <p className="text-gray-500 text-sm mt-1 font-body">
-            {tournament.name} •{" "}
-            <span className={isLocked ? "text-red-400" : "text-green-400"}>
-              {isLocked ? "🔒 Picks locked" : "✅ Picks open"}
-            </span>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-court-500 text-xs uppercase tracking-widest mb-1">
+            Welcome back
           </p>
-        )}
+          <h1 className="font-display text-5xl font-black uppercase tracking-tight text-white">
+            {session!.user?.name?.split(" ")[0]}'s Dashboard
+          </h1>
+          {tournament && (
+            <p className="text-ink-300 text-sm mt-1 font-body">
+              {tournament.name} •{" "}
+              <span className={isLocked ? "text-red-400" : "text-green-400"}>
+                {isLocked ? "🔒 Picks locked" : "✅ Picks open"}
+              </span>
+            </p>
+          )}
+        </div>
+        <LockCountdownBadge tournament={tournament ?? undefined} variant="default" />
       </div>
 
       {/* My Brackets */}
@@ -61,7 +66,7 @@ export default async function DashboardPage() {
 
         {brackets.length === 0 ? (
           <div className="bg-hardwood-800 border border-hardwood-600 rounded-xl p-8 text-center">
-            <p className="text-gray-500 font-body mb-4">No brackets yet.</p>
+            <p className="text-ink-300 font-body mb-4">No brackets yet.</p>
             {!isLocked && (
               <Link
                 href="/bracket/new"
@@ -84,7 +89,7 @@ export default async function DashboardPage() {
                       {bracket.score}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-xs font-mono text-gray-500">
+                  <div className="flex items-center justify-between text-xs font-mono text-ink-300">
                     <span>Max possible: {bracket.maxPossibleScore}</span>
                     {bracket.isEliminated && (
                       <span className="text-red-400">Eliminated</span>
@@ -99,23 +104,26 @@ export default async function DashboardPage() {
 
       {/* My Groups */}
       <section>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-white flex items-center gap-2">
             <UsersIcon className="w-5 h-5 text-court-500" />
             My Groups
           </h2>
-          <Link
-            href="/groups/new"
-            className="flex items-center gap-2 bg-hardwood-700 hover:bg-hardwood-600 border border-hardwood-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-          >
-            <PlusIcon className="w-4 h-4" />
-            New Group
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <LockCountdownBadge tournament={tournament ?? undefined} variant="compact" />
+            <Link
+              href="/groups/new"
+              className="flex items-center gap-2 bg-hardwood-700 hover:bg-hardwood-600 border border-hardwood-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+            >
+              <PlusIcon className="w-4 h-4" />
+              New Group
+            </Link>
+          </div>
         </div>
 
         {groups.length === 0 ? (
           <div className="bg-hardwood-800 border border-hardwood-600 rounded-xl p-8 text-center">
-            <p className="text-gray-500 font-body mb-4">
+            <p className="text-ink-300 font-body mb-4">
               No groups yet. Create one or ask a friend for an invite link.
             </p>
             <Link
@@ -130,12 +138,19 @@ export default async function DashboardPage() {
             {groups.map((group) => (
               <Link key={group.groupId} href={`/groups/${group.groupId}`}>
                 <div className="bg-hardwood-800 border border-hardwood-600 hover:border-court-500 rounded-xl p-5 transition-all duration-150 hover:-translate-y-0.5 group">
-                  <h3 className="font-display text-xl font-bold uppercase tracking-wide text-white group-hover:text-court-400 mb-1">
-                    {group.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 font-mono">
-                    {group.adminUserId === userId ? "👑 Admin" : "Member"} ·{" "}
-                    {new Date(group.createdAt).toLocaleDateString()}
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h3 className="font-display text-xl font-bold uppercase tracking-wide text-white group-hover:text-court-400 min-w-0">
+                      {group.name}
+                    </h3>
+                    <LockCountdownBadge tournament={tournament ?? undefined} variant="compact" className="shrink-0" />
+                  </div>
+                  <p className="text-xs text-ink-300 font-mono">
+                    {String(group.adminUserId) === String(userId)
+                      ? "👑 Owner"
+                      : isGroupAdmin(group, userId)
+                        ? "🛡️ Admin"
+                        : "Member"}{" "}
+                    · {new Date(group.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </Link>

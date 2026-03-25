@@ -20,7 +20,7 @@ export function OfficialBracketClient() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500 font-mono text-sm animate-pulse">
+      <div className="flex items-center justify-center h-64 text-ink-300 font-mono text-sm animate-pulse">
         Loading bracket...
       </div>
     );

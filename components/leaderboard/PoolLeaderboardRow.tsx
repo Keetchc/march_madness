@@ -23,28 +23,28 @@ export function PoolLeaderboardTableHeaders() {
   return (
     <>
       <div className="hidden md:grid grid-cols-[4rem_1fr_8rem_8rem_8rem_8rem] gap-6 px-8 py-4 border-b border-hardwood-600 bg-hardwood-700">
-        <span className="font-mono text-sm text-gray-600 uppercase">#</span>
-        <span className="font-mono text-sm text-gray-600 uppercase">Player</span>
-        <span className="font-mono text-sm text-gray-600 uppercase text-right">Score</span>
-        <span className="font-mono text-sm text-gray-600 uppercase text-right">Max</span>
+        <span className="font-mono text-sm text-ink-400 uppercase">#</span>
+        <span className="font-mono text-sm text-ink-400 uppercase">Player</span>
+        <span className="font-mono text-sm text-ink-400 uppercase text-right">Score</span>
+        <span className="font-mono text-sm text-ink-400 uppercase text-right">Max</span>
         <span
-          className="font-mono text-sm text-gray-600 uppercase text-right"
+          className="font-mono text-sm text-ink-400 uppercase text-right"
           title="Correct picks out of tournament games already final"
         >
           Correct
         </span>
-        <span className="font-mono text-sm text-gray-600 uppercase text-right">Status</span>
+        <span className="font-mono text-sm text-ink-400 uppercase text-right">Status</span>
       </div>
       <div className="md:hidden px-4 py-3 border-b border-hardwood-600 bg-hardwood-700/80 grid grid-cols-4 gap-2 text-center">
-        <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Score</span>
-        <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Max</span>
+        <span className="font-mono text-[10px] text-ink-400 uppercase tracking-wide">Score</span>
+        <span className="font-mono text-[10px] text-ink-400 uppercase tracking-wide">Max</span>
         <span
-          className="font-mono text-[10px] text-gray-600 uppercase tracking-wide"
+          className="font-mono text-[10px] text-ink-400 uppercase tracking-wide"
           title="Correct picks out of games already final"
         >
           Correct
         </span>
-        <span className="font-mono text-[10px] text-gray-600 uppercase tracking-wide">Status</span>
+        <span className="font-mono text-[10px] text-ink-400 uppercase tracking-wide">Status</span>
       </div>
     </>
   );
@@ -60,6 +60,8 @@ type PoolLeaderboardRowProps = {
   maskStats?: boolean;
   /** Leaderboard rank (1-based). Ignored for masked non–current-user rows (they use the reduced layout). */
   rankDisplay: number;
+  /** Appended to bracket URL (e.g. `?fromGroup=…`) for pool-aware what-if. */
+  bracketHrefQuery?: string;
 };
 
 export function PoolLeaderboardRow({
@@ -67,13 +69,14 @@ export function PoolLeaderboardRow({
   isCurrentUser,
   maskStats = false,
   rankDisplay,
+  bracketHrefQuery = "",
 }: PoolLeaderboardRowProps) {
   const reduced = Boolean(maskStats && !isCurrentUser);
   const bracketSubtitle = reduced ? "Bracket submitted" : entry.bracketName;
 
   const rankColors: Record<number, string> = {
     1: "text-yellow-400",
-    2: "text-gray-300",
+    2: "text-ink-100",
     3: "text-amber-600",
   };
 
@@ -86,7 +89,7 @@ export function PoolLeaderboardRow({
         )}
       >
         <div className="flex items-center gap-3 min-w-0 pb-3 md:contents md:pb-0">
-          <span className="font-display text-2xl md:text-3xl font-black w-10 shrink-0 text-center md:w-auto md:text-left text-gray-600">
+          <span className="font-display text-2xl md:text-3xl font-black w-10 shrink-0 text-center md:w-auto md:text-left text-ink-400">
             —
           </span>
           <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
@@ -107,7 +110,7 @@ export function PoolLeaderboardRow({
               >
                 {entry.userName}
               </p>
-              <p className="text-xs md:text-sm text-gray-600 font-body truncate">{bracketSubtitle}</p>
+              <p className="text-xs md:text-sm text-ink-400 font-body truncate">{bracketSubtitle}</p>
             </div>
           </div>
         </div>
@@ -120,16 +123,16 @@ export function PoolLeaderboardRow({
           )}
         >
           <div className="md:text-right">
-            <span className="font-mono text-2xl font-bold text-gray-600 tabular-nums">—</span>
+            <span className="font-mono text-2xl font-bold text-ink-400 tabular-nums">—</span>
           </div>
           <div className="md:text-right">
-            <span className="font-mono text-sm md:text-lg text-gray-600 tabular-nums">—</span>
+            <span className="font-mono text-sm md:text-lg text-ink-400 tabular-nums">—</span>
           </div>
           <div className="md:text-right">
-            <span className="font-mono text-sm md:text-lg text-gray-600 tabular-nums">—</span>
+            <span className="font-mono text-sm md:text-lg text-ink-400 tabular-nums">—</span>
           </div>
           <div className="flex justify-center md:justify-end md:text-right">
-            <span className="font-mono text-sm text-gray-600">—</span>
+            <span className="font-mono text-sm text-ink-400">—</span>
           </div>
         </div>
       </div>
@@ -138,7 +141,7 @@ export function PoolLeaderboardRow({
   }
 
   const rankShown = rankDisplay;
-  const rankClass = rankColors[rankDisplay] ?? "text-gray-600";
+  const rankClass = rankColors[rankDisplay] ?? "text-ink-400";
 
   const inner = (
     <div
@@ -178,7 +181,7 @@ export function PoolLeaderboardRow({
                 <span className="ml-2 text-[10px] md:text-xs text-court-600 normal-case font-mono">you</span>
               )}
             </p>
-            <p className="text-xs md:text-sm text-gray-600 font-body truncate">{bracketSubtitle}</p>
+            <p className="text-xs md:text-sm text-ink-400 font-body truncate">{bracketSubtitle}</p>
           </div>
         </div>
       </div>
@@ -195,10 +198,10 @@ export function PoolLeaderboardRow({
           <span className="font-mono text-2xl md:text-2xl font-bold text-white tabular-nums">{entry.score}</span>
         </div>
         <div className="flex flex-col gap-0.5 md:block md:text-right">
-          <span className="font-mono text-sm md:text-lg text-gray-500 tabular-nums">{entry.maxPossibleScore}</span>
+          <span className="font-mono text-sm md:text-lg text-ink-300 tabular-nums">{entry.maxPossibleScore}</span>
         </div>
         <div className="flex flex-col gap-0.5 md:block md:text-right">
-          <span className="font-mono text-sm md:text-lg text-gray-400 tabular-nums">
+          <span className="font-mono text-sm md:text-lg text-ink-200 tabular-nums">
             {entry.correctPicks}/{entry.gamesDecidedCount}
           </span>
         </div>
@@ -222,11 +225,11 @@ export function PoolLeaderboardRow({
                   "inline-flex items-center gap-1 rounded-full px-2 py-1 font-mono text-[10px] md:text-xs border",
                   game.isMustHave
                     ? "text-yellow-300 border-yellow-600/70 bg-yellow-900/25"
-                    : "text-gray-300 border-hardwood-500 bg-hardwood-700/60"
+                    : "text-ink-100 border-hardwood-500 bg-hardwood-700/60"
                 )}
               >
                 <span>{game.teamName}</span>
-                <span className="text-gray-500">{game.round}</span>
+                <span className="text-ink-300">{game.round}</span>
                 <span className="text-white tabular-nums">+{game.potentialPoints}</span>
               </span>
             ))}
@@ -246,7 +249,7 @@ export function PoolLeaderboardRow({
             <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-sky-400/90 mb-0.5">
               Next up — {ROUND_DISPLAY_LABELS[entry.nextSliceRound]}
             </p>
-            <p className="text-[10px] text-gray-600 font-body mb-1.5 leading-snug">
+            <p className="text-[10px] text-ink-400 font-body mb-1.5 leading-snug">
               Pending games in this round where your pick differs from others in this pool.
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -275,5 +278,5 @@ export function PoolLeaderboardRow({
     </div>
   );
 
-  return <Link href={`/bracket/${entry.bracketId}`}>{inner}</Link>;
+  return <Link href={`/bracket/${entry.bracketId}${bracketHrefQuery}`}>{inner}</Link>;
 }

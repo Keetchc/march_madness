@@ -45,7 +45,7 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
                 ? "Add Bracket"
                 : "Bracket picks"}
           </h1>
-          <p className="text-gray-500 font-mono text-sm mt-1">
+          <p className="text-ink-300 font-mono text-sm mt-1">
             {tournament ? (
               <>
                 {tournament.name} · Status:{" "}
@@ -54,7 +54,7 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
                     tournament.status === "active"
                       ? "text-green-400"
                       : tournament.status === "complete"
-                        ? "text-gray-400"
+                        ? "text-ink-200"
                         : "text-yellow-400"
                   )}
                 >
@@ -76,7 +76,7 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
             "px-5 py-2 rounded-lg font-display text-sm font-bold uppercase tracking-wide transition-colors",
             adminTab === "results"
               ? "bg-court-500 text-white"
-              : "bg-hardwood-700 text-gray-400 hover:text-white hover:bg-hardwood-600"
+              : "bg-hardwood-700 text-ink-200 hover:text-white hover:bg-hardwood-600"
           )}
         >
           Game Results
@@ -87,7 +87,7 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
             "px-5 py-2 rounded-lg font-display text-sm font-bold uppercase tracking-wide transition-colors",
             adminTab === "add-bracket"
               ? "bg-court-500 text-white"
-              : "bg-hardwood-700 text-gray-400 hover:text-white hover:bg-hardwood-600"
+              : "bg-hardwood-700 text-ink-200 hover:text-white hover:bg-hardwood-600"
           )}
         >
           Add Bracket
@@ -98,7 +98,7 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
             "px-5 py-2 rounded-lg font-display text-sm font-bold uppercase tracking-wide transition-colors",
             adminTab === "picks"
               ? "bg-court-500 text-white"
-              : "bg-hardwood-700 text-gray-400 hover:text-white hover:bg-hardwood-600"
+              : "bg-hardwood-700 text-ink-200 hover:text-white hover:bg-hardwood-600"
           )}
         >
           Bracket picks
@@ -113,7 +113,7 @@ export function AdminPageClient({ games, teams: teamsInput, tournament: tourname
       ) : tournament ? (
         <PicksLockPanel tournament={tournament} onSaved={setTournament} />
       ) : (
-        <p className="text-gray-500 font-body">Seed a tournament record to configure picks.</p>
+        <p className="text-ink-300 font-body">Seed a tournament record to configure picks.</p>
       )}
     </div>
   );
@@ -217,7 +217,7 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
           {syncing ? "Syncing ESPN..." : "Sync from ESPN"}
         </button>
         {syncResult && (
-          <p className="text-xs font-mono text-gray-500">{syncResult}</p>
+          <p className="text-xs font-mono text-ink-300">{syncResult}</p>
         )}
       </div>
 
@@ -234,14 +234,14 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
                 "flex-shrink-0 px-4 py-2.5 text-sm font-display font-bold uppercase tracking-wide transition-colors border-b-2 -mb-px whitespace-nowrap",
                 activeRound === round
                   ? "text-court-400 border-court-500"
-                  : "text-gray-500 border-transparent hover:text-gray-300"
+                  : "text-ink-300 border-transparent hover:text-ink-100"
               )}
             >
               {ROUND_LABELS[round]}
               {count > 0 && (
                 <span className={clsx(
                   "ml-2 text-[10px] font-mono",
-                  done === count ? "text-green-500" : "text-gray-600"
+                  done === count ? "text-green-500" : "text-ink-400"
                 )}>
                   {done}/{count}
                 </span>
@@ -254,7 +254,7 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
       {/* Games list */}
       <div className="space-y-3">
         {roundGames.length === 0 && (
-          <p className="text-gray-600 font-mono text-sm py-8 text-center">
+          <p className="text-ink-400 font-mono text-sm py-8 text-center">
             No games in this round yet.
           </p>
         )}
@@ -303,7 +303,7 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
                     )}>
                       {team1 ? `#${team1.seed} ${team1.name}` : "TBD"}
                     </span>
-                    <span className="text-gray-600 mx-2 font-mono">vs</span>
+                    <span className="text-ink-400 mx-2 font-mono">vs</span>
                     <span className={clsx(
                       "font-display font-bold uppercase",
                       isFinal && game.winnerId === game.team2Id ? "text-green-400" : "text-white"
@@ -311,7 +311,7 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
                       {team2 ? `#${team2.seed} ${team2.name}` : "TBD"}
                     </span>
                   </div>
-                  <span className="font-mono text-xs text-gray-600">
+                  <span className="font-mono text-xs text-ink-400">
                     {game.region} · Slot {game.bracketSlot}
                   </span>
                   {isFinal && (
@@ -359,7 +359,7 @@ function GameResultsPanel({ games, teamsMap }: { games: Game[]; teamsMap: Map<st
                     }
                     className="w-20 bg-hardwood-700 border border-hardwood-500 rounded-lg px-2 py-1.5 text-white text-sm font-mono text-center outline-none focus:border-court-500"
                   />
-                  <span className="text-gray-600 font-mono">-</span>
+                  <span className="text-ink-400 font-mono">-</span>
                   <input
                     type="number"
                     placeholder={team2?.shortName ?? "T2"}

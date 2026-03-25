@@ -63,7 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           rel="stylesheet"
         />
       </head>
-      <body className="bg-hardwood-900 text-white font-body antialiased">
+      <body className="bg-hardwood-900 text-ink-50 font-body antialiased leading-normal">
         <Providers session={session}>{children}</Providers>
       </body>
     </html>

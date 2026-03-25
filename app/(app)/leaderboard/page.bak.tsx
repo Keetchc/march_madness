@@ -53,7 +53,7 @@ export default async function LeaderboardPage() {
         <h1 className="font-display text-5xl font-black uppercase tracking-tight text-white">
           Leaderboard
         </h1>
-        <p className="text-gray-500 text-sm font-mono mt-1">
+        <p className="text-ink-300 text-sm font-mono mt-1">
           {completedGames} games complete · {brackets.length} brackets
         </p>
       </div>
@@ -62,16 +62,16 @@ export default async function LeaderboardPage() {
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl overflow-hidden">
         {/* Desktop header */}
         <div className="hidden md:grid grid-cols-[3rem_1fr_6rem_6rem_6rem_6rem] gap-4 px-6 py-3 border-b border-hardwood-600 bg-hardwood-700">
-          <span className="font-mono text-xs text-gray-600 uppercase">#</span>
-          <span className="font-mono text-xs text-gray-600 uppercase">Player</span>
-          <span className="font-mono text-xs text-gray-600 uppercase text-right">Score</span>
-          <span className="font-mono text-xs text-gray-600 uppercase text-right">Max</span>
-          <span className="font-mono text-xs text-gray-600 uppercase text-right">Correct</span>
-          <span className="font-mono text-xs text-gray-600 uppercase text-right">Status</span>
+          <span className="font-mono text-xs text-ink-400 uppercase">#</span>
+          <span className="font-mono text-xs text-ink-400 uppercase">Player</span>
+          <span className="font-mono text-xs text-ink-400 uppercase text-right">Score</span>
+          <span className="font-mono text-xs text-ink-400 uppercase text-right">Max</span>
+          <span className="font-mono text-xs text-ink-400 uppercase text-right">Correct</span>
+          <span className="font-mono text-xs text-ink-400 uppercase text-right">Status</span>
         </div>
 
         {leaderboard.length === 0 ? (
-          <div className="p-12 text-center text-gray-600 font-body">
+          <div className="p-12 text-center text-ink-400 font-body">
             No brackets submitted yet.
           </div>
         ) : (
@@ -99,7 +99,7 @@ function LeaderboardRow({
 }) {
   const rankColors: Record<number, string> = {
     1: "text-yellow-400",
-    2: "text-gray-300",
+    2: "text-ink-100",
     3: "text-amber-600",
   };
 
@@ -116,7 +116,7 @@ function LeaderboardRow({
         <span
           className={clsx(
             "font-display text-2xl font-black",
-            rankColors[entry.rank] ?? "text-gray-600"
+            rankColors[entry.rank] ?? "text-ink-400"
           )}
         >
           {entry.rank}
@@ -145,7 +145,7 @@ function LeaderboardRow({
                 <span className="ml-2 text-xs text-court-600 normal-case font-mono">you</span>
               )}
             </p>
-            <p className="text-xs text-gray-600 font-body truncate">{entry.bracketName}</p>
+            <p className="text-xs text-ink-400 font-body truncate">{entry.bracketName}</p>
           </div>
         </div>
 
@@ -156,12 +156,12 @@ function LeaderboardRow({
 
         {/* Max possible */}
         <div className="hidden md:block text-right">
-          <span className="font-mono text-sm text-gray-500">{entry.maxPossibleScore}</span>
+          <span className="font-mono text-sm text-ink-300">{entry.maxPossibleScore}</span>
         </div>
 
         {/* Correct picks */}
         <div className="hidden md:block text-right">
-          <span className="font-mono text-sm text-gray-400">
+          <span className="font-mono text-sm text-ink-200">
             {entry.correctPicks}/{entry.gamesDecidedCount}
           </span>
         </div>

@@ -56,7 +56,7 @@ export default function NewGroupPage() {
       <div className="space-y-6">
         {/* Group name */}
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-6">
-          <label className="block font-mono text-xs uppercase tracking-widest text-gray-500 mb-2">
+          <label className="block font-mono text-xs uppercase tracking-widest text-ink-300 mb-2">
             Group Name
           </label>
           <input
@@ -85,7 +85,7 @@ export default function NewGroupPage() {
                   "px-4 py-1.5 rounded-lg text-sm font-display font-bold uppercase tracking-wide transition-all",
                   scoringPreset === p
                     ? "bg-court-500 text-white"
-                    : "bg-hardwood-700 text-gray-400 border border-hardwood-500 hover:text-white"
+                    : "bg-hardwood-700 text-ink-200 border border-hardwood-500 hover:text-white"
                 )}
               >
                 {p === "brians" && "Brian's Rules"}
@@ -95,7 +95,7 @@ export default function NewGroupPage() {
             ))}
           </div>
 
-          <p className="text-xs font-body text-gray-600">
+          <p className="text-xs font-body text-ink-400">
             {scoringPreset === "brians" &&
               "Base × seed per correct pick. Adjust bases per round; use Custom for upset multipliers or champion bonus."}
             {scoringPreset === "upset" && "Lower-seed wins pay extra; includes champion bonus. Use Custom to edit."}
@@ -106,10 +106,10 @@ export default function NewGroupPage() {
           <div className="space-y-2">
             {(Object.keys(ROUND_LABELS) as Round[]).map((round) => (
               <div key={round} className="flex items-center justify-between gap-4">
-                <span className="font-mono text-xs text-gray-500 w-28">{ROUND_LABELS[round]}</span>
+                <span className="font-mono text-xs text-ink-300 w-28">{ROUND_LABELS[round]}</span>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-gray-600 font-mono">pts</span>
+                    <span className="text-xs text-ink-400 font-mono">pts</span>
                     <input
                       type="number"
                       min={0}
@@ -133,7 +133,7 @@ export default function NewGroupPage() {
                     />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-gray-600 font-mono">upset×</span>
+                    <span className="text-xs text-ink-400 font-mono">upset×</span>
                     <input
                       type="number"
                       min={0}
@@ -163,7 +163,7 @@ export default function NewGroupPage() {
 
           {/* Champion bonus */}
           <div className="pt-3 border-t border-hardwood-600 flex items-center justify-between gap-4">
-            <span className="font-mono text-xs text-gray-500">🏆 Champion Bonus</span>
+            <span className="font-mono text-xs text-ink-300">🏆 Champion Bonus</span>
             <input
               type="number"
               min={0}

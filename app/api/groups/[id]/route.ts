@@ -11,7 +11,11 @@ import {
   updateMemberScore,
   regenerateInviteToken,
   updateGroupScoringRules,
+  updateGroupName,
+  updateGroupSubgroups,
 } from "@/lib/dynamo/queries/groups";
+import { isGroupAdmin } from "@/lib/group-permissions";
+import type { GroupSubgroup } from "@/lib/types";
 import { getBracket, getBracketsByTournament } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams } from "@/lib/dynamo/queries/games";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
@@ -36,7 +40,7 @@ export async function GET(
   const membership = await getGroupMembership(params.id, userId);
   const isAdmin = (session as any).user?.isAdmin;
 
-  if (!membership && group.adminUserId !== userId && !isAdmin) {
+  if (!membership && !isGroupAdmin(group, userId) && !isAdmin) {
     return NextResponse.json({ error: "Not a member of this group" }, { status: 403 });
   }
 
@@ -91,7 +95,7 @@ export async function PATCH(
   const group = await getGroup(params.id);
   if (!group) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (group.adminUserId !== userId && !(session as any).user?.isAdmin) {
+  if (!isGroupAdmin(group, userId) && !(session as any).user?.isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -99,6 +103,33 @@ export async function PATCH(
 
   if (body.scoringRules) {
     await updateGroupScoringRules(params.id, body.scoringRules);
+  }
+
+  if (typeof body.name === "string") {
+    const n = body.name.trim();
+    if (!n || n.length > 120) {
+      return NextResponse.json({ error: "Name must be 1–120 characters." }, { status: 400 });
+    }
+    await updateGroupName(params.id, n);
+  }
+
+  if (body.subgroups !== undefined) {
+    if (!Array.isArray(body.subgroups)) {
+      return NextResponse.json({ error: "subgroups must be an array." }, { status: 400 });
+    }
+    const cleaned: GroupSubgroup[] = [];
+    const seen = new Set<string>();
+    for (const raw of body.subgroups) {
+      if (!raw || typeof raw !== "object") continue;
+      const id = typeof (raw as GroupSubgroup).id === "string" ? (raw as GroupSubgroup).id.trim() : "";
+      const name = typeof (raw as GroupSubgroup).name === "string" ? (raw as GroupSubgroup).name.trim() : "";
+      if (!id || !name || name.length > 80) continue;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      cleaned.push({ id, name });
+      if (cleaned.length >= 40) break;
+    }
+    await updateGroupSubgroups(params.id, cleaned);
   }
 
   if (body.regenerateInvite) {

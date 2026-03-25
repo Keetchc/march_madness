@@ -57,7 +57,7 @@ export function NewBracketForm({ returnTo }: { returnTo: string }) {
       <h1 className="font-display text-5xl font-black uppercase tracking-tight text-white mb-2">
         New Bracket
       </h1>
-      <p className="text-gray-500 font-body mb-8">
+      <p className="text-ink-300 font-body mb-8">
         Give it a name — you can always update it later.
         {returnTo ? (
           <span className="block text-court-500/90 text-sm mt-2 font-mono">
@@ -68,7 +68,7 @@ export function NewBracketForm({ returnTo }: { returnTo: string }) {
 
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-6 space-y-4">
         <div>
-          <label className="block font-mono text-xs uppercase tracking-widest text-gray-500 mb-2">
+          <label className="block font-mono text-xs uppercase tracking-widest text-ink-300 mb-2">
             Bracket Name
           </label>
           <input

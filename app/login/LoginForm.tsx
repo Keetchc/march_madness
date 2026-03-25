@@ -37,7 +37,7 @@ export function LoginForm({ callbackUrl, authError }: Props) {
 
   return (
     <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-8 w-80 mx-auto shadow-2xl">
-      <p className="text-sm text-gray-400 mb-6 font-body">
+      <p className="text-sm text-ink-200 mb-6 font-body">
         Sign in to submit your bracket, join groups, and trash-talk your friends.
       </p>
       {inAppHint && (

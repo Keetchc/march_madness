@@ -80,12 +80,12 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
               {team2?.name ?? "TBD"}
             </h2>
             {isProjected && (
-              <p className="font-mono text-[10px] text-gray-600 mt-0.5">Projected matchup</p>
+              <p className="font-mono text-[10px] text-ink-400 mt-0.5">Projected matchup</p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-white transition-colors p-1"
+            className="text-ink-300 hover:text-white transition-colors p-1"
           >
             <XIcon className="w-5 h-5" />
           </button>
@@ -94,7 +94,7 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
         {/* Game status */}
         {isGameFinal && (
           <div className="px-5 py-3 bg-hardwood-700 border-b border-hardwood-600">
-            <p className="text-sm font-mono text-gray-400">
+            <p className="text-sm font-mono text-ink-200">
               Final:{" "}
               <span className="text-white font-semibold">
                 {team1?.name} {data!.game.score1} --{" "}
@@ -111,7 +111,7 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
         )}
 
         {loading && (
-          <div className="p-10 text-center text-gray-500 font-mono text-sm">
+          <div className="p-10 text-center text-ink-300 font-mono text-sm">
             Loading picks...
           </div>
         )}
@@ -119,11 +119,11 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
         {data && !loading && (
           <div className="p-5">
             {data.picksHidden ? (
-              <p className="text-gray-500 text-sm text-center py-4 font-body">
+              <p className="text-ink-300 text-sm text-center py-4 font-body">
                 Everyone&apos;s picks stay private until brackets lock.
               </p>
             ) : totalPicks === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4 font-body">
+              <p className="text-ink-300 text-sm text-center py-4 font-body">
                 No one has picked this game yet.
               </p>
             ) : (
@@ -149,7 +149,7 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
 
                 {otherByTeam.size > 0 && (
                   <div className="mt-4 pt-4 border-t border-hardwood-600">
-                    <p className={`font-mono text-xs uppercase tracking-widest mb-3 ${hidePickStatus ? "text-gray-500" : "text-red-400/80"}`}>
+                    <p className={`font-mono text-xs uppercase tracking-widest mb-3 ${hidePickStatus ? "text-ink-300" : "text-red-400/80"}`}>
                       {hidePickStatus ? "Other picks" : "Eliminated picks"}
                     </p>
                     <div className="grid grid-cols-2 gap-4">
@@ -170,14 +170,14 @@ export function GamePickModal({ gameId, projectedTeam1Id, projectedTeam2Id, team
 
                 {/* Summary bar */}
                 <div className="mt-4 pt-4 border-t border-hardwood-600">
-                  <div className="flex flex-wrap gap-2 text-xs font-mono text-gray-500">
+                  <div className="flex flex-wrap gap-2 text-xs font-mono text-ink-300">
                     <span>{team1Picks.length} picked {team1?.shortName ?? "T1"}</span>
                     <span>--</span>
                     <span>{team2Picks.length} picked {team2?.shortName ?? "T2"}</span>
                     {otherPicks.length > 0 && (
                       <>
                         <span>--</span>
-                        <span className={hidePickStatus ? "text-gray-500" : "text-red-400/60"}>
+                        <span className={hidePickStatus ? "text-ink-300" : "text-red-400/60"}>
                           {otherPicks.length} {hidePickStatus ? "other" : "eliminated"}
                         </span>
                       </>
@@ -234,11 +234,11 @@ function PickColumn({
     <div>
       <div
         className={`text-xs font-display font-bold uppercase tracking-wide mb-2 flex items-center gap-1 ${
-          hidePickStatus ? "text-gray-400" :
-          isWinner ? "text-green-400" : isLoser || forceIncorrect ? "text-red-400" : "text-gray-400"
+          hidePickStatus ? "text-ink-200" :
+          isWinner ? "text-green-400" : isLoser || forceIncorrect ? "text-red-400" : "text-ink-200"
         }`}
       >
-        {seed && <span className="text-gray-600">#{seed}</span>}
+        {seed && <span className="text-ink-400">#{seed}</span>}
         {teamName}
         {!hidePickStatus && isWinner && <CheckCircleIcon className="w-3 h-3" />}
         {!hidePickStatus && (isLoser || forceIncorrect) && <XCircleIcon className="w-3 h-3" />}
@@ -266,13 +266,13 @@ function PickColumn({
                 <XCircleIcon className="w-4 h-4 text-red-400 flex-shrink-0" />
               )}
               {correct === null && (
-                <MinusCircleIcon className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                <MinusCircleIcon className="w-4 h-4 text-ink-400 flex-shrink-0" />
               )}
             </div>
           );
         })}
         {picks.length === 0 && (
-          <p className="text-xs text-gray-600 font-mono py-1">No picks</p>
+          <p className="text-xs text-ink-400 font-mono py-1">No picks</p>
         )}
       </div>
     </div>

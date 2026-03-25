@@ -8,7 +8,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { dynamo } from "../client";
 import { TABLES } from "../tables";
-import type { Group, GroupMember } from "../../types";
+import type { Group, GroupMember, GroupSubgroup } from "../../types";
 
 // ─── Groups ───────────────────────────────────────────────────────────────────
 
@@ -72,6 +72,40 @@ export async function regenerateInviteToken(
       Key: { pk: `GROUP#${groupId}`, sk: "META" },
       UpdateExpression: "SET inviteToken = :t",
       ExpressionAttributeValues: { ":t": newToken },
+    })
+  );
+}
+
+export async function updateGroupName(groupId: string, name: string): Promise<void> {
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: TABLES.GROUPS,
+      Key: { pk: `GROUP#${groupId}`, sk: "META" },
+      UpdateExpression: "SET #n = :n",
+      ExpressionAttributeNames: { "#n": "name" },
+      ExpressionAttributeValues: { ":n": name },
+    })
+  );
+}
+
+export async function updateGroupCoAdmins(groupId: string, coAdminUserIds: string[]): Promise<void> {
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: TABLES.GROUPS,
+      Key: { pk: `GROUP#${groupId}`, sk: "META" },
+      UpdateExpression: "SET coAdminUserIds = :c",
+      ExpressionAttributeValues: { ":c": coAdminUserIds },
+    })
+  );
+}
+
+export async function updateGroupSubgroups(groupId: string, subgroups: GroupSubgroup[]): Promise<void> {
+  await dynamo.send(
+    new UpdateCommand({
+      TableName: TABLES.GROUPS,
+      Key: { pk: `GROUP#${groupId}`, sk: "META" },
+      UpdateExpression: "SET subgroups = :s",
+      ExpressionAttributeValues: { ":s": subgroups },
     })
   );
 }
@@ -159,6 +193,31 @@ export async function removeMember(groupId: string, userId: string): Promise<voi
   );
 }
 
+export async function updateMemberSubgroup(
+  groupId: string,
+  userId: string,
+  subgroupId: string | null
+): Promise<void> {
+  if (subgroupId) {
+    await dynamo.send(
+      new UpdateCommand({
+        TableName: TABLES.GROUPS,
+        Key: { pk: `GROUP#${groupId}`, sk: `MEMBER#${userId}` },
+        UpdateExpression: "SET subgroupId = :sg",
+        ExpressionAttributeValues: { ":sg": subgroupId },
+      })
+    );
+  } else {
+    await dynamo.send(
+      new UpdateCommand({
+        TableName: TABLES.GROUPS,
+        Key: { pk: `GROUP#${groupId}`, sk: `MEMBER#${userId}` },
+        UpdateExpression: "REMOVE subgroupId",
+      })
+    );
+  }
+}
+
 function isMissingIndexError(err: unknown): boolean {
   const name = err && typeof err === "object" && "name" in err ? (err as { name: string }).name : "";
   return name === "ValidationException" || name === "ResourceNotFoundException";
@@ -233,6 +292,76 @@ async function collectGroupIdsWhereAdmin(userId: string): Promise<Set<string>> {
     startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
   } while (startKey);
   return ids;
+}
+
+/**
+ * Groups where this user has linked the given bracket (member rows only).
+ * Used to show “same bracket in multiple pools” in the UI.
+ */
+export async function listGroupsUsingBracket(
+  userId: string,
+  bracketId: string
+): Promise<{ groupId: string; name: string }[]> {
+  const bid = String(bracketId ?? "").trim();
+  if (!userId || !bid) return [];
+
+  let startKey: Record<string, unknown> | undefined;
+  const matches: { groupId: string }[] = [];
+
+  try {
+    do {
+      const res = await dynamo.send(
+        new QueryCommand({
+          TableName: TABLES.GROUPS,
+          IndexName: "userId-index",
+          KeyConditionExpression: "userId = :uid",
+          ExpressionAttributeValues: { ":uid": userId },
+          ExclusiveStartKey: startKey,
+        })
+      );
+      for (const item of res.Items ?? []) {
+        const sk = item.sk as string | undefined;
+        if (!sk?.startsWith("MEMBER#")) continue;
+        if (String(item.bracketId ?? "").trim() !== bid) continue;
+        const gid = item.groupId as string | undefined;
+        if (gid) matches.push({ groupId: gid });
+      }
+      startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+    } while (startKey);
+  } catch (e) {
+    if (!isMissingIndexError(e)) throw e;
+    startKey = undefined;
+    do {
+      const res = await dynamo.send(
+        new ScanCommand({
+          TableName: TABLES.GROUPS,
+          FilterExpression: "userId = :uid AND begins_with(sk, :mp) AND bracketId = :bid",
+          ExpressionAttributeValues: {
+            ":uid": userId,
+            ":mp": "MEMBER#",
+            ":bid": bid,
+          },
+          ProjectionExpression: "groupId",
+          ExclusiveStartKey: startKey,
+        })
+      );
+      for (const item of res.Items ?? []) {
+        const gid = item.groupId as string | undefined;
+        if (gid) matches.push({ groupId: gid });
+      }
+      startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+    } while (startKey);
+  }
+
+  const seen = new Set<string>();
+  const out: { groupId: string; name: string }[] = [];
+  for (const m of matches) {
+    if (seen.has(m.groupId)) continue;
+    seen.add(m.groupId);
+    const g = await getGroup(m.groupId);
+    if (g) out.push({ groupId: g.groupId, name: g.name });
+  }
+  return out;
 }
 
 // Groups the user is in (member row) OR admins (META row), merged and deduped.

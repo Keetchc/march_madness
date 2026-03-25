@@ -151,10 +151,20 @@ export function detectScoringPreset(rules: ScoringRules): ScoringPresetId {
 
 // ─── Groups ───────────────────────────────────────────────────────────────────
 
+/** Optional slice of a pool (e.g. department, family team) for mini-standings. */
+export interface GroupSubgroup {
+  id: string;
+  name: string;
+}
+
 export interface Group {
   groupId: string;
   name: string;
   adminUserId: string;
+  /** Additional admins (primary stays {@link adminUserId}). */
+  coAdminUserIds?: string[];
+  /** Named segments; members optionally assign themselves via admin to one. */
+  subgroups?: GroupSubgroup[];
   tournamentId: string;
   inviteToken: string;
   scoringRules: ScoringRules;
@@ -168,6 +178,22 @@ export interface GroupMember {
   joinedAt: string;
   currentScore: number;
   rank: number;
+  /** When set, must match {@link Group.subgroups}[].id */
+  subgroupId?: string;
+}
+
+/** Shout-out / trash-talk line on a group (stored under the group partition). */
+export interface GroupWallPost {
+  postId: string;
+  groupId: string;
+  userId: string;
+  userName: string;
+  body: string;
+  createdAt: string;
+  /** Present when this post is a reply to another wall message. */
+  parentPostId?: string;
+  /** Thread root (same as {@link postId} for top-level posts). Omitted on legacy rows. */
+  rootPostId?: string;
 }
 
 // ─── Users ────────────────────────────────────────────────────────────────────

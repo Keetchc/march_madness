@@ -13,7 +13,7 @@ export function LoginSessionPanel({ name, email }: Props) {
 
   return (
     <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-8 w-80 mx-auto shadow-2xl text-left space-y-4">
-      <p className="text-sm text-gray-400 font-body">
+      <p className="text-sm text-ink-200 font-body">
         You&apos;re already signed in as <span className="text-white font-medium">{label}</span>.
       </p>
       <div className="flex flex-col gap-2">
@@ -26,7 +26,7 @@ export function LoginSessionPanel({ name, email }: Props) {
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="text-center border border-hardwood-500 hover:bg-hardwood-700 text-gray-300 text-sm font-mono py-2.5 px-4 rounded-xl transition-colors"
+          className="text-center border border-hardwood-500 hover:bg-hardwood-700 text-ink-100 text-sm font-mono py-2.5 px-4 rounded-xl transition-colors"
         >
           Sign out
         </button>

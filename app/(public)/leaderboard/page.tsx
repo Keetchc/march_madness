@@ -8,6 +8,7 @@ import {
   PoolLeaderboardRow,
   PoolLeaderboardTableHeaders,
 } from "@/components/leaderboard/PoolLeaderboardRow";
+import { RoundMiniLeaderboard } from "@/components/leaderboard/RoundMiniLeaderboard";
 
 export const dynamic = "force-dynamic";
 
@@ -47,12 +48,12 @@ export default async function PublicLeaderboardPage() {
           {tournament?.name ?? "Tournament"}
         </p>
         <h1 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
-          Leaderboard
+          Global Leaderboard
         </h1>
-        <p className="text-gray-500 text-sm font-mono mt-1">
+        <p className="text-ink-300 text-sm font-mono mt-1">
           {completedGames} games complete -- {brackets.length} brackets
         </p>
-        <p className="text-gray-600 text-xs font-mono mt-3 max-w-md">
+        <p className="text-ink-400 text-xs font-mono mt-3 max-w-md">
           Pool-wide view. To browse or compare picks with your crew, open a group from your dashboard.
         </p>
       </div>
@@ -61,7 +62,7 @@ export default async function PublicLeaderboardPage() {
         {leaderboard.length > 0 && <PoolLeaderboardTableHeaders />}
 
         {leaderboard.length === 0 ? (
-          <div className="p-12 text-center text-gray-600 font-body">No brackets submitted yet.</div>
+          <div className="p-12 text-center text-ink-400 font-body">No brackets submitted yet.</div>
         ) : (
           <div className="divide-y divide-hardwood-700">
             {leaderboard.map((entry) => (
@@ -76,6 +77,15 @@ export default async function PublicLeaderboardPage() {
           </div>
         )}
       </div>
+
+      {leaderboard.length > 0 && (
+        <div className="mt-6 space-y-2">
+          <p className="text-[10px] text-ink-400 font-mono max-w-xl">
+            Round scores below use the site default scoring rules, not a private group&apos;s custom rules.
+          </p>
+          <RoundMiniLeaderboard leaderboard={leaderboard} />
+        </div>
+      )}
     </div>
   );
 }

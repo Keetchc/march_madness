@@ -1,18 +1,26 @@
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
 import { getTournament } from "@/lib/dynamo/queries/games";
+import { getGroup, getGroupMembership } from "@/lib/dynamo/queries/groups";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
 import { getUserId } from "@/lib/session";
 import { picksEffectivelyClosed } from "@/lib/picks-lock";
+import { scoringTournamentIdForGroup } from "@/lib/scoring/group-tournament-id";
 import { BracketPageClient } from "@/app/(app)/bracket/[id]/BracketPageClient";
 
 export const dynamic = "force-dynamic";
 
 const DEFAULT_TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
-export default async function PublicBracketPage({ params }: { params: { id: string } }) {
+export default async function PublicBracketPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { fromGroup?: string };
+}) {
   const bracket = await getBracket(params.id);
   if (!bracket) notFound();
 
@@ -35,6 +43,22 @@ export default async function PublicBracketPage({ params }: { params: { id: stri
     ? `Picks become visible to the group after lock (${new Date(tournament.lockDate).toLocaleString()}).`
     : "Picks become visible to the group after the pool locks.";
 
+  const fromGroup = typeof searchParams.fromGroup === "string" ? searchParams.fromGroup.trim() : "";
+  let whatIfScoringRules: import("@/lib/types").ScoringRules | undefined;
+  let whatIfScoringSourceLabel: string | undefined;
+  if (fromGroup && sessionUserId) {
+    const g = await getGroup(fromGroup);
+    const mem = await getGroupMembership(fromGroup, sessionUserId);
+    if (g && mem) {
+      const bracketTid = (bracket.tournamentId ?? DEFAULT_TOURNAMENT_ID).trim();
+      const resolvedTid = scoringTournamentIdForGroup(g.tournamentId, [bracket], DEFAULT_TOURNAMENT_ID);
+      if (resolvedTid === bracketTid) {
+        whatIfScoringRules = g.scoringRules;
+        whatIfScoringSourceLabel = g.name;
+      }
+    }
+  }
+
   return (
     <BracketPageClient
       bracketId={bracket.bracketId}
@@ -45,6 +69,8 @@ export default async function PublicBracketPage({ params }: { params: { id: stri
       picksHiddenUntilLock={picksHiddenUntilLock}
       lockHint={lockHint}
       serverRedactedPicks={picksHiddenUntilLock}
+      whatIfScoringRules={whatIfScoringRules}
+      whatIfScoringSourceLabel={whatIfScoringSourceLabel}
     />
   );
 }

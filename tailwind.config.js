@@ -30,8 +30,18 @@ module.exports = {
           900: "#0f0e0c",
           800: "#1a1814",
           700: "#252219",
-          600: "#312c20",
-          500: "#3d3628",
+          600: "#3a3428",
+          500: "#4a4334",
+        },
+        /** Warm neutrals tuned for readability on hardwood-800/900 (WCAG-friendly vs cool grays). */
+        ink: {
+          50: "#faf9f7",
+          100: "#ece8e1",
+          200: "#d4cfc6",
+          300: "#b8b2a6",
+          400: "#9c9589",
+          500: "#827b70",
+          600: "#6a645b",
         },
       },
       animation: {

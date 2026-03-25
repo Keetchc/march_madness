@@ -56,7 +56,7 @@ export function BracketRegion({
           if (roundGames.length === 0) return null;
           return (
             <div key={round}>
-              <p className="font-display text-xs font-bold uppercase tracking-widest text-gray-600 mb-3">
+              <p className="font-display text-xs font-bold uppercase tracking-widest text-ink-400 mb-3">
                 {ROUND_LABELS[round]}
               </p>
               <div className="space-y-2">
@@ -97,7 +97,7 @@ export function BracketRegion({
 
         return (
           <div key={round} className="flex flex-col flex-1 min-w-[188px]">
-            <p className="font-display text-xs font-bold uppercase tracking-widest text-gray-700 mb-1 text-center truncate px-1">
+            <p className="font-display text-xs font-bold uppercase tracking-widest text-ink-500 mb-1 text-center truncate px-1">
               {ROUND_LABELS[round]}
             </p>
             <div className="flex flex-col flex-1 justify-around gap-1">

@@ -87,9 +87,9 @@ export function PicksLockPanel({ tournament: initial, onSaved }: Props) {
         <h2 className="font-display text-xl font-bold uppercase tracking-wide text-white mb-1">
           Bracket picks
         </h2>
-        <p className="text-sm text-gray-500 font-body">
+        <p className="text-sm text-ink-300 font-body">
           Control when players can create brackets and change picks. Tournament status (
-          <span className="font-mono text-gray-400">{initial.status}</span>) is separate — lock time alone
+          <span className="font-mono text-ink-200">{initial.status}</span>) is separate — lock time alone
           closes the pick window and unlocks group standings visibility.
         </p>
       </div>
@@ -109,7 +109,7 @@ export function PicksLockPanel({ tournament: initial, onSaved }: Props) {
           <p className="text-sm font-semibold text-white">
             {previewClosed ? "Players cannot edit picks" : "Players can edit picks"}
           </p>
-          <p className="text-xs text-gray-500 font-mono mt-0.5">
+          <p className="text-xs text-ink-300 font-mono mt-0.5">
             {override
               ? "Override is on — picks stay open until you turn it off."
               : previewClosed
@@ -120,7 +120,7 @@ export function PicksLockPanel({ tournament: initial, onSaved }: Props) {
       </div>
 
       <div className="space-y-2">
-        <label className="block font-mono text-xs uppercase tracking-widest text-gray-500">
+        <label className="block font-mono text-xs uppercase tracking-widest text-ink-300">
           Picks close (your local time)
         </label>
         <input
@@ -142,7 +142,7 @@ export function PicksLockPanel({ tournament: initial, onSaved }: Props) {
           <span className="block text-sm font-medium text-white group-hover:text-court-200 transition-colors">
             Keep picks open (ignore lock time)
           </span>
-          <span className="block text-xs text-gray-500 mt-1 font-body">
+          <span className="block text-xs text-ink-300 mt-1 font-body">
             Use for late entries or corrections. Turn off to enforce the close time above again.
           </span>
         </span>

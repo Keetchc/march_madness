@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { getGroup, getGroupMembers, getGroupMembership } from "@/lib/dynamo/queries/groups";
+import { isGroupAdmin } from "@/lib/group-permissions";
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import { getAllGames, getAllTeams, getTournament } from "@/lib/dynamo/queries/games";
 import { resolveUserDisplayProfile } from "@/lib/dynamo/queries/users";
@@ -33,7 +34,7 @@ export default async function GroupComparePage({
   if (!group) notFound();
 
   const membership = await getGroupMembership(params.id, userId);
-  if (!membership && group.adminUserId !== userId && !isAdmin) {
+  if (!membership && !isGroupAdmin(group, userId) && !isAdmin) {
     redirect("/dashboard");
   }
 
@@ -70,17 +71,17 @@ export default async function GroupComparePage({
   if (!bracketA || !bracketB) {
     return (
       <div className="space-y-4 animate-fade-in">
-        <p className="font-mono text-xs text-court-500 uppercase tracking-widest mb-1">
-          <Link href={groupBase} className="hover:text-court-400 transition-colors">
-            {group.name}
-          </Link>
-        </p>
-        <h1 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
-          Compare Brackets
-        </h1>
-        <p className="text-gray-500">Need at least two brackets in this group to compare.</p>
+        <div>
+          <p className="font-mono text-xs text-court-500 uppercase tracking-widest mb-1">Compare</p>
+          <h2 className="font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+            Compare brackets
+          </h2>
+          <p className="text-ink-300 text-sm font-body mt-2">
+            Need at least two brackets in this group to compare.
+          </p>
+        </div>
         <Link href={`${groupBase}/brackets`} className="text-sm font-mono text-court-400 hover:text-court-300">
-          ← Group brackets
+          View all brackets →
         </Link>
       </div>
     );
@@ -104,33 +105,22 @@ export default async function GroupComparePage({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <p className="font-mono text-xs text-court-500 uppercase tracking-widest mb-1">
-            <Link href={groupBase} className="hover:text-court-400 transition-colors">
-              {group.name}
-            </Link>
-            {" · "}
-            {tournament?.name ?? "Tournament"}
-          </p>
-          <h1 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
-            Compare Brackets
-          </h1>
-        </div>
-        <div className="flex flex-col items-end gap-1 text-xs font-mono">
-          <Link href={groupBase} className="text-gray-500 hover:text-gray-300 transition-colors">
-            Back to group
-          </Link>
-          <Link href={`${groupBase}/brackets`} className="text-gray-500 hover:text-gray-300 transition-colors">
-            All group brackets
-          </Link>
-        </div>
+      <div>
+        <p className="font-mono text-xs text-court-500 uppercase tracking-widest mb-1">
+          Compare · {tournament?.name ?? "Tournament"}
+        </p>
+        <h2 className="font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+          Side-by-side picks
+        </h2>
+        <p className="text-ink-300 text-sm font-body mt-2">
+          Diffs use this pool&apos;s scoring rules. Switch brackets with the form below.
+        </p>
       </div>
 
       <form method="get" className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-4 md:p-5">
         <div className="grid sm:grid-cols-2 gap-3">
           <label className="block">
-            <span className="font-mono text-xs text-gray-500 uppercase tracking-widest">Bracket A</span>
+            <span className="font-mono text-xs text-ink-300 uppercase tracking-widest">Bracket A</span>
             <select
               name="a"
               defaultValue={bracketA.bracketId}
@@ -144,7 +134,7 @@ export default async function GroupComparePage({
             </select>
           </label>
           <label className="block">
-            <span className="font-mono text-xs text-gray-500 uppercase tracking-widest">Bracket B</span>
+            <span className="font-mono text-xs text-ink-300 uppercase tracking-widest">Bracket B</span>
             <select
               name="b"
               defaultValue={bracketB.bracketId}
@@ -170,14 +160,14 @@ export default async function GroupComparePage({
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-4">
           <p className="font-mono text-xs text-court-500 uppercase tracking-widest mb-1">{userA}</p>
           <h2 className="font-display text-2xl font-black uppercase tracking-tight text-white">{bracketA.name}</h2>
-          <p className="font-mono text-sm text-gray-400 mt-2">Score: {scoreA.score}</p>
-          <p className="font-mono text-sm text-gray-500">Max: {scoreA.maxPossibleScore}</p>
+          <p className="font-mono text-sm text-ink-200 mt-2">Score: {scoreA.score}</p>
+          <p className="font-mono text-sm text-ink-300">Max: {scoreA.maxPossibleScore}</p>
         </div>
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-4">
           <p className="font-mono text-xs text-court-500 uppercase tracking-widest mb-1">{userB}</p>
           <h2 className="font-display text-2xl font-black uppercase tracking-tight text-white">{bracketB.name}</h2>
-          <p className="font-mono text-sm text-gray-400 mt-2">Score: {scoreB.score}</p>
-          <p className="font-mono text-sm text-gray-500">Max: {scoreB.maxPossibleScore}</p>
+          <p className="font-mono text-sm text-ink-200 mt-2">Score: {scoreB.score}</p>
+          <p className="font-mono text-sm text-ink-300">Max: {scoreB.maxPossibleScore}</p>
         </div>
       </div>
 
@@ -190,12 +180,12 @@ export default async function GroupComparePage({
           <Metric label={`${userB} Remaining Swing`} value={`+${pendingPotentialB}`} />
         </div>
         <div className="pt-2 border-t border-hardwood-600">
-          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-2">Differences by Round</p>
+          <p className="font-mono text-xs uppercase tracking-widest text-ink-300 mb-2">Differences by Round</p>
           <div className="flex flex-wrap gap-2">
             {ROUNDS_IN_ORDER.map((round) => (
               <span
                 key={round}
-                className="px-2 py-1 rounded-md bg-hardwood-700 text-xs font-mono text-gray-300 border border-hardwood-500"
+                className="px-2 py-1 rounded-md bg-hardwood-700 text-xs font-mono text-ink-100 border border-hardwood-500"
               >
                 {round}: {roundDiffCounts[round]}
               </span>
@@ -227,9 +217,9 @@ export default async function GroupComparePage({
 function Metric({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
     <div className="bg-hardwood-700 border border-hardwood-500 rounded-xl p-3">
-      <p className="font-mono text-[10px] uppercase tracking-widest text-gray-500">{label}</p>
+      <p className="font-mono text-[10px] uppercase tracking-widest text-ink-300">{label}</p>
       <p className="font-display text-2xl font-black text-white mt-1">{value}</p>
-      {detail ? <p className="font-mono text-xs text-gray-500 mt-1">{detail}</p> : null}
+      {detail ? <p className="font-mono text-xs text-ink-300 mt-1">{detail}</p> : null}
     </div>
   );
 }
@@ -253,40 +243,40 @@ function DiffPanel({
         <p className="font-display font-bold uppercase tracking-wide text-sm text-white">{title}</p>
       </div>
       {data.length === 0 ? (
-        <div className="p-4 text-sm text-gray-500">{emptyText}</div>
+        <div className="p-4 text-sm text-ink-300">{emptyText}</div>
       ) : (
         <div className="divide-y divide-hardwood-700">
           {data.map((game) => (
             <div key={game.gameId} className="px-4 py-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-600 mb-1">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-ink-400 mb-1">
                 {game.round} - {game.gameId}
               </p>
               <div className="grid grid-cols-[1fr_auto] gap-2 text-sm">
-                <p className="text-gray-300 truncate">
+                <p className="text-ink-100 truncate">
                   {aLabel}: {game.aTeamName}
                 </p>
                 <p
                   className={clsx(
                     "font-mono tabular-nums",
-                    game.aPoints > game.bPoints ? "text-green-400" : "text-gray-500"
+                    game.aPoints > game.bPoints ? "text-green-400" : "text-ink-300"
                   )}
                 >
                   +{game.aPoints}
                 </p>
-                <p className="text-gray-300 truncate">
+                <p className="text-ink-100 truncate">
                   {bLabel}: {game.bTeamName}
                 </p>
                 <p
                   className={clsx(
                     "font-mono tabular-nums",
-                    game.bPoints > game.aPoints ? "text-green-400" : "text-gray-500"
+                    game.bPoints > game.aPoints ? "text-green-400" : "text-ink-300"
                   )}
                 >
                   +{game.bPoints}
                 </p>
               </div>
               {game.status === "final" && (
-                <p className="font-mono text-[10px] text-gray-500 mt-1">Winner: {game.winnerName}</p>
+                <p className="font-mono text-[10px] text-ink-300 mt-1">Winner: {game.winnerName}</p>
               )}
             </div>
           ))}

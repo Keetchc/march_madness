@@ -8,6 +8,7 @@ import {
 } from "@/lib/dynamo/queries/groups";
 import { getBracket } from "@/lib/dynamo/queries/brackets";
 import type { GroupMember } from "@/lib/types";
+import { isGroupAdmin } from "@/lib/group-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +34,9 @@ export async function POST(
   if (!group) return NextResponse.json({ error: "Group not found" }, { status: 404 });
 
   const membership = await getGroupMembership(params.id, userId);
-  const isGroupAdmin = group.adminUserId === userId;
+  const adminOk = isGroupAdmin(group, userId);
 
-  if (!membership && !isGroupAdmin) {
+  if (!membership && !adminOk) {
     return NextResponse.json({ error: "Not a member of this group" }, { status: 403 });
   }
 

@@ -44,7 +44,7 @@ export default async function BracketsListPage() {
 
       {brackets.length === 0 ? (
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-xl p-12 text-center">
-          <p className="text-gray-500 font-body mb-4 text-lg">
+          <p className="text-ink-300 font-body mb-4 text-lg">
             You haven't created any brackets yet.
           </p>
           {!isLocked && (
@@ -69,7 +69,7 @@ export default async function BracketsListPage() {
                     {bracket.score}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-xs font-mono text-gray-500">
+                <div className="flex items-center justify-between text-xs font-mono text-ink-300">
                   <span>{Object.keys(bracket.picks).length}/63 picks</span>
                   <span>Max: {bracket.maxPossibleScore}</span>
                 </div>

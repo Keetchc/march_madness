@@ -2,13 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  body {
+    color: var(--text-primary);
+    text-rendering: optimizeLegibility;
+  }
+  /* Visible keyboard focus for links / controls */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-court-500/80 rounded-sm;
+  }
+  ::selection {
+    @apply bg-court-600/40 text-white;
+  }
+}
+
 :root {
   --court-orange: #ff7c0a;
   --court-amber: #ffc06d;
   --hardwood-dark: #0f0e0c;
   --hardwood-mid: #1a1814;
   --hardwood-light: #252219;
-  --grain-opacity: 0.035;
+  --grain-opacity: 0.028;
+  /* Default body / muted copy on dark hardwood */
+  --text-primary: #f2efe9;
+  --text-muted: #c9c3b8;
+  --text-subtle: #a8a29a;
 }
 
 /* Subtle grain texture over everything */

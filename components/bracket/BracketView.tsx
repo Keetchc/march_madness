@@ -41,7 +41,7 @@ export function BracketView({ games, teams, picks, projectedSlots, actualTeamOve
                 "flex-shrink-0 px-4 py-3 font-display font-bold uppercase text-sm tracking-wide transition-colors border-b-2 -mb-px whitespace-nowrap",
                 activeTab === region
                   ? "text-court-400 border-court-500"
-                  : "text-gray-500 border-transparent hover:text-gray-300"
+                  : "text-ink-300 border-transparent hover:text-ink-100"
               )}
             >
               {region === "FinalFour" ? "F4 / Champ" : region}
@@ -125,7 +125,7 @@ export function BracketView({ games, teams, picks, projectedSlots, actualTeamOve
 function RegionColumn({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex-1">
-      <p className="font-display text-sm font-bold uppercase tracking-widest text-gray-600 mb-2 text-center">
+      <p className="font-display text-sm font-bold uppercase tracking-widest text-ink-400 mb-2 text-center">
         {label}
       </p>
       {children}

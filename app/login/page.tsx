@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
+import { LoginCourtBackground } from "@/components/login/LoginCourtBackground";
 import { LoginForm } from "./LoginForm";
 import { LoginSessionPanel } from "./LoginSessionPanel";
 
@@ -28,11 +29,7 @@ export default async function LoginPage({
 
   return (
     <div className="min-h-screen bg-hardwood-900 flex items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full border-2 border-white" />
-        <div className="absolute top-1/2 left-0 right-0 h-px bg-white" />
-        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
-      </div>
+      <LoginCourtBackground />
 
       <div className="relative z-10 text-center animate-fade-in">
         <div className="mb-8">

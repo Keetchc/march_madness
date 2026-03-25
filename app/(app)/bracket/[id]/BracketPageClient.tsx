@@ -2,7 +2,9 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { BracketView } from "@/components/bracket/BracketView";
-import type { Game, Team, Picks, Tournament } from "@/lib/types";
+import { BracketWhatIfPanel } from "@/components/bracket/BracketWhatIfPanel";
+import type { Game, Team, Picks, Tournament, ScoringRules } from "@/lib/types";
+import { LockCountdownBadge } from "@/components/layout/LockCountdownBadge";
 import { projectPicksOntoGames } from "@/lib/bracket-utils";
 import { picksClosedByTournament } from "@/lib/picks-lock";
 import { SaveIcon, LockIcon, RefreshCwIcon } from "lucide-react";
@@ -19,6 +21,9 @@ interface BracketPageClientProps {
   lockHint?: string;
   /** Server omitted picks; refetch when client learns the viewer is the owner. */
   serverRedactedPicks?: boolean;
+  /** When opened from a group the user belongs to, what-if uses this pool’s scoring rules. */
+  whatIfScoringRules?: ScoringRules;
+  whatIfScoringSourceLabel?: string;
 }
 
 type SaveState = "saved" | "saving" | "unsaved" | "error";
@@ -32,6 +37,8 @@ export function BracketPageClient({
   picksHiddenUntilLock = false,
   lockHint,
   serverRedactedPicks = false,
+  whatIfScoringRules,
+  whatIfScoringSourceLabel,
 }: BracketPageClientProps) {
   const { data: session, status: sessionStatus } = useSession();
   const [games, setGames] = useState<Game[]>([]);
@@ -141,7 +148,7 @@ export function BracketPageClient({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500 font-mono text-sm animate-pulse">
+      <div className="flex items-center justify-center h-64 text-ink-300 font-mono text-sm animate-pulse">
         Loading bracket...
       </div>
     );
@@ -159,10 +166,10 @@ export function BracketPageClient({
           </div>
         </div>
         <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-10 text-center space-y-3 max-w-lg mx-auto">
-          <p className="text-gray-300 font-body">
+          <p className="text-ink-100 font-body">
             This player has submitted a bracket. Picks and scores stay hidden until the pool locks.
           </p>
-          {lockHint ? <p className="text-sm text-gray-500 font-mono">{lockHint}</p> : null}
+          {lockHint ? <p className="text-sm text-ink-300 font-mono">{lockHint}</p> : null}
         </div>
       </div>
     );
@@ -187,7 +194,7 @@ export function BracketPageClient({
             "flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-full border transition-all",
             saveState === "saved"   && "text-green-400 border-green-900 bg-green-950/30",
             saveState === "saving"  && "text-yellow-400 border-yellow-900 bg-yellow-950/30",
-            saveState === "unsaved" && "text-gray-400 border-hardwood-600 bg-hardwood-800",
+            saveState === "unsaved" && "text-ink-200 border-hardwood-600 bg-hardwood-800",
             saveState === "error"   && "text-red-400 border-red-900 bg-red-950/30",
           )}>
             {saveState === "saving"  && <RefreshCwIcon className="w-3 h-3 animate-spin" />}
@@ -199,12 +206,17 @@ export function BracketPageClient({
           </div>
         )}
 
-        {isLocked && (
-          <div className="flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-full border text-red-400 border-red-900 bg-red-950/30">
-            <LockIcon className="w-3 h-3" />
-            Picks locked
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-2 justify-end">
+          {!isLocked && tournament ? (
+            <LockCountdownBadge tournament={tournament} variant="default" />
+          ) : null}
+          {isLocked && (
+            <div className="flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 rounded-full border text-red-400 border-red-900 bg-red-950/30">
+              <LockIcon className="w-3 h-3" />
+              Picks locked
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bracket */}
@@ -216,6 +228,14 @@ export function BracketPageClient({
         actualTeamOverrides={actualTeamOverrides}
         onPick={canEdit ? handlePick : undefined}
         isReadOnly={!canEdit}
+      />
+
+      <BracketWhatIfPanel
+        picks={picks}
+        games={games}
+        teams={teams}
+        scoringRules={whatIfScoringRules}
+        scoringSourceLabel={whatIfScoringSourceLabel}
       />
     </div>
   );

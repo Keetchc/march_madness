@@ -113,23 +113,26 @@ export default function JoinGroupPage() {
         <h1 className="font-display text-4xl font-black uppercase tracking-tight text-white mb-2">
           You&apos;re Invited!
         </h1>
-        <p className="text-gray-500 font-body">
+        <p className="text-ink-300 font-body">
           {groupName ? (
             <>
-              Join <span className="text-gray-300 font-semibold">{groupName}</span>.
+              Join <span className="text-ink-100 font-semibold">{groupName}</span>.
             </>
           ) : (
             "Join a March Madness bracket group."
           )}
         </p>
+        <p className="text-xs text-ink-400 font-body mt-3 max-w-sm mx-auto leading-relaxed">
+          You can reuse the same bracket in every pool you join—no need to fill out picks again for each group.
+        </p>
       </div>
 
       <div className="bg-hardwood-800 border border-hardwood-600 rounded-2xl p-6 space-y-5">
         {status === "loading" ? (
-          <p className="text-center text-gray-500 font-body text-sm py-6">Loading…</p>
+          <p className="text-center text-ink-300 font-body text-sm py-6">Loading…</p>
         ) : status === "unauthenticated" ? (
           <div className="space-y-4 text-center">
-            <p className="text-sm text-gray-400 font-body">
+            <p className="text-sm text-ink-200 font-body">
               Sign in to join this group. You&apos;ll be able to link an existing bracket, create a new one, or join
               now and add a bracket later.
             </p>
@@ -143,7 +146,7 @@ export default function JoinGroupPage() {
         ) : (
           <>
             <div>
-              <p className="font-mono text-xs uppercase tracking-widest text-gray-500 mb-3">
+              <p className="font-mono text-xs uppercase tracking-widest text-ink-300 mb-3">
                 How do you want to enter?
               </p>
               <div className="space-y-2">
@@ -167,7 +170,7 @@ export default function JoinGroupPage() {
                       <span className="block font-display font-bold text-white text-sm uppercase tracking-wide">
                         Link an existing bracket
                       </span>
-                      <span className="text-xs text-gray-500 font-body">
+                      <span className="text-xs text-ink-300 font-body">
                         Pick a bracket you already created in this app.
                       </span>
                     </span>
@@ -192,7 +195,7 @@ export default function JoinGroupPage() {
                     <span className="block font-display font-bold text-white text-sm uppercase tracking-wide">
                       Create a new bracket
                     </span>
-                    <span className="text-xs text-gray-500 font-body">
+                    <span className="text-xs text-ink-300 font-body">
                       We&apos;ll create an empty bracket and attach it to this group.
                     </span>
                   </span>
@@ -216,7 +219,7 @@ export default function JoinGroupPage() {
                     <span className="block font-display font-bold text-white text-sm uppercase tracking-wide">
                       Join now, add a bracket later
                     </span>
-                    <span className="text-xs text-gray-500 font-body">
+                    <span className="text-xs text-ink-300 font-body">
                       Enter the group now; link a bracket from the group page when you&apos;re ready.
                     </span>
                   </span>
@@ -226,7 +229,7 @@ export default function JoinGroupPage() {
 
             {mode === "existing" && brackets.length > 0 && (
               <div>
-                <label className="block font-mono text-xs uppercase tracking-widest text-gray-500 mb-2">
+                <label className="block font-mono text-xs uppercase tracking-widest text-ink-300 mb-2">
                   Your bracket
                 </label>
                 <select
@@ -246,7 +249,7 @@ export default function JoinGroupPage() {
 
             {mode === "new" && (
               <div>
-                <label className="block font-mono text-xs uppercase tracking-widest text-gray-500 mb-2">
+                <label className="block font-mono text-xs uppercase tracking-widest text-ink-300 mb-2">
                   New bracket name
                 </label>
                 <input

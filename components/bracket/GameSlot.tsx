@@ -155,8 +155,8 @@ function TeamRow({
               : isPicked && isWrong ? "text-red-400"
               : isOverridden ? "text-red-400/60"
               : isWinner ? "text-court-400"
-              : isProjected ? "text-gray-700"
-              : "text-gray-600",
+              : isProjected ? "text-court-400"
+              : "text-ink-400",
           )}>
             {team.seed}
           </span>
@@ -172,11 +172,11 @@ function TeamRow({
               ? isWinner
                 ? "text-white"
                 : isProjected
-                  ? "text-gray-500 italic"
+                  ? "text-ink-300 italic"
                   : isPicked
-                    ? "text-gray-300"
-                    : "text-gray-300"
-              : "text-gray-600",
+                    ? "text-ink-100"
+                    : "text-ink-100"
+              : "text-ink-400",
         )}>
           {team ? (size === "sm" ? team.shortName : team.name) : "TBD"}
         </span>
@@ -185,7 +185,7 @@ function TeamRow({
           <span className={clsx(
             "font-mono flex-shrink-0",
             size === "sm" ? "text-sm" : "text-xs",
-            isWinner ? "text-white font-bold" : "text-gray-500"
+            isWinner ? "text-white font-bold" : "text-ink-300"
           )}>
             {score}
           </span>
@@ -195,7 +195,7 @@ function TeamRow({
           <span className={clsx(
             "flex-shrink-0 ml-0.5 font-mono",
             size === "sm" ? "text-sm" : "text-xs",
-            isCorrect ? "text-green-400" : isWrong ? "text-red-400" : "text-gray-600",
+            isCorrect ? "text-green-400" : isWrong ? "text-red-400" : "text-ink-400",
           )}>
             {isCorrect ? "✓" : isWrong ? "✗" : "●"}
           </span>
