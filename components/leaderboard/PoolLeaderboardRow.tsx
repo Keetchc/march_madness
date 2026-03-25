@@ -207,45 +207,8 @@ export function PoolLeaderboardRow({
         </div>
       </div>
 
-      {entry.nextSliceRound && entry.nextSliceCriticalGames.length > 0 && (
+      {entry.criticalGames.length > 0 && entry.status !== "eliminated" && (
         <div className="md:col-start-2 md:col-end-7 mt-2 md:mt-1">
-          <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-sky-400/90 mb-0.5">
-            Next up — {ROUND_DISPLAY_LABELS[entry.nextSliceRound]}
-          </p>
-          <p className="text-[10px] text-gray-600 font-body mb-1.5 leading-snug">
-            Pending games in this round where your pick differs from others in this pool (or highest upside if you&apos;re alone).
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {entry.nextSliceCriticalGames.slice(0, 4).map((game) => (
-              <span
-                key={`slice-${game.gameId}`}
-                className="inline-flex items-center gap-1 rounded-full px-2 py-1 font-mono text-[10px] md:text-xs border text-sky-100 border-sky-700/60 bg-sky-950/35"
-                title={
-                  game.rivalsAheadWithDifferentPick > 0
-                    ? `${game.rivalsAheadWithDifferentPick} other bracket(s) picked the other team`
-                    : undefined
-                }
-              >
-                <span>{game.teamName}</span>
-                <span className="text-sky-600/90 tabular-nums">+{game.potentialPoints}</span>
-                {game.rivalsAheadWithDifferentPick > 0 ? (
-                  <span className="text-sky-600/70 text-[9px] md:text-[10px]">
-                    vs {game.rivalsAheadWithDifferentPick}
-                  </span>
-                ) : null}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {entry.criticalGames.length > 0 && (
-        <div
-          className={clsx(
-            "md:col-start-2 md:col-end-7 md:mt-1",
-            entry.nextSliceRound && entry.nextSliceCriticalGames.length > 0 ? "mt-3" : "mt-2",
-          )}
-        >
           <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-court-500 mb-1.5">
             {entry.status === "leader" && entry.criticalGames.some((g) => g.rivalsAheadWithDifferentPick > 0)
               ? "Tiebreak — key remaining games"
@@ -270,6 +233,45 @@ export function PoolLeaderboardRow({
           </div>
         </div>
       )}
+
+      {entry.nextSliceRound &&
+        entry.nextSliceCriticalGames.length > 0 &&
+        entry.status !== "eliminated" && (
+          <div
+            className={clsx(
+              "md:col-start-2 md:col-end-7 md:mt-1",
+              entry.criticalGames.length > 0 ? "mt-3" : "mt-2",
+            )}
+          >
+            <p className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-sky-400/90 mb-0.5">
+              Next up — {ROUND_DISPLAY_LABELS[entry.nextSliceRound]}
+            </p>
+            <p className="text-[10px] text-gray-600 font-body mb-1.5 leading-snug">
+              Pending games in this round where your pick differs from others in this pool.
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {entry.nextSliceCriticalGames.slice(0, 4).map((game) => (
+                <span
+                  key={`slice-${game.gameId}`}
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-1 font-mono text-[10px] md:text-xs border text-sky-100 border-sky-700/60 bg-sky-950/35"
+                  title={
+                    game.rivalsAheadWithDifferentPick > 0
+                      ? `${game.rivalsAheadWithDifferentPick} other bracket(s) picked the other team`
+                      : undefined
+                  }
+                >
+                  <span>{game.teamName}</span>
+                  <span className="text-sky-600/90 tabular-nums">+{game.potentialPoints}</span>
+                  {game.rivalsAheadWithDifferentPick > 0 ? (
+                    <span className="text-sky-600/70 text-[9px] md:text-[10px]">
+                      vs {game.rivalsAheadWithDifferentPick}
+                    </span>
+                  ) : null}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
     </div>
   );
 
