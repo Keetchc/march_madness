@@ -13,7 +13,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const existing = await getTournament(viewingId);
   if (!existing) {
     return NextResponse.json({ error: "Tournament not found" }, { status: 404 });

@@ -16,7 +16,7 @@ function slugify(name: string): string {
 }
 
 export async function GET() {
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const brackets = await getBracketsByTournament(viewingId);
 
   const enriched = await Promise.all(
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   };
   await upsertUser(user);
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const bracket: Bracket = {
     bracketId: uuidv4(),
     userId,

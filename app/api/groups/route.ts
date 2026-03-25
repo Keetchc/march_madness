@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Group name is required" }, { status: 400 });
   }
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const group: Group = {
     groupId: uuidv4(),
     name: name.trim(),

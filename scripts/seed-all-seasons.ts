@@ -3,7 +3,8 @@
  *
  *   npm run seed:all
  *
- * Set `TOURNAMENT_SEASONS=2024,2025,2026` in `.env.local` so the app shows a season switcher.
+ * The app lists seasons from Dynamo (each seeded tournament). Optional `TOURNAMENT_SEASONS`
+ * in `.env.local` can hide some years from the switcher.
  *
  * Uses the same process as `npm run seed` (no nested `npx`), so it works reliably on Windows.
  */

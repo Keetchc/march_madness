@@ -21,7 +21,7 @@ export default async function PublicLeaderboardPage() {
       ? ((session.user as { userId?: string }).userId ?? "")
       : "";
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const [brackets, games, teams, tournament] = await Promise.all([
     getBracketsByTournament(viewingId),
     getAllGames(viewingId),

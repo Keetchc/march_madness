@@ -81,13 +81,13 @@ You do **not** need `mm-dev-*` tables inside DynamoDB Local for day-to-day work.
      npm run seed
      ```
 
-   - **Multiple seasons** (official bracket + lists switcher): add `TOURNAMENT_SEASONS=2024,2025,2026` to `.env.local`, then seed each bracket file:
+   - **Multiple seasons** (navbar **Season** switcher): seed each tournament into Dynamo (one META row per year). The app **discovers seasons from Dynamo**—no env list required.
 
      ```bash
      npm run seed:all
      ```
 
-     Use the **Season** control in the navbar to change the active year (cookie `mm_view_tid`). Past seasons in the repo use the same tree as `bracket-2026.json` for structure only; replace with real historical data if you have it.
+     Optional: `TOURNAMENT_SEASONS=2024,2025` limits which seeded years appear in the switcher (must still exist in Dynamo). Use the **Season** control to change the active year (cookie `mm_view_tid`). Past seasons in the repo use the same tree as `bracket-2026.json` for structure only; replace with real historical data if you have it.
 
    - **Copy AWS dev data into local `mm-*`** (needs AWS credentials that can read **`mm-dev-*`** in your region):
 

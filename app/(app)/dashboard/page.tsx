@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const session = await getServerSession(getAuthOptions());
   const userId = (session!.user as any).userId;
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const [bracketsAll, groupsAll, tournament] = await Promise.all([
     getBracketsByUser(userId),
     getGroupsByUser(userId),

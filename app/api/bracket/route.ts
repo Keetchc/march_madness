@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bracket name is required" }, { status: 400 });
   }
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const tournament = await getTournament(viewingId);
   if (picksEffectivelyClosed(tournament)) {
     return NextResponse.json({ error: "Tournament is locked. No new brackets." }, { status: 403 });

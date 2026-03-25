@@ -14,7 +14,7 @@ export default async function BracketsListPage() {
   const session = await getServerSession(getAuthOptions());
   const userId = (session!.user as any).userId;
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const [bracketsAll, tournament] = await Promise.all([
     getBracketsByUser(userId),
     getTournament(viewingId),

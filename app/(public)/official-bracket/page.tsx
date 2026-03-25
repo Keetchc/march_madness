@@ -6,7 +6,7 @@ import { getViewingTournamentIdFromCookies } from "@/lib/viewing-tournament";
 export const dynamic = "force-dynamic";
 
 export default async function OfficialBracketPage() {
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const tournament = await getTournament(viewingId);
   let games: Game[] = [];
   let teams: Team[] = [];

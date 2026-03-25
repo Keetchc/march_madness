@@ -2,6 +2,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { dynamo } from "../client";
@@ -27,6 +28,35 @@ export async function upsertTournament(t: Tournament): Promise<void> {
       Item: { pk: `TOURNAMENT#${t.tournamentId}`, sk: "META", ...t },
     })
   );
+}
+
+/**
+ * All tournament root rows (`sk = META`). Scans the tournament table; cached at the app layer.
+ * Sorted by `year` descending (newest first).
+ */
+export async function listAllTournaments(): Promise<Tournament[]> {
+  const items: Tournament[] = [];
+  let startKey: Record<string, unknown> | undefined;
+  do {
+    const res = await dynamo.send(
+      new ScanCommand({
+        TableName: TABLES.TOURNAMENT,
+        FilterExpression: "sk = :meta AND begins_with(#pk, :tp)",
+        ExpressionAttributeNames: { "#pk": "pk" },
+        ExpressionAttributeValues: {
+          ":meta": "META",
+          ":tp": "TOURNAMENT#",
+        },
+        ExclusiveStartKey: startKey,
+      })
+    );
+    for (const item of res.Items ?? []) {
+      items.push(item as Tournament);
+    }
+    startKey = res.LastEvaluatedKey as Record<string, unknown> | undefined;
+  } while (startKey);
+  items.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+  return items;
 }
 
 export async function updateTournamentPicksSettings(

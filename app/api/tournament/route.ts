@@ -5,7 +5,7 @@ import { resolveTournamentIdFromRequestUrl } from "@/lib/viewing-tournament";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const tournamentId = resolveTournamentIdFromRequestUrl(req);
+  const tournamentId = await resolveTournamentIdFromRequestUrl(req);
   const [tournament, games, teams] = await Promise.all([
     getTournament(tournamentId),
     getAllGames(tournamentId),

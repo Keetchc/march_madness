@@ -15,7 +15,7 @@ export default async function GroupsPage() {
   if (!session) redirect("/login");
 
   const userId = (session.user as any).userId as string;
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const [groupsAll, tournament] = await Promise.all([
     getGroupsByUser(userId),
     getTournament(viewingId),

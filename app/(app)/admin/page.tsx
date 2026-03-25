@@ -12,7 +12,7 @@ export default async function AdminPage() {
   if (!session) redirect("/login");
   if (!(session.user as { isAdmin?: boolean }).isAdmin) redirect("/dashboard");
 
-  const viewingId = getViewingTournamentIdFromCookies();
+  const viewingId = await getViewingTournamentIdFromCookies();
   const [games, teams, tournament] = await Promise.all([
     getAllGames(viewingId),
     getAllTeams(viewingId),

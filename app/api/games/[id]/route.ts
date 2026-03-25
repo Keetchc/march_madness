@@ -12,7 +12,7 @@ import type { GamePicksResponse } from "@/lib/types";
 import {
   resolveTournamentIdFromRequestUrl,
   defaultTournamentId,
-  getConfiguredSeasonIds,
+  getAllowedTournamentIds,
 } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const tid = resolveTournamentIdFromRequestUrl(req);
+  const tid = await resolveTournamentIdFromRequestUrl(req);
   const game = await getGame(tid, params.id);
   if (!game) return NextResponse.json({ error: "Game not found" }, { status: 404 });
 
@@ -110,7 +110,7 @@ export async function POST(
     return NextResponse.json({ error: "winnerId, score1, score2 required" }, { status: 400 });
   }
 
-  const allowed = getConfiguredSeasonIds();
+  const allowed = await getAllowedTournamentIds();
   const raw = typeof bodyTid === "string" ? bodyTid.trim() : "";
   let adminTid = defaultTournamentId();
   if (raw) {

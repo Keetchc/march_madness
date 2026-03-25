@@ -1,30 +1,27 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getTournament } from "@/lib/dynamo/queries/games";
 import {
   VIEWING_TOURNAMENT_COOKIE,
-  getConfiguredSeasonIds,
+  getAllowedTournamentIds,
+  getCachedTournamentsForSeasonPicker,
   normalizeViewingTournamentId,
 } from "@/lib/viewing-tournament";
 
 export const dynamic = "force-dynamic";
 
-/** List configured seasons + current viewing id (for navbar). */
+/** Seasons from Dynamo (META rows) + current viewing id (for navbar). */
 export async function GET() {
-  const ids = getConfiguredSeasonIds();
+  const tournaments = await getCachedTournamentsForSeasonPicker();
+  const allowed = await getAllowedTournamentIds();
   const cookieVal = cookies().get(VIEWING_TOURNAMENT_COOKIE)?.value;
-  const viewingTournamentId = normalizeViewingTournamentId(null, cookieVal);
+  const viewingTournamentId = normalizeViewingTournamentId(null, cookieVal, allowed);
 
-  const tournaments = await Promise.all(ids.map((id) => getTournament(id)));
-  const seasons = ids.map((tournamentId, i) => {
-    const t = tournaments[i];
-    return {
-      tournamentId,
-      name: t?.name ?? `NCAA Tournament ${tournamentId}`,
-      year: t?.year ?? Number.parseInt(tournamentId, 10),
-      status: t?.status ?? ("pending" as const),
-    };
-  });
+  const seasons = tournaments.map((t) => ({
+    tournamentId: t.tournamentId,
+    name: t.name ?? `NCAA Tournament ${t.tournamentId}`,
+    year: t.year ?? Number.parseInt(t.tournamentId, 10),
+    status: t.status ?? ("pending" as const),
+  }));
 
   return NextResponse.json({ viewingTournamentId, seasons });
 }
@@ -38,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
   const id = (body.tournamentId ?? "").trim();
-  const allowed = getConfiguredSeasonIds();
+  const allowed = await getAllowedTournamentIds();
   if (!id || !allowed.includes(id)) {
     return NextResponse.json({ error: "Invalid tournament season" }, { status: 400 });
   }
