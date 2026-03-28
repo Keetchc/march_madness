@@ -1,5 +1,6 @@
 import {
   ROUNDS_IN_ORDER,
+  ROUND_BASE_POINTS,
   type Bracket,
   type Game,
   type Team,
@@ -8,15 +9,6 @@ import {
   type BracketStatus,
   type CriticalGame,
 } from "../types";
-
-const ROUND_BASE_POINTS: Record<Round, number> = {
-  R64: 1,
-  R32: 2,
-  S16: 4,
-  E8: 8,
-  F4: 14,
-  NCG: 22,
-};
 
 function pickForGame(picks: Bracket["picks"], gameId: string): string | undefined {
   return picks[gameId] ?? picks[String(gameId)];

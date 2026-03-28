@@ -20,6 +20,16 @@ export const ROUND_DISPLAY_LABELS: Record<Round, string> = {
   NCG: "Championship",
 };
 
+/** Points awarded per round before the seed multiplier. Single source of truth for scoring. */
+export const ROUND_BASE_POINTS: Record<Round, number> = {
+  R64: 1,
+  R32: 2,
+  S16: 4,
+  E8: 8,
+  F4: 16,
+  NCG: 32,
+};
+
 export type Region = "East" | "West" | "South" | "Midwest" | "FinalFour";
 
 export type GameStatus = "scheduled" | "in_progress" | "final";
@@ -102,29 +112,31 @@ export interface ScoringRules {
 }
 
 export const DEFAULT_SCORING_RULES: ScoringRules = {
-  rounds: {
-    R64: { basePoints: 1,  upsetMultiplier: 0 },
-    R32: { basePoints: 2,  upsetMultiplier: 0 },
-    S16: { basePoints: 4,  upsetMultiplier: 0 },
-    E8:  { basePoints: 8,  upsetMultiplier: 0 },
-    F4:  { basePoints: 16, upsetMultiplier: 0 },
-    NCG: { basePoints: 32, upsetMultiplier: 0 },
-  },
+  rounds: Object.fromEntries(
+    ROUNDS_IN_ORDER.map((r) => [r, { basePoints: ROUND_BASE_POINTS[r], upsetMultiplier: 0 }])
+  ) as Record<Round, RoundScoringRule>,
   bonuses: {
     correctChampion: 0,
     perfectRound: 0,
   },
 };
 
+const UPSET_MULTIPLIERS: Record<Round, number> = {
+  R64: 1.0,
+  R32: 1.5,
+  S16: 2.0,
+  E8: 2.5,
+  F4: 3.0,
+  NCG: 0.0,
+};
+
 export const UPSET_SCORING_RULES: ScoringRules = {
-  rounds: {
-    R64: { basePoints: 1,  upsetMultiplier: 1.0 },
-    R32: { basePoints: 2,  upsetMultiplier: 1.5 },
-    S16: { basePoints: 4,  upsetMultiplier: 2.0 },
-    E8:  { basePoints: 8,  upsetMultiplier: 2.5 },
-    F4:  { basePoints: 16, upsetMultiplier: 3.0 },
-    NCG: { basePoints: 32, upsetMultiplier: 0.0 },
-  },
+  rounds: Object.fromEntries(
+    ROUNDS_IN_ORDER.map((r) => [
+      r,
+      { basePoints: ROUND_BASE_POINTS[r], upsetMultiplier: UPSET_MULTIPLIERS[r] },
+    ])
+  ) as Record<Round, RoundScoringRule>,
   bonuses: {
     correctChampion: 25,
     perfectRound: 50,
