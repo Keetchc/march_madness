@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const startedAt = Date.now();
+
 export async function GET() {
+  const uptimeSeconds = Math.floor((Date.now() - startedAt) / 1000);
+
   const diagnostics: Record<string, string> = {
     MM_REGION: process.env.MM_REGION ? "set" : "MISSING",
     MM_ACCESS_KEY_ID: process.env.MM_ACCESS_KEY_ID
@@ -19,13 +23,23 @@ export async function GET() {
   };
 
   let dbStatus = "untested";
+  let dbLatencyMs: number | null = null;
   try {
     const { getAllTeams } = await import("@/lib/dynamo/queries/games");
+    const t0 = Date.now();
     const teams = await getAllTeams(process.env.TOURNAMENT_ID ?? "2026");
+    dbLatencyMs = Date.now() - t0;
     dbStatus = `ok (${teams.length} teams)`;
-  } catch (err: any) {
-    dbStatus = `error: ${err.name}: ${err.message}`;
+  } catch (err: unknown) {
+    const e = err as Error;
+    dbStatus = `error: ${e.name}: ${e.message}`;
   }
 
-  return NextResponse.json({ diagnostics, dbStatus });
+  return NextResponse.json({
+    status: dbStatus.startsWith("ok") ? "healthy" : "degraded",
+    timestamp: new Date().toISOString(),
+    uptimeSeconds,
+    diagnostics,
+    db: { status: dbStatus, latencyMs: dbLatencyMs },
+  });
 }

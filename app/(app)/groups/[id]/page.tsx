@@ -14,8 +14,8 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  const userId = (session.user as any).userId as string;
-  const isAdmin = (session.user as any).isAdmin as boolean;
+  const userId = session.user.userId;
+  const isAdmin = session.user.isAdmin;
 
   const group = await getGroup(params.id);
   if (!group) notFound();
@@ -46,7 +46,7 @@ export default async function GroupPage({ params }: { params: { id: string } }) 
   const teamsMap = new Map(teams.map((t) => [t.id, t]));
 
   const leaderboard = buildLeaderboard(
-    brackets as any[],
+    brackets as NonNullable<(typeof brackets)[number]>[],
     usersMap,
     games,
     teamsMap,

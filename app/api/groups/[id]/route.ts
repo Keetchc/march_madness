@@ -33,7 +33,7 @@ export async function GET(
   if (!group) return NextResponse.json({ error: "Group not found" }, { status: 404 });
 
   const membership = await getGroupMembership(params.id, userId);
-  const isAdmin = (session as any).user?.isAdmin;
+  const isAdmin = session!.user.isAdmin;
 
   if (!membership && group.adminUserId !== userId && !isAdmin) {
     return NextResponse.json({ error: "Not a member of this group" }, { status: 403 });
@@ -61,7 +61,7 @@ export async function GET(
   const teamsMap = new Map(teams.map((t) => [t.id, t]));
 
   const leaderboard = buildLeaderboard(
-    validBrackets as any,
+    validBrackets as NonNullable<(typeof validBrackets)[number]>[],
     usersMap,
     games,
     teamsMap,
@@ -89,7 +89,7 @@ export async function PATCH(
   const group = await getGroup(params.id);
   if (!group) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (group.adminUserId !== userId && !(session as any).user?.isAdmin) {
+  if (group.adminUserId !== userId && !session!.user.isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

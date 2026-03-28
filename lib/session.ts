@@ -19,13 +19,13 @@ export async function requireAdmin() {
   if (!session?.user) {
     return { session: null, error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
-  if (!(session.user as any).isAdmin) {
+  if (!session.user.isAdmin) {
     return { session: null, error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
   return { session, error: null };
 }
 
-export function getUserId(session: any): string {
-  return session.user.userId as string;
+export function getUserId(session: NonNullable<Awaited<ReturnType<typeof getSession>>>): string {
+  return session.user.userId;
 }
 
