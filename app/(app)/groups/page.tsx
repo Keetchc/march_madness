@@ -9,7 +9,7 @@ export default async function GroupsPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  const userId = (session.user as any).userId as string;
+  const userId = session.user.userId;
   const groups = await getGroupsByUser(userId);
 
   return (

@@ -9,7 +9,7 @@ const TOURNAMENT_ID = process.env.TOURNAMENT_ID ?? "2026";
 
 export default async function BracketsListPage() {
   const session = await getServerSession(authOptions);
-  const userId = (session!.user as any).userId;
+  const userId = session!.user.userId;
 
   const [brackets, tournament] = await Promise.all([
     getBracketsByUser(userId),

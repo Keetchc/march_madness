@@ -8,7 +8,7 @@ import { clsx } from "clsx";
 import { Menu, X } from "lucide-react";
 
 interface NavbarProps {
-  user: { name?: string; email?: string; image?: string; isAdmin?: boolean };
+  user: { name?: string | null; email?: string | null; image?: string | null; isAdmin?: boolean };
 }
 
 const NAV_LINKS = [
